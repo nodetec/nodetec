@@ -13,7 +13,7 @@ export default function AppMenu() {
   return (
     <Popover className="relative">
       <Popover.Button className="inline-flex outline-none items-center gap-x-1 font-semibold text-slate-900 dark:text-slate-100">
-        <span>Solutions</span>
+        <span>Apps</span>
         <ChevronDownIcon className="h-5 w-5" aria-hidden="true" />
       </Popover.Button>
 
