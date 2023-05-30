@@ -26,7 +26,7 @@ export default function AppMenu() {
         leaveFrom="opacity-100 translate-y-0"
         leaveTo="opacity-0 translate-y-1"
       >
-        <Popover.Panel className="absolute z-10 mt-5 flex w-1/2 max-w-min -translate-x-full px-4">
+        <Popover.Panel className="absolute z-10 right-full mt-5 flex w-1/2 max-w-min -translate-x-full px-4 mr-8 lg:mr-0">
           <div className="w-56 shrink rounded-xl bg-white dark:bg-slate-700 p-4 text-sm font-semibold leading-6 text-slate-900 dark:text-slate-100 shadow-lg ring-1 ring-slate-900/5">
             {solutions.map((item) => (
               <a
