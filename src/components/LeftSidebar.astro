@@ -1,0 +1,48 @@
+---
+import { getCollection } from "astro:content";
+import DocNavigation from "./DocNavigation.astro";
+
+const LANG = "en";
+
+const metaData = await getCollection("docs", ({ id }) => {
+  return id.endsWith("index.md");
+});
+
+let folders = metaData.map((folder: any) => {
+  return {
+    id: folder.id.split("/").slice(0, -1).join("/"),
+    label: folder.data.label,
+    slug: `${folder.slug}`,
+    order: folder.data.order,
+  };
+});
+
+folders.sort((a, b) => a.order - b.order);
+
+const files = await getCollection("docs", ({ id }) => {
+  return !id.endsWith("index.md");
+});
+
+type Props = {
+  currentPage: string;
+};
+
+const { currentPage } = Astro.props;
+---
+
+<nav class="mt-10 pr-3 px-8 lg:text-sm lg:leading-6 relative">
+  <ul
+    class="h-full overflow-x-visible overflow-y-auto max-h-screen last:pb-8 last:mb-24"
+  >
+    {
+      folders.map((folder: any) => (
+        <DocNavigation
+          folder={folder}
+          currentPage={currentPage}
+          files={files}
+        />
+      ))
+    }
+  </ul>
+</nav>
+

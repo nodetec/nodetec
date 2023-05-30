@@ -1,0 +1,28 @@
+---
+const { prev, next } = Astro.props;
+---
+
+<div class="md:mt-24 flex justify-between w-full">
+  {
+    prev && (
+      <a
+        class="no-underline rounded-xl border-2 border-slate-600 text-sm px-4 py-2 mr-auto"
+        href={`/${prev.slug}`}
+      >
+        {/* Prev */}
+        {prev.data.label}
+      </a>
+    )
+  }
+  {
+    next && (
+      <a
+        class="flex items-center no-underline rounded-xl border-2 border-slate-600 text-sm px-4 py-2 ml-auto"
+        href={`/${next.slug}`}
+      >
+        {/* Next */}
+        {next.data.label}
+      </a>
+    )
+  }
+</div>

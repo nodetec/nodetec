@@ -1,0 +1,65 @@
+---
+import { Icon } from "astro-icon";
+import { GIT_REPO } from "../settings";
+import { getCollection } from "astro:content";
+
+const currentPage = Astro.url.pathname;
+
+const docs = await getCollection("docs", ({ id }) => {
+  return !id.endsWith("index.md");
+});
+
+let currentDoc = null;
+let currentFile = "";
+if (currentPage !== "/") {
+  currentDoc = docs.find(function (doc) {
+    return `/${doc.slug}/` === currentPage || `/${doc.slug}` === currentPage;
+  });
+  if (currentDoc) {
+    currentFile = `${currentDoc.id.replace(/\/$/, "")}`;
+  }
+}
+
+const contribute = [
+  {
+    title: "Contributor Guide",
+    icon: "mdi:book-open",
+    link: GIT_REPO.contributingURL,
+  },
+  {
+    title: "Edit this page",
+    icon: "mdi:lead-pencil",
+    link: `${GIT_REPO.editURL}/${currentFile}`,
+  },
+  {
+    title: "Report an issue",
+    icon: "mdi:alert-circle-outline",
+    link: GIT_REPO.issueURL,
+  },
+];
+---
+
+<div>
+  <h2 class="font-bold cursor-pointer mb-2 select-none leading-6">
+    Contribute
+  </h2>
+  <ul>
+    {
+      contribute.map((item: any) => (
+        <li class="flex gap-2 items-center">
+          <a
+            href={item.link}
+            target="_blank"
+            rel="nofollow noopener noreferrer"
+            class="pl-4 space-x-reverse transition border-l-2 dark:border-slate-700 duration-200 ease-out pt-1 pb-1 leading-5 text-theme-text-lighter no-underline bidi-override text-base w-full inline-flex gap-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:underline"
+          >
+            <div class="flex gap-2 items-center">
+              <Icon class="w-4 h-4 cursor-pointer" name={item.icon} />
+              {item.title}
+            </div>
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</div>

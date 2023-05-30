@@ -1,0 +1,33 @@
+---
+import HeadCommon from "../components/HeadCommon.astro";
+// import HeadSEO from '../components/HeadSEO.astro';
+import Header from "../components/Header.astro";
+import { SITE } from "../settings";
+
+const { label } = Astro.props;
+// const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const currentPage = Astro.url.pathname;
+---
+
+<html dir={"ltr"} lang={"en"} class="initial">
+  <head>
+    <HeadCommon />
+    <!-- <HeadSEO {...data} canonicalUrl={canonicalURL} /> -->
+    <title>
+      {`${label} | ${SITE.title}`}
+    </title>
+  </head>
+
+  <body
+    class="antialiased text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-900"
+  >
+    <slot />
+    <style>
+      @media (prefers-reduced-motion: no-preference) {
+        :root {
+          scroll-behavior: smooth;
+        }
+      }
+    </style>
+  </body>
+</html>

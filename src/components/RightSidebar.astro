@@ -1,0 +1,21 @@
+---
+import TableOfContents from "./TableOfContents";
+import generateToc from "../util/generateToc";
+import Community from "./Community.astro";
+import Contribute from "./Contribute.astro";
+const { headings } = Astro.props;
+---
+
+<nav class="px-8 flex flex-col gap-10">
+  {
+    headings && (
+      <TableOfContents
+        // client:media="(min-width: 50em)"
+        toc={generateToc(headings, "Overview")}
+        labels={{ onThisPage: "On this page" }}
+      />
+    )
+  }
+  <Community />
+  <Contribute />
+</nav>
