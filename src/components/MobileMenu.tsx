@@ -50,7 +50,9 @@ export default function MobileMenu() {
           className="fixed inset-0 bg-black/30 backdrop-blur-sm"
           aria-hidden="true"
         />
-        <div className="fixed z-50 inset-0 lg:hidden">
+        <div 
+
+          className="fixed z-50 inset-0 lg:hidden">
           <Dialog.Panel className="fixed top-4 right-4 w-56 max-w-xs bg-slate-50 dark:bg-slate-800 rounded-lg shadow-lg p-6 text-base font-semibold">
             <button
               onClick={closePopup}

@@ -1,8 +1,11 @@
 ---
 import Lightning from "../components/Lightning";
+import AppMenu from "../components/AppMenu";
 import ThemeMenu from "../components/ThemeMenu";
 import MainLayout from "../layouts/MainLayout.astro";
-import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
+import {
+  ArrowTopRightOnSquareIcon,
+} from "@heroicons/react/24/outline";
 ---
 
 <MainLayout label="NODE-TEC">
@@ -33,9 +36,10 @@ import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
           >
           <a
             href="#"
-            class="text font-semibold leading-6 text-slate-900 dark:text-slate-100 hover:underline"
-            >Apps</a
-          >
+            class="text font-semibold flex items-center gap-2 leading-6 text-slate-900 dark:text-slate-100 hover:underline"
+            >
+            <AppMenu client:load />
+          </a>
           <a
             href="https://www.youtube.com/@nodetec"
             class="text font-semibold flex items-center gap-2 leading-6 text-slate-900 dark:text-slate-100 hover:underline"
