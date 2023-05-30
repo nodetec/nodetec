@@ -27,14 +27,14 @@ export default function AppMenu() {
         leaveTo="opacity-0 translate-y-1"
       >
         <Popover.Panel className="absolute left-1/2 z-10 mt-5 flex w-1/2 max-w-min -translate-x-full px-4">
-          <div className="w-56 shrink rounded-xl bg-white dark:bg-slate-700 p-4 text-sm font-semibold leading-6 text-gray-900 dark:text-slate-100 shadow-lg ring-1 ring-gray-900/5">
+          <div className="w-56 shrink rounded-xl bg-white dark:bg-slate-700 p-4 text-sm font-semibold leading-6 text-slate-900 dark:text-slate-100 shadow-lg ring-1 ring-slate-900/5">
             {solutions.map((item) => (
               <a
                 key={item.name}
                 href={item.href}
                 target="_blank"
                 rel="nofollow noopener noreferrer"
-                className="p-2 flex gap-x-2 items-center hover:bg-gray-100 dark:hover:bg-slate-600 rounded-md"
+                className="p-2 flex gap-x-2 items-center hover:bg-slate-100 dark:hover:bg-slate-600 rounded-md"
               >
                 {item.name}
                 <ArrowTopRightOnSquareIcon
