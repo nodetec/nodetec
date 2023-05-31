@@ -31,8 +31,6 @@ export default function AppMenu() {
               <a
                 key={item.name}
                 href={item.href}
-                target="_blank"
-                rel="nofollow noopener noreferrer"
                 className="p-2 flex gap-x-2 items-center hover:bg-slate-100 dark:hover:bg-slate-600 rounded-md"
               >
                 {item.name}
