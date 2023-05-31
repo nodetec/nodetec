@@ -6,7 +6,7 @@ module.exports = {
   theme: {
     fontFamily: {
       sans: [
-        "Inter Variable, sans-serif",
+        "Poppins, sans-serif",
         {
           fontFeatureSettings: '"cv11", "ss01", "ss02"',
           fontVariationSettings: '"opsz" 32',
