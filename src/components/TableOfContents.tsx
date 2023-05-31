@@ -96,7 +96,7 @@ const TableOfContents = ({ toc = [], labels }: Props) => {
   return (
     <div>
       <h2
-        className="font-bold cursor-pointer mb-2 select-none leading-6"
+        className="font-bold mb-2 select-none leading-6"
         id={onThisPageID}
       >
         {labels.onThisPage}
