@@ -75,7 +75,7 @@ export default function SearchPopup({
 
   function NoResults() {
     return (
-      <div className="px-8 pt-12 pb-16 flex font-semibold justify-center items-center">
+      <div className="flex items-center justify-center px-8 pb-16 pt-12 font-semibold">
         <h2 className="text-slate-500">Nothing to see here</h2>
       </div>
     );
@@ -88,7 +88,7 @@ export default function SearchPopup({
       afterLeave={() => setQuery("")}
       appear
     >
-      <Dialog open={isOpen} className="fixed z-50 top-52" onClose={closePopup}>
+      <Dialog open={isOpen} className="fixed top-52 z-50" onClose={closePopup}>
         <div className="fixed inset-0 bg-black/30 backdrop-blur-sm" />
         <div className="fixed inset-0 p-4 sm:p-8 md:p-28">
           <Transition.Child
@@ -100,20 +100,20 @@ export default function SearchPopup({
             leaveFrom="opacity-100 scale-100"
             leaveTo="opacity-0 scale-95"
           >
-            <Dialog.Panel className="border pb-4 border-slate-300 dark:border-slate-700 mx-auto rounded-lg max-w-3xl bg-slate-50 dark:bg-slate-800 shadow-3xl overflow-hidden">
+            <Dialog.Panel className="shadow-3xl mx-auto max-w-3xl overflow-hidden rounded-lg border border-slate-300 bg-slate-50 pb-4 dark:border-slate-700 dark:bg-slate-800">
               <Combobox
                 onChange={(loc: any) => {
                   window.location = loc;
                   setIsOpen(false);
                 }}
               >
-                <div className="border-b flex items-center mb-4 border-slate-300 dark:border-slate-700">
+                <div className="mb-4 flex items-center border-b border-slate-300 dark:border-slate-700">
                   <Combobox.Input
-                    className="w-full text-lg border-none p-8 h-8 focus:ring-0 text-slate-900 placeholder:text-slate-400 dark:text-slate-100 placeholder-slate-400 bg-transparent"
+                    className="h-8 w-full border-none bg-transparent p-8 text-lg text-slate-900 placeholder-slate-400 placeholder:text-slate-400 focus:ring-0 dark:text-slate-100"
                     onChange={(event) => setQuery(event.target.value)}
                     placeholder="Type to search..."
                   />
-                  <span className="p-1 select-none items-center text-slate-500 justify-center text-xs font-mono tracking-wide leading-3 pointer-events-none border border-slate-300 dark:border-slate-500 rounded-md mr-8 font-thin">
+                  <span className="font-mono pointer-events-none mr-8 select-none items-center justify-center rounded-md border border-slate-300 p-1 text-xs font-thin leading-3 tracking-wide text-slate-500 dark:border-slate-500">
                     <kbd className="text-inherit" aria-hidden="true">
                       esc
                     </kbd>
@@ -126,16 +126,16 @@ export default function SearchPopup({
                 )}
 
                 {transformedContent.length > 0 && (
-                  <Combobox.Options className="px-4 pb-4 max-h-[30rem] scroll-p-12 space-y-2 overflow-y-auto">
+                  <Combobox.Options className="max-h-[30rem] scroll-p-12 space-y-2 overflow-y-auto px-4 pb-4">
                     {transformedContent.map((content: any) => (
                       <li key={content.slug}>
-                        <div className=" pl-1 py-2 gap-2 flex items-center">
+                        <div className=" flex items-center gap-2 py-2 pl-1">
                           <DocumentTextIcon className="h-7 w-7 text-slate-600 dark:text-slate-300" />
                           <h2 className="font-semibold text-slate-600 dark:text-slate-300">
                             {content.label}
                           </h2>
                         </div>
-                        <ul className="text-slate-600 dark:text-slate-300 font-semibold">
+                        <ul className="font-semibold text-slate-600 dark:text-slate-300">
                           {content.content.map((section: any) => (
                             <div>
                               <Combobox.Option
@@ -143,14 +143,14 @@ export default function SearchPopup({
                                 className={({ active }) =>
                                   `${
                                     active &&
-                                    "bg-slate-100 text-slate-900 dark:bg-slate-700 dark:text-slate-100 rounded-lg"
+                                    "rounded-lg bg-slate-100 text-slate-900 dark:bg-slate-700 dark:text-slate-100"
                                   }`
                                 }
                                 value={`/${content.slug}#${cleanHeaderLink(
                                   section.header
                                 )}`}
                               >
-                                <div className="cursor-pointer border-l-2 border-slate-400 ml-4 pl-4 py-4 gap-2 flex items-center">
+                                <div className="ml-4 flex cursor-pointer items-center gap-2 border-l-2 border-slate-400 py-4 pl-4">
                                   <HashtagIcon className="h-6 w-6" />
                                   <p>{section.header}</p>
                                 </div>
@@ -163,14 +163,14 @@ export default function SearchPopup({
                                     className={({ active }) =>
                                       `${
                                         active &&
-                                        "bg-slate-100 text-slate-900 dark:bg-slate-700 dark:text-slate-100 rounded-lg"
+                                        "rounded-lg bg-slate-100 text-slate-900 dark:bg-slate-700 dark:text-slate-100"
                                       }`
                                     }
                                     value={`/${content.slug}#${cleanHeaderLink(
                                       section.header
                                     )}`}
                                   >
-                                    <div className="cursor-pointer border-l-2 border-slate-400 ml-4 pl-4 py-4 gap-2 flex items-center">
+                                    <div className="ml-4 flex cursor-pointer items-center gap-2 border-l-2 border-slate-400 py-4 pl-4">
                                       <Bars3BottomLeftIcon className="h-6 w-6 " />
                                       <p>{paragraph.slice(0, 75)}</p>
                                     </div>

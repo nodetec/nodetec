@@ -20,25 +20,25 @@ const currentPage = Astro.url.pathname;
 <MainLayout label={data.label}>
   <div class="flex flex-col">
     <div
-      class="sticky top-0 w-full backdrop-blur flex-none transition-colors duration-500 z-40 border-b border-slate-200 dark:border-slate-700 bg-slate-50/95 dark:bg-slate-900/80"
+      class="sticky top-0 z-40 w-full flex-none border-b border-slate-200 bg-slate-50/95 backdrop-blur transition-colors duration-500 dark:border-slate-700 dark:bg-slate-900/80"
     >
       <Header currentPage={currentPage} />
     </div>
 
-    <div class="2xl:flex overflow-hidden">
+    <div class="overflow-hidden 2xl:flex">
       <div class="max-w-8xl mx-auto px-4 sm:px-6 md:px-8">
         <aside
-          class="hidden lg:block fixed z-20 inset-0 top-[3.8125rem] left-[max(0px,calc(50%-45rem))] right-auto w-[16.5rem] pb-10 overflow-y-auto"
+          class="fixed inset-0 left-[max(0px,calc(50%-45rem))] right-auto top-[3.8125rem] z-20 hidden w-[16.5rem] overflow-y-auto pb-10 lg:block"
         >
           <LeftSidebar currentPage={currentPage} />
         </aside>
         <div class="lg:pl-[16rem]">
           <div class="mx-auto max-w-none xl:ml-0 xl:mr-[15.5rem] xl:pr-16">
             <div
-              class="flex flex-col items-center lg:border-l lg:border-slate-200 lg:dark:border-slate-700 lg:pl-[3.5rem]"
+              class="flex flex-col items-center lg:border-l lg:border-slate-200 lg:pl-[3.5rem] lg:dark:border-slate-700"
             >
               <article
-                class="pt-10 max-w-3xl lg:min-w-[40rem] min-h-[20rem] prose prose-slate prose-h2:pt-20 prose-h2:mt-[-5rem] xl:mb-0 dark:prose-dark dark:prose-invert lg:mb-48 mb-16"
+                class="dark:prose-dark prose prose-slate mb-16 min-h-[20rem] max-w-3xl pt-10 dark:prose-invert prose-h2:mt-[-5rem] prose-h2:pt-20 lg:mb-48 lg:min-w-[40rem] xl:mb-0"
               >
                 <slot />
               </article>
@@ -46,7 +46,7 @@ const currentPage = Astro.url.pathname;
               <Footer />
             </div>
             <aside
-              class="fixed z-20 top-[3.8125rem] bottom-0 right-[max(0px,calc(50%-45rem))] w-[19.5rem] py-10 overflow-y-auto hidden xl:block"
+              class="fixed bottom-0 right-[max(0px,calc(50%-45rem))] top-[3.8125rem] z-20 hidden w-[19.5rem] overflow-y-auto py-10 xl:block"
             >
               <RightSidebar headings={headings} />
             </aside>

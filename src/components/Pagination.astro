@@ -6,11 +6,11 @@ const currentPage = Astro.url.pathname;
 const collection = currentPage.split("/")[2] as CollectionType;
 ---
 
-<div class="md:mt-24 flex justify-between w-full">
+<div class="flex w-full justify-between md:mt-24">
   {
     prev && (
       <a
-        class="no-underline rounded-xl border-2 border-slate-600 text-sm px-4 py-2 mr-auto"
+        class="mr-auto rounded-xl border-2 border-slate-600 px-4 py-2 text-sm no-underline"
         href={`/guide/${collection}/${prev.slug}`}
       >
         {/* Prev */}
@@ -21,7 +21,7 @@ const collection = currentPage.split("/")[2] as CollectionType;
   {
     next && (
       <a
-        class="flex items-center no-underline rounded-xl border-2 border-slate-600 text-sm px-4 py-2 ml-auto"
+        class="ml-auto flex items-center rounded-xl border-2 border-slate-600 px-4 py-2 text-sm no-underline"
         href={`/guide/${collection}/${next.slug}`}
       >
         {/* Next */}

@@ -34,9 +34,9 @@ const files = await getCollection(currentDoc, (item: { id: string }) => {
 });
 ---
 
-<nav class="mt-10 pr-3 px-8 lg:text-sm lg:leading-6 relative">
+<nav class="relative mt-10 px-8 pr-3 lg:text-sm lg:leading-6">
   <ul
-    class="h-full overflow-x-visible overflow-y-auto max-h-screen last:pb-8 last:mb-24"
+    class="h-full max-h-screen overflow-y-auto overflow-x-visible last:mb-24 last:pb-8"
   >
     {
       folders.map((folder: any) => (

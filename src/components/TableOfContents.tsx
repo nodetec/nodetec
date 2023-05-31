@@ -57,7 +57,8 @@ const TableOfContents = ({ toc = [], labels }: Props) => {
 
     let headerDepth = "pl-4 space-x-reverse";
 
-    let textBase = "text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700";
+    let textBase =
+      "text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700";
 
     if (depth === 3) {
       headerDepth = "pl-8 space-x-reverse";
@@ -77,7 +78,7 @@ const TableOfContents = ({ toc = [], labels }: Props) => {
     return (
       <li className="">
         <a
-          className={`transition border-l-2 duration-200 ease-out pt-1 pb-1 leading-5 text-theme-text-lighter no-underline bidi-override text-base pr-2 rounded-r-md w-full inline-flex gap-2 hover:text-slate-900 dark:hover:text-slate-100 hover:underline ${headerDepth} ${textBase} ${currentHeaderLink}`.trim()}
+          className={`text-theme-text-lighter bidi-override inline-flex w-full gap-2 rounded-r-md border-l-2 pb-1 pr-2 pt-1 text-base leading-5 no-underline transition duration-200 ease-out hover:text-slate-900 hover:underline dark:hover:text-slate-100 ${headerDepth} ${textBase} ${currentHeaderLink}`.trim()}
           href={`#${slug}`}
         >
           {unescape(text)}
@@ -95,13 +96,10 @@ const TableOfContents = ({ toc = [], labels }: Props) => {
 
   return (
     <div>
-      <h2
-        className="font-bold mb-2 select-none leading-6"
-        id={onThisPageID}
-      >
+      <h2 className="mb-2 select-none font-bold leading-6" id={onThisPageID}>
         {labels.onThisPage}
       </h2>
-      <ul className="text-slate-700 dark:text-slate-300 text-sm leading-6">
+      <ul className="text-sm leading-6 text-slate-700 dark:text-slate-300">
         {toc.map((heading2) => (
           <TableOfContentsItem key={heading2.slug} heading={heading2} />
         ))}

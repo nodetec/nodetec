@@ -6,11 +6,11 @@ import Contribute from "./Contribute.astro";
 const { headings } = Astro.props;
 ---
 
-<nav class="px-8 flex flex-col gap-10">
+<nav class="flex flex-col gap-10 px-8">
   {
     headings && (
       <TableOfContents
-        // client:media="(min-width: 50em)"
+        client:media="(min-width: 50em)"
         toc={generateToc(headings, "Overview")}
         labels={{ onThisPage: "On this page" }}
       />

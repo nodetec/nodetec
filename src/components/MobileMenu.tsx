@@ -36,7 +36,7 @@ export default function MobileMenu() {
     <>
       <button className="lg:hidden" onClick={openPopup}>
         <EllipsisVerticalIcon
-          className="md:h-6 md:w-6 h-5 w-5"
+          className="h-5 w-5 md:h-6 md:w-6"
           aria-hidden="true"
         />
       </button>
@@ -44,19 +44,17 @@ export default function MobileMenu() {
       <Dialog
         open={isOpen}
         onClose={() => setIsOpen(false)}
-        className="max-w-2xl relative z-40"
+        className="relative z-40 max-w-2xl"
       >
         <div
           className="fixed inset-0 bg-black/30 backdrop-blur-sm"
           aria-hidden="true"
         />
-        <div 
-
-          className="fixed z-50 inset-0 lg:hidden">
-          <Dialog.Panel className="fixed top-4 right-4 w-56 max-w-xs bg-slate-50 dark:bg-slate-800 rounded-lg shadow-lg p-6 text-base font-semibold">
+        <div className="fixed inset-0 z-50 lg:hidden">
+          <Dialog.Panel className="fixed right-4 top-4 w-56 max-w-xs rounded-lg bg-slate-50 p-6 text-base font-semibold shadow-lg dark:bg-slate-800">
             <button
               onClick={closePopup}
-              className="absolute z-10 top-5 right-5 w-8 h-8 flex items-center justify-center text-slate-500 hover:text-slate-600 dark:hover:text-slate-400"
+              className="absolute right-5 top-5 z-10 flex h-8 w-8 items-center justify-center text-slate-500 hover:text-slate-600 dark:hover:text-slate-400"
             >
               <XMarkIcon className="h-6 w-6" aria-hidden="true" />
             </button>
@@ -66,7 +64,7 @@ export default function MobileMenu() {
                   <a
                     key={item.name}
                     href={item.href}
-                    className="block font-semibold rounded-md"
+                    className="block rounded-md font-semibold"
                   >
                     {item.name}
                   </a>

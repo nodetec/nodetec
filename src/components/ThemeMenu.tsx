@@ -4,7 +4,6 @@ import { SunIcon, MoonIcon } from "@heroicons/react/24/outline";
 export default function ThemeToggle() {
   const [theme, setTheme] = useState("");
 
-
   const toggleTheme = () => {
     if (theme === "dark") {
       setTheme("light");
@@ -33,7 +32,7 @@ export default function ThemeToggle() {
   return (
     <>
       <button
-        className="hidden lg:block outline-none focus:ring-0"
+        className="hidden outline-none focus:ring-0 lg:block"
         onClick={toggleTheme}
       >
         {theme === "light" ? (

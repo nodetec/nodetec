@@ -38,6 +38,8 @@
     "@types/node": "^20.2.5",
     "@webbtc/webln-types": "^1.0.10",
     "html-escaper": "^3.0.3",
+    "prettier": "^2.8.8",
+    "prettier-plugin-tailwindcss": "^0.3.0",
     "vite-plugin-node-polyfills": "^0.8.2"
   }
 }

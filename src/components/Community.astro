@@ -4,20 +4,20 @@ import { COMMUNITY } from "../settings";
 ---
 
 <div>
-  <h2 class="font-bold mb-2 select-none leading-6">Community</h2>
+  <h2 class="mb-2 select-none font-bold leading-6">Community</h2>
 
   <ul>
     {
       COMMUNITY.map((item) => (
-        <li class="flex gap-2 items-center">
+        <li class="flex items-center gap-2">
           <a
             target="_blank"
             rel="nofollow noopener noreferrer"
             href={item.link}
-            class="pl-4 space-x-reverse transition border-l-2 dark:border-slate-700 duration-200 ease-out pt-1 pb-1 leading-5 text-theme-text-lighter no-underline bidi-override text-base w-full inline-flex gap-2 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100 hover:underline"
+            class="text-theme-text-lighter bidi-override inline-flex w-full gap-2 space-x-reverse border-l-2 pb-1 pl-4 pt-1 text-base leading-5 text-slate-600 no-underline transition duration-200 ease-out hover:text-slate-900 hover:underline dark:border-slate-700 dark:text-slate-400 dark:hover:text-slate-100"
           >
-            <div class="flex gap-2 items-center">
-              <Icon class="w-4 h-4 cursor-pointer" name={item.icon} />
+            <div class="flex items-center gap-2">
+              <Icon class="h-4 w-4 cursor-pointer" name={item.icon} />
               {item.title}
             </div>
           </a>

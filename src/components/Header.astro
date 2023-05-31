@@ -123,15 +123,15 @@ if (currentPage !== "/") {
 
 <header class="max-w-8xl mx-auto">
   <div
-    class="py-4 border-b border-slate-900/10 lg:px-8 lg:border-0 dark:border-slate-300/10 mx-4 lg:mx-0"
+    class="mx-4 border-b border-slate-900/10 py-4 dark:border-slate-300/10 lg:mx-0 lg:border-0 lg:px-8"
   >
     <nav
-      class="relative flex justify-between items-center"
+      class="relative flex items-center justify-between"
       title="Top Navigation"
     >
-      <div class="flex gap-4 items-center">
+      <div class="flex items-center gap-4">
         <a
-          class="mr-3 flex flex-row gap-2 w-[2.0625rem] overflow-hidden md:w-auto text-xl items-center"
+          class="mr-3 flex w-[2.0625rem] flex-row items-center gap-2 overflow-hidden text-xl md:w-auto"
           href="/"
         >
           <!-- <Icon class="w-7 h-7 cursor-pointer" name={"ph:planet-fill"} /> -->
@@ -141,7 +141,7 @@ if (currentPage !== "/") {
             version="1.1"
             id="svg99"
             viewBox="0 0 1850.508 980.47635"
-            class="w-9 h-6 cursor-pointer fill-slate-700 dark:fill-slate-300"
+            class="h-6 w-9 cursor-pointer fill-slate-700 dark:fill-slate-300"
           >
             <defs id="defs103"></defs>
             <g id="g105" transform="translate(-46.516152,-184.16177)">
@@ -170,7 +170,7 @@ if (currentPage !== "/") {
       </div>
     </nav>
   </div>
-  <div class="flex gap-4 py-4 lg:px-8 lg:hidden ml-4 lg:mx-0">
+  <div class="ml-4 flex gap-4 py-4 lg:mx-0 lg:hidden lg:px-8">
     <MobileSidebar client:load>
       {
         folders.map((folder: any) => (
@@ -182,22 +182,22 @@ if (currentPage !== "/") {
         ))
       }
     </MobileSidebar>
-    <div class="flex items-center text leading-6 whitespace-nowrap min-w-0">
+    <div class="text flex min-w-0 items-center whitespace-nowrap leading-6">
       {
         currentPage && (
           <>
             {currentDocFolder && (
               <>
-                <span class="font-semibold text-slate-600 dark:text-slate-400 pr-2">
+                <span class="pr-2 font-semibold text-slate-600 dark:text-slate-400">
                   {currentDocFolder?.data.label}
                 </span>
                 <ChevronRightIcon
-                  className="text-slate-600 dark:text-slate-400 h-4 w-4"
+                  className="h-4 w-4 text-slate-600 dark:text-slate-400"
                   aria-hidden="true"
                 />
               </>
             )}
-            <span class="font-semibold text-slate-900 dark:text-slate-200 truncate pl-2">
+            <span class="truncate pl-2 font-semibold text-slate-900 dark:text-slate-200">
               {currentDocLabel}
             </span>
           </>

@@ -18,8 +18,7 @@ export default function Search(props: any) {
   const [query, setQuery] = useState("");
   const [posts, setPosts] = useState([]);
 
-  useEffect(() => {
-  }, []);
+  useEffect(() => {}, []);
 
   useEffect(() => {
     const posts: any = fuse
@@ -68,24 +67,27 @@ export default function Search(props: any) {
     <div>
       <div
         onClick={openPopup}
-        className="py-1 px-2 border cursor-pointer hover:border-slate-900 border-slate-400 dark:border-slate-600 dark:hover:border-slate-400 lg:flex flex-row justify-between gap-2 items-center rounded-full hidden"
+        className="hidden cursor-pointer flex-row items-center justify-between gap-2 rounded-full border border-slate-400 px-2 py-1 hover:border-slate-900 dark:border-slate-600 dark:hover:border-slate-400 lg:flex"
       >
         <div className="flex flex-row items-center text-slate-500">
           {props.children}
           <span className="ml-2 mr-12 select-none text-slate-500">Search</span>
         </div>
-        <span className="inset-x-3/4 p-1 select-none items-center justify-center text-xs font-mono tracking-wide leading-3 pointer-events-none border text-slate-400 border-slate-400 dark:border-slate-600 rounded-md mr-2">
+        <span className="font-mono pointer-events-none inset-x-3/4 mr-2 select-none items-center justify-center rounded-md border border-slate-400 p-1 text-xs leading-3 tracking-wide text-slate-400 dark:border-slate-600">
           <kbd aria-hidden="true">/</kbd>
         </span>
       </div>
       <div
         onClick={openPopup}
         className={
-          "lg:hidden py-1 cursor-pointer flex flex-row justify-center items-center"
+          "flex cursor-pointer flex-row items-center justify-center py-1 lg:hidden"
         }
       >
         <button className="lg:hidden" onClick={openPopup}>
-          <MagnifyingGlassIcon className="md:h-6 md:w-6 h-5 w-5" aria-hidden="true" />
+          <MagnifyingGlassIcon
+            className="h-5 w-5 md:h-6 md:w-6"
+            aria-hidden="true"
+          />
         </button>
       </div>
       <SearchPopup
