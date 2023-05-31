@@ -30,7 +30,7 @@ const docs = await getCollection(collection, (item: { id: string }) => {
 function parseMarkdown(doc: any) {
   const markdownContent = doc.body;
   const label = doc.data.label;
-  const slug = doc.slug;
+  const slug = `guide/${collection}/${doc.slug}` ;
 
   // Split by line
   let lines = markdownContent.split("\n");
@@ -161,7 +161,7 @@ if (currentPage !== "/") {
       </div>
 
       <div class="flex flex-row gap-3 lg:gap-6">
-        <Search client:load searchList={parsed_markdown.flat()}>
+        <Search client:load searchList={parsed_markdown.flat()} >
           <MagnifyingGlassIcon className="h-4 w-4" aria-hidden="true" />
         </Search>
         <ThemeMenu client:load />
