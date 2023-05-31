@@ -16,8 +16,6 @@ export async function getStaticPaths() {
     })
   );
 
-  console.log(docArr)
-
   return docArr.flat().map((entry: DocType) => ({
     params: {
       slug: entry.collection + "/" + entry.slug,
@@ -64,12 +62,9 @@ function getNextItemByKey(objects: any, key: string, value: string) {
 
 const prev =  getPreviousItemByKey(docs, "id", post.id);
 const next = getNextItemByKey(docs, "id", post.id);
-
-// console.log(prev);
 ---
 
 <DocLayout headings={headings} next={next} prev={prev} {...post.data}>
-<!-- <DocLayout headings={headings} {...post.data}> -->
   <Content />
   <!-- <Pagination next={next} prev={prev} /> -->
 </DocLayout>

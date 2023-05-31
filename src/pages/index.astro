@@ -1,6 +1,7 @@
 ---
 import Lightning from "../components/Lightning";
 import AppMenu from "../components/AppMenu";
+import GuideMenu from "../components/GuideMenu";
 import ThemeMenu from "../components/ThemeMenu";
 import MainLayout from "../layouts/MainLayout.astro";
 import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
@@ -44,22 +45,16 @@ import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
         </div>
 
         <div class="hidden lg:flex lg:gap-x-12">
-          <a
-            href="guide/fullnode/en/hardware/prep"
-            class="text font-semibold leading-6 text-slate-900 dark:text-slate-100 hover:underline"
-            >Full Node Guide</a
+          <span
+            class="text font-semibold flex items-center gap-2 leading-6 text-slate-900 dark:text-slate-100 hover:underline"
           >
-          <a
-            href="guide/nostr/en/getting-started/prep"
-            class="text font-semibold leading-6 text-slate-900 dark:text-slate-100 hover:underline"
-            >Nostr</a
-          >
-          <a
-            href="#"
+            <GuideMenu client:load />
+          </span>
+          <span
             class="text font-semibold flex items-center gap-2 leading-6 text-slate-900 dark:text-slate-100 hover:underline"
           >
             <AppMenu client:load />
-          </a>
+          </span>
           <a
             href="https://www.youtube.com/@nodetec"
             class="text font-semibold flex items-center gap-2 leading-6 text-slate-900 dark:text-slate-100 hover:underline"

@@ -4,6 +4,6 @@ slug: en/hardware/testing
 order: 10
 ---
 
-# Hardware Preparation for a Bitcoin Node
+# Hardware Testing
 
 🚧 Coming Soon... 🚧
