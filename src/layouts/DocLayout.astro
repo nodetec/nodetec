@@ -1,18 +1,17 @@
 ---
-import type { MarkdownHeading } from "astro";
-import type { CollectionEntry } from "astro:content";
 import Header from "../components/Header.astro";
 import LeftSidebar from "../components/LeftSidebar.astro";
 import RightSidebar from "../components/RightSidebar.astro";
 import Footer from "../components/Footer.astro";
 import Pagination from "../components/Pagination.astro";
 import MainLayout from "./MainLayout.astro";
+import type { ContentType } from "../content/config";
 
-type Props = CollectionEntry<"docs">["data"] & {
-  headings: MarkdownHeading[];
-  next?: any;
-  prev?: any;
-};
+// type Props = CollectionEntry<ContentType>["data"] & {
+//   headings: MarkdownHeading[];
+//   next?: any;
+//   prev?: any;
+// };
 
 const { headings, next, prev, ...data } = Astro.props;
 const currentPage = Astro.url.pathname;

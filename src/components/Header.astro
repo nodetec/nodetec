@@ -10,15 +10,21 @@ import DocNavigation from "./DocNavigation.astro";
 import {
   MagnifyingGlassIcon,
   ChevronRightIcon,
-  RocketLaunchIcon,
 } from "@heroicons/react/24/solid";
+
+import type { ContentType, DocType } from "../content/config";
 
 type Props = {
   currentPage: string;
 };
 
-const docs = await getCollection("docs", ({ id }) => {
-  return !id.endsWith("index.md");
+const { currentPage } = Astro.props;
+
+// get first part of the path
+const collection = currentPage.split("/")[2] as ContentType;
+
+const docs = await getCollection(collection, (item: { id: string }) => {
+  return !item.id.endsWith("index.md");
 });
 
 function parseMarkdown(doc: any) {
@@ -63,8 +69,8 @@ const parsed_markdown = docs.map((doc) => {
 
 const LANG = "en";
 
-const metaData = await getCollection("docs", ({ id }) => {
-  return id.endsWith("index.md");
+const metaData = await getCollection(collection, (item: { id: string }) => {
+  return item.id.endsWith("index.md");
 });
 
 let folders = metaData.map((folder: any) => {
@@ -78,11 +84,9 @@ let folders = metaData.map((folder: any) => {
 
 folders.sort((a, b) => a.order - b.order);
 
-const files = await getCollection("docs", ({ id }) => {
-  return !id.endsWith("index.md");
+const files = await getCollection(collection, (item: { id: string }) => {
+  return !item.id.endsWith("index.md");
 });
-
-const { currentPage } = Astro.props;
 
 // getid by looking up by slug
 
@@ -90,24 +94,29 @@ let currentDocLabel = "";
 let currentDocFolder = null;
 
 if (currentPage !== "/") {
-  let currentDoc = docs.find(function (doc) {
+  let currentDoc: DocType | undefined = docs.find((doc: DocType) => {
     return `/${doc.slug}/` === currentPage || `/${doc.slug}` === currentPage;
   });
 
-  if (currentDoc) {
-    currentDocLabel = currentDoc.data.label;
+  if (!currentDoc) {
+    currentDoc = new Object() as DocType;
   }
 
-  if (currentDoc) {
+  if (currentDoc !== undefined && currentDoc.data !== undefined) {
+    currentDocLabel = currentDoc.data.label;
     let currentDocId: any = currentDoc?.id;
     let slashPosition = currentDocId?.lastIndexOf("/");
     if (slashPosition !== -1) {
       currentDocId = currentDocId.substring(0, slashPosition);
     }
 
-    currentDocFolder = metaData.find(function (item) {
+    currentDocFolder = metaData.find(function (item: { id: string }) {
       return item.id.startsWith(currentDocId);
     });
+
+    if (!currentDocFolder) {
+      currentDocFolder = new Object() as DocType;
+    }
   }
 }
 ---
@@ -197,13 +206,3 @@ if (currentPage !== "/") {
     </div>
   </div>
 </header>
-
-<style>
-  .primary {
-    fill: #7c3aed;
-  }
-
-  .secondary {
-    fill: #fff;
-  }
-</style>

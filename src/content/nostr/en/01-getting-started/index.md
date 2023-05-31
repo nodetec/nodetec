@@ -1,6 +1,5 @@
 ---
-label: Hardware
-slug: hardware
+label: Getting Started
 order: 10
 ---
 

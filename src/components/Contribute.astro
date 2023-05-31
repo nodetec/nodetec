@@ -2,20 +2,29 @@
 import { Icon } from "astro-icon";
 import { GIT_REPO } from "../settings";
 import { getCollection } from "astro:content";
+import type { ContentType, DocType } from "../content/config";
 
 const currentPage = Astro.url.pathname;
 
-const docs = await getCollection("docs", ({ id }) => {
-  return !id.endsWith("index.md");
+// get first part of the path
+const collection = currentPage.split("/")[2] as ContentType;
+
+const docs = await getCollection(collection, (item: { id: string }) => {
+  return !item.id.endsWith("index.md");
 });
 
 let currentDoc = null;
 let currentFile = "";
 if (currentPage !== "/") {
-  currentDoc = docs.find(function (doc) {
+  currentDoc = docs.find(function (doc: DocType) {
     return `/${doc.slug}/` === currentPage || `/${doc.slug}` === currentPage;
   });
-  if (currentDoc) {
+
+  if (!currentDoc) {
+    currentDoc = new Object() as DocType;
+  }
+
+  if (currentDoc && currentDoc.id) {
     currentFile = `${currentDoc.id.replace(/\/$/, "")}`;
   }
 }

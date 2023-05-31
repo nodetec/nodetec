@@ -1,25 +1,40 @@
 ---
-import { CollectionEntry, getCollection } from "astro:content";
-import DocLayout from "../layouts/DocLayout.astro";
+import { getCollection } from "astro:content";
+import DocLayout from "../../layouts/DocLayout.astro";
+import type { CollectionType, DocType } from "../../content/config";
+import { collections } from "../../content/config";
 
 export async function getStaticPaths() {
-  const docs = await getCollection("docs", ({ id }) => {
-    return !id.endsWith("index.md");
-  });
-  return docs.map((entry) => ({
+  const collectionArr = Object.keys(collections) as CollectionType[];
+
+  const docArr = await Promise.all(
+    collectionArr.map(async (collection) => {
+      const docs = await getCollection(collection, (item: { id: string }) => {
+        return !item.id.endsWith("index.md");
+      });
+      return docs;
+    })
+  );
+
+  console.log(docArr)
+
+  return docArr.flat().map((entry: DocType) => ({
     params: {
-      slug: entry.slug,
+      slug: entry.collection + "/" + entry.slug,
     },
     props: entry,
   }));
 }
-type Props = CollectionEntry<"docs">;
+
+const currentPage = Astro.url.pathname;
+
+const collection = currentPage.split("/")[2] as CollectionType;
 
 const post = Astro.props;
 const { Content, headings } = await post.render();
 
-const docs = await getCollection("docs", ({ id }) => {
-  return !id.endsWith("index.md");
+const docs = await getCollection(collection, (item: { id: string }) => {
+  return !item.id.endsWith("index.md");
 });
 
 function getIndexByKey(objects: any, key: string, value: string) {
@@ -47,11 +62,14 @@ function getNextItemByKey(objects: any, key: string, value: string) {
   return null; // Return null if no next item exists
 }
 
-const prev = getPreviousItemByKey(docs, "id", post.id);
+const prev =  getPreviousItemByKey(docs, "id", post.id);
 const next = getNextItemByKey(docs, "id", post.id);
+
+// console.log(prev);
 ---
 
 <DocLayout headings={headings} next={next} prev={prev} {...post.data}>
+<!-- <DocLayout headings={headings} {...post.data}> -->
   <Content />
   <!-- <Pagination next={next} prev={prev} /> -->
 </DocLayout>

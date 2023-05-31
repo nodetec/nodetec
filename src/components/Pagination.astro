@@ -1,5 +1,9 @@
 ---
+import { CollectionType } from "../content/config";
 const { prev, next } = Astro.props;
+
+const currentPage = Astro.url.pathname;
+const collection = currentPage.split("/")[2] as CollectionType;
 ---
 
 <div class="md:mt-24 flex justify-between w-full">
@@ -7,7 +11,7 @@ const { prev, next } = Astro.props;
     prev && (
       <a
         class="no-underline rounded-xl border-2 border-slate-600 text-sm px-4 py-2 mr-auto"
-        href={`/${prev.slug}`}
+        href={`/guide/${collection}/${prev.slug}`}
       >
         {/* Prev */}
         {prev.data.label}
@@ -18,7 +22,7 @@ const { prev, next } = Astro.props;
     next && (
       <a
         class="flex items-center no-underline rounded-xl border-2 border-slate-600 text-sm px-4 py-2 ml-auto"
-        href={`/${next.slug}`}
+        href={`/guide/${collection}/${next.slug}`}
       >
         {/* Next */}
         {next.data.label}

@@ -1,4 +1,6 @@
 ---
+import { CollectionType } from "../content/config";
+
 type Props = {
   currentPage: string;
   folder: any;
@@ -6,6 +8,8 @@ type Props = {
 };
 
 const { currentPage, folder, files } = Astro.props;
+const collection = currentPage.split("/")[2] as CollectionType;
+console.log("currentPAge", currentPage);
 ---
 
 <li class="mb-6 flex flex-col">
@@ -23,10 +27,10 @@ const { currentPage, folder, files } = Astro.props;
         .map((file: any) => (
           <li>
             <a
-              href={`/${file.slug}`}
+              href={`/guide/${collection}/${file.slug}`}
               class={`text-base p-1 pl-3 no-underline block hover:underline hover:text-slate-900 dark:hover:text-slate-100 ${
-                currentPage === `/${file.slug}` ||
-                currentPage === `/${file.slug}/`
+                currentPage === `/guide/${collection}/${file.slug}` ||
+                currentPage === `/guide/${collection}/${file.slug}/`
                   ? "text-slate-900 bg-slate-200 dark:text-slate-100 dark:bg-slate-700 font-semibold rounded-md" // border-l-4
                   : "text-slate-600 dark:text-slate-400"
               } `}
