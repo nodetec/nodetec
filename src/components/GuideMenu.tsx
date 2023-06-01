@@ -3,8 +3,8 @@ import { Popover, Transition } from "@headlessui/react";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
 
 const guides = [
-  { name: "Bitcoin Node", href: "guide/fullnode/en/hardware/prep" },
-  { name: "Nostr", href: "guide/nostr/en/getting-started/prep" },
+  { name: "Bitcoin Node", href: "en/guides/fullnode/hardware/prep" },
+  { name: "Nostr", href: "en/guides/nostr/getting-started/setup" },
 ];
 
 export default function AppMenu() {

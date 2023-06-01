@@ -1,6 +1,6 @@
 ---
 label: Prep
-slug: en/hardware/prep
+slug: en/guides/fullnode/hardware/prep
 order: 10
 ---
 

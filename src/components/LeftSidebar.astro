@@ -1,7 +1,6 @@
 ---
 import { getCollection } from "astro:content";
 import DocNavigation from "./DocNavigation.astro";
-import type { ContentType } from "../content/config";
 
 type Props = {
   currentPage: string;
@@ -9,13 +8,11 @@ type Props = {
 
 const { currentPage } = Astro.props;
 
-// get first part of the path
-const currentDoc = currentPage.split("/")[2] as ContentType;
+const parts: string[] = currentPage.split("/");
+const result: string = parts.slice(0, 4).join("/");
 
-console.log("currentDoc", currentDoc);
-
-const metaData = await getCollection(currentDoc, (item: { id: string }) => {
-  return item.id.endsWith("index.md");
+const metaData = await getCollection("docs", ({ id }) => {
+  return id.endsWith("index.md") && id.startsWith(result.slice(1));
 });
 
 let folders = metaData.map((folder: any) => {
@@ -29,8 +26,8 @@ let folders = metaData.map((folder: any) => {
 
 folders.sort((a, b) => a.order - b.order);
 
-const files = await getCollection(currentDoc, (item: { id: string }) => {
-  return !item.id.endsWith("index.md");
+const docs = await getCollection("docs", ({ id }) => {
+  return !id.endsWith("index.md") && id.startsWith(result.slice(1));
 });
 ---
 
@@ -40,11 +37,7 @@ const files = await getCollection(currentDoc, (item: { id: string }) => {
   >
     {
       folders.map((folder: any) => (
-        <DocNavigation
-          folder={folder}
-          currentPage={currentPage}
-          files={files}
-        />
+        <DocNavigation folder={folder} currentPage={currentPage} files={docs} />
       ))
     }
   </ul>

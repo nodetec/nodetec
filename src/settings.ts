@@ -1,8 +1,8 @@
 export const SITE = {
   title: "NODE-TEC",
-  description: "A documentation template for Astro",
+  description: "Sovereign Computing For a Brighter Future",
   defaultLanguage: "en-us",
-};
+} as const;
 
 export const COMMUNITY = [
   {
@@ -18,7 +18,7 @@ export const COMMUNITY = [
   {
     title: "Twitter",
     icon: "mdi:twitter",
-    link: "https://twitter.com/chrisatmachine",
+    link: "https://twitter.com/node_tec",
   },
   {
     title: "Nostr",
@@ -28,7 +28,7 @@ export const COMMUNITY = [
   {
     title: "YouTube",
     icon: "mdi:youtube",
-    link: "https://youtube.com/@chrisatmachine",
+    link: "https://youtube.com/@nodetec",
   },
   {
     title: "Twitch",
@@ -37,11 +37,19 @@ export const COMMUNITY = [
   },
 ];
 
+export const OPEN_GRAPH = {
+  image: {
+    src: "https://user-images.githubusercontent.com/29136904/242467407-ae84ec98-0322-44bb-8620-12d2855203f6.png",
+    alt: "NODE-TEC logo",
+  },
+  twitter: "node_tec",
+};
+
 export const GIT_REPO = {
-  editURL: "https://github.com/ChristianChiarulli/novadocs/edit/master/src/content/docs",
+  editURL: "https://github.com/nodetec/nodetec/edit/master/src/content/docs",
   contributingURL:
-    "https://github.com/ChristianChiarulli/novadocs/edit/master/CONTRIBUTING.md",
-  issueURL: "https://github.com/ChristianChiarulli/novadocs/issues",
+    "https://github.com/nodetec/nodetec/edit/master/CONTRIBUTING.md",
+  issueURL: "https://github.com/nodetec/nodetec/issues",
 };
 
 export const LN_URL_OR_ADDRESS = "chrisatmachine@getalby.com";

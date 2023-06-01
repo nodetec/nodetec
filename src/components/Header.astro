@@ -12,25 +12,23 @@ import {
   ChevronRightIcon,
 } from "@heroicons/react/24/solid";
 
-import type { ContentType, DocType } from "../content/config";
-
 type Props = {
   currentPage: string;
 };
 
 const { currentPage } = Astro.props;
 
-// get first part of the path
-const collection = currentPage.split("/")[2] as ContentType;
+const parts: string[] = currentPage.split("/");
+const result: string = parts.slice(0, 4).join("/");
 
-const docs = await getCollection(collection, (item: { id: string }) => {
-  return !item.id.endsWith("index.md");
+const docs = await getCollection("docs", ({ id }) => {
+  return !id.endsWith("index.md") && id.startsWith(result.slice(1));
 });
 
 function parseMarkdown(doc: any) {
   const markdownContent = doc.body;
   const label = doc.data.label;
-  const slug = `guide/${collection}/${doc.slug}`;
+  const slug = `${doc.slug}`;
 
   // Split by line
   let lines = markdownContent.split("\n");
@@ -69,8 +67,8 @@ const parsed_markdown = docs.map((doc) => {
 
 const LANG = "en";
 
-const metaData = await getCollection(collection, (item: { id: string }) => {
-  return item.id.endsWith("index.md");
+const metaData = await getCollection("docs", ({ id }) => {
+  return id.endsWith("index.md") && id.startsWith(result.slice(1));
 });
 
 let folders = metaData.map((folder: any) => {
@@ -84,23 +82,15 @@ let folders = metaData.map((folder: any) => {
 
 folders.sort((a, b) => a.order - b.order);
 
-const files = await getCollection(collection, (item: { id: string }) => {
-  return !item.id.endsWith("index.md");
-});
-
 // getid by looking up by slug
 
 let currentDocLabel = "";
 let currentDocFolder = null;
 
 if (currentPage !== "/") {
-  let currentDoc: DocType | undefined = docs.find((doc: DocType) => {
+  let currentDoc = docs.find((doc) => {
     return `/${doc.slug}/` === currentPage || `/${doc.slug}` === currentPage;
   });
-
-  if (!currentDoc) {
-    currentDoc = new Object() as DocType;
-  }
 
   if (currentDoc !== undefined && currentDoc.data !== undefined) {
     currentDocLabel = currentDoc.data.label;
@@ -113,10 +103,6 @@ if (currentPage !== "/") {
     currentDocFolder = metaData.find(function (item: { id: string }) {
       return item.id.startsWith(currentDocId);
     });
-
-    if (!currentDocFolder) {
-      currentDocFolder = new Object() as DocType;
-    }
   }
 }
 ---
@@ -134,9 +120,6 @@ if (currentPage !== "/") {
           class="mr-3 flex w-[2.0625rem] flex-row items-center gap-2 overflow-hidden text-xl md:w-auto"
           href="/"
         >
-          <!-- <Icon class="w-7 h-7 cursor-pointer" name={"ph:planet-fill"} /> -->
-          <!-- <RocketLaunchIcon className="h-6 w-6" aria-hidden="true" /> -->
-
           <svg
             version="1.1"
             id="svg99"
@@ -153,11 +136,6 @@ if (currentPage !== "/") {
 
           <h1 class="hidden lg:block">{SITE.title ?? "Documentation"}</h1>
         </a>
-        <!-- <div class="lg:flex gap-4 text-slate-600 dark:text-slate-400 font-semibold hidden"> -->
-        <!--   <a class="hover:text-slate-900 dark:hover:text-slate-100" href="/"> Docs</a> -->
-        <!--   <a class="hover:text-slate-900 dark:hover:text-slate-100" href="/blog"> Blog</a> -->
-        <!--   <a class="hover:text-slate-900 dark:hover:text-slate-100" href="/references"> References</a> -->
-        <!-- </div> -->
       </div>
 
       <div class="flex flex-row gap-3 lg:gap-6">
@@ -177,7 +155,7 @@ if (currentPage !== "/") {
           <DocNavigation
             currentPage={currentPage}
             folder={folder}
-            files={files}
+            files={docs}
           />
         ))
       }

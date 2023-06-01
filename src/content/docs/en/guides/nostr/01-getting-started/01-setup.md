@@ -1,7 +1,7 @@
 ---
-label: Keys
-slug: en/getting-started/keys
-order: 20
+label: Prep
+slug: en/guides/nostr/getting-started/setup
+order: 10
 ---
 
 # Hardware Preparation for a Bitcoin Node

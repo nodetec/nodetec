@@ -11,7 +11,7 @@ const collection = currentPage.split("/")[2] as CollectionType;
     prev && (
       <a
         class="mr-auto rounded-xl border-2 border-slate-600 px-4 py-2 text-sm no-underline"
-        href={`/guide/${collection}/${prev.slug}`}
+        href={`/${prev.slug}`}
       >
         {/* Prev */}
         {prev.data.label}
@@ -22,7 +22,7 @@ const collection = currentPage.split("/")[2] as CollectionType;
     next && (
       <a
         class="ml-auto flex items-center rounded-xl border-2 border-slate-600 px-4 py-2 text-sm no-underline"
-        href={`/guide/${collection}/${next.slug}`}
+        href={`/${next.slug}`}
       >
         {/* Next */}
         {next.data.label}
