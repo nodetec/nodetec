@@ -15,4 +15,5 @@ export default defineConfig({
       theme: "github-dark",
     },
   },
+	site: `https://nodetec.co`,
 });
