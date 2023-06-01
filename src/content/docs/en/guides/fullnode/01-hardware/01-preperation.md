@@ -1,7 +1,8 @@
 ---
 label: Prep
 slug: en/guides/fullnode/hardware/prep
-image: https://user-images.githubusercontent.com/29136904/242499360-f8ceeaaf-e8f7-44c8-8532-6ce859957718.png
+image: https://user-images.githubusercontent.com/29136904/242515287-6e600994-be07-42b3-afe4-f8166cdb2575.png
+
 order: 10
 ---
 
