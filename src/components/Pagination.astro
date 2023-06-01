@@ -1,9 +1,5 @@
 ---
-import { CollectionType } from "../content/config";
 const { prev, next } = Astro.props;
-
-const currentPage = Astro.url.pathname;
-const collection = currentPage.split("/")[2] as CollectionType;
 ---
 
 <div class="flex w-full justify-between md:mt-24">
