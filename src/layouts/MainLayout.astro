@@ -4,14 +4,14 @@ import HeadCommon from "../components/HeadCommon.astro";
 import HeadSEO from "../components/HeadSEO.astro";
 import { SITE } from "../settings";
 
-const { label, headings, ...data } = Astro.props;
+const { label, image, headings, ...data } = Astro.props;
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 ---
 
 <html dir={"ltr"} lang={"en"} class="initial">
   <head>
     <HeadCommon />
-    <HeadSEO {...data} canonicalUrl={canonicalURL} label={label} />
+    <HeadSEO {...data} canonicalUrl={canonicalURL} label={label} image={image} />
     <title>
       {`${label} | ${SITE.title}`}
     </title>

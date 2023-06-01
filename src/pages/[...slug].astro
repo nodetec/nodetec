@@ -60,6 +60,7 @@ function getNextItemByKey(objects: any, key: string, value: string) {
 
 const prev = getPreviousItemByKey(docs, "id", post.id);
 const next = getNextItemByKey(docs, "id", post.id);
+console.log(post)
 ---
 
 <DocLayout headings={headings} next={next} prev={prev} {...post.data}>

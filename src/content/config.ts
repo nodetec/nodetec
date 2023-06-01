@@ -1,5 +1,5 @@
 import { z, defineCollection } from "astro:content";
-import { SITE } from "../settings";
+import { SITE, OPEN_GRAPH } from "../settings";
 const docs = defineCollection({
   type: "content",
   schema: z.object({
@@ -8,12 +8,7 @@ const docs = defineCollection({
     title: z.string().default(SITE.title),
     description: z.string().default(SITE.description),
     lang: z.literal("en-us").default(SITE.defaultLanguage),
-    image: z
-      .object({
-        src: z.string(),
-        alt: z.string(),
-      })
-      .optional(),
+    image: z.string().default(OPEN_GRAPH.image.src),
     ogLocale: z.string().optional(),
   }),
 });
