@@ -5,13 +5,14 @@ import HeadSEO from "../components/HeadSEO.astro";
 import { SITE } from "../settings";
 
 const { label, headings, ...data } = Astro.props;
+console.log(label)
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 ---
 
 <html dir={"ltr"} lang={"en"} class="initial">
   <head>
     <HeadCommon />
-    <HeadSEO {...data} canonicalUrl={canonicalURL} />
+    <HeadSEO {...data} canonicalUrl={canonicalURL} label={label} />
     <title>
       {`${label} | ${SITE.title}`}
     </title>
