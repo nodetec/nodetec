@@ -39,7 +39,7 @@ export const COMMUNITY = [
 
 export const OPEN_GRAPH = {
   image: {
-    src: "https://user-images.githubusercontent.com/29136904/242467407-ae84ec98-0322-44bb-8620-12d2855203f6.png",
+    src: "https://user-images.githubusercontent.com/29136904/242499360-f8ceeaaf-e8f7-44c8-8532-6ce859957718.png",
     alt: "NODE-TEC logo",
   },
   twitter: "node_tec",
