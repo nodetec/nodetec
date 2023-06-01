@@ -1,5 +1,5 @@
 import { z, defineCollection } from "astro:content";
-const fullnode = defineCollection({
+const docs = defineCollection({
   type: "content",
   schema: z.object({
     label: z.string(),
@@ -7,17 +7,10 @@ const fullnode = defineCollection({
   }),
 });
 
-const nostr = defineCollection({
-  type: "content",
-  schema: z.object({
-    label: z.string(),
-    order: z.number(),
-  }),
-});
 
 export const collections = {
-  fullnode: fullnode,
-  nostr: nostr,
+  fullnode: docs,
+  nostr: docs,
 };
 
 export type DocType = {
