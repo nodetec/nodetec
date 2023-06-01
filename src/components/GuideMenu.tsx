@@ -4,7 +4,7 @@ import { ChevronDownIcon } from "@heroicons/react/20/solid";
 
 const guides = [
   // { name: "Bitcoin Node", href: "en/guides/fullnode/hardware/prep" },
-  { name: "Nostr", href: "en/guides/nostr/getting-started/setup" },
+  { name: "Nostr", href: "en/guides/nostr/getting-started/intro" },
 ];
 
 export default function AppMenu() {
