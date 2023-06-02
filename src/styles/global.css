@@ -52,6 +52,10 @@ h5[id],
   @apply scroll-mt-36 lg:scroll-mt-28;
 }
 
+.markdown .callout p {
+  @apply m-0;
+}
+
 .line-clamp-1 {
   overflow: hidden;
   display: -webkit-box;
