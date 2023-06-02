@@ -21,3 +21,30 @@
 .markdown .remark-code-title {
   @apply z-10 -mb-7 mt-3 w-full rounded-t-md border-b border-slate-600 bg-slate-800 px-3 py-2 font-mono text-sm font-semibold text-slate-300;
 }
+
+.markdown {
+  /* @apply selection:bg-blue-200 selection:text-blue-500 dark:text-blue-100 dark:selection:bg-blue-200 flex w-full flex-col items-start justify-start px-4 leading-relaxed text-slate-900 dark:selection:text-slate-900; */
+}
+
+.markdown a:not(.heading-link--hidden---effects) {
+  @apply text-blue-600 underline decoration-slate-500 
+          decoration-dotted underline-offset-2  
+          hover:text-blue-700 dark:text-blue-400 
+          dark:decoration-blue-200 dark:hover:text-blue-300;
+}
+
+h1[id],
+h2[id],
+h3[id],
+h4[id],
+h5[id],
+#content {
+  @apply scroll-mt-36 lg:scroll-mt-24;
+}
+
+.line-clamp-1 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
