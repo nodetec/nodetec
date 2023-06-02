@@ -28,7 +28,7 @@ export default function AppMenu() {
       >
         <Popover.Panel className="absolute right-full z-10 mr-8 mt-5 flex w-1/2 max-w-min -translate-x-full px-4 lg:mr-0">
           {({ close }) => (
-            <div className="w-56 shrink rounded-xl bg-white p-4 text-sm font-semibold leading-6 text-slate-900 shadow-lg ring-1 ring-slate-900/5 dark:bg-slate-700 dark:text-slate-100">
+            <div className="w-56 shrink rounded-xl bg-white p-2 text-sm font-semibold leading-6 text-slate-900 shadow-lg ring-1 ring-slate-900/5 dark:bg-slate-700 dark:text-slate-100">
               {solutions.map((item) => (
                 <a
                   onClick={() => {

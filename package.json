@@ -42,6 +42,9 @@
     "html-escaper": "^3.0.3",
     "prettier": "^2.8.8",
     "prettier-plugin-tailwindcss": "^0.3.0",
+    "rehype-autolink-headings": "^6.1.1",
+    "rehype-external-links": "^2.1.0",
+    "rehype-slug": "^5.1.0",
     "remark-code-titles": "^0.1.2",
     "vite-plugin-node-polyfills": "^0.8.2"
   }

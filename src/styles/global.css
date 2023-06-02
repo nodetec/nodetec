@@ -33,13 +33,23 @@
           dark:decoration-blue-200 dark:hover:text-blue-300;
 }
 
+
+.markdown h1 a,
+.markdown h2 a,
+.markdown h3 a,
+.markdown h4 a,
+.markdown h5 a,
+.markdown h6 a {
+  @apply no-underline hover:underline;
+}
+
 h1[id],
 h2[id],
 h3[id],
 h4[id],
 h5[id],
 #content {
-  @apply scroll-mt-36 lg:scroll-mt-24;
+  @apply scroll-mt-36 lg:scroll-mt-28;
 }
 
 .line-clamp-1 {
