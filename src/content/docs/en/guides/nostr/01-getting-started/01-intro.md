@@ -4,4 +4,20 @@ slug: en/guides/nostr/getting-started/intro
 order: 10
 ---
 
-# Introduction to Nostr
+# Introduction
+
+Nostr is a decentralized network protocol designed for a distributed and free social networking system. In this guide we will explore Nostr by interacting with the protocol directly. 
+
+## Who is this Guide for?
+
+This guide will assume some level of technical competency and is targeted primarily at developers. If you are not a developer, you may still find this guide useful, but you may need to do some additional research to understand some of the concepts.
+
+A basic understanding of the following concepts will be helpful:
+
+- [Typescript](https://www.typescriptlang.org/)
+
+- [Node.js](https://nodejs.org/en/)
+
+- [CLI](https://en.wikipedia.org/wiki/Command-line_interface)
+
+Throughout this guide will will mostly stick to creating simple command line applications for nostr but you will easily be able to take these concepts to create decentralized censorship resistant applications.

@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.markdown pre {
+  @apply mx-auto mb-3 rounded-none p-2 pl-3 font-mono shadow-xl sm:pt-2;
+}
+
+.markdown code {
+  @apply break-words font-mono [direction:ltr] [unicode-bidi:embed] lg:break-normal;
+}
+
+.markdown .code-wrapper {
+  @apply inline rounded border border-blue-200 bg-blue-200/40 px-0.5 py-[0.5px] dark:border-blue-400/30 dark:bg-blue-400/20;
+}
+
+.markdown pre {
+  @apply mx-auto mb-3 rounded-b p-2 pl-3 font-mono shadow-xl sm:pt-2;
+}
+
+.markdown details pre {
+  @apply border-0 font-mono shadow-none;
+}
+
+.markdown .remark-code-title {
+  @apply z-10 -mb-6 mt-3 w-full rounded-t-md border-b border-slate-600 bg-slate-800 px-3 py-2 font-mono text-sm font-semibold text-slate-300;
+}

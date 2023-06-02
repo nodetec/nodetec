@@ -58,7 +58,7 @@ const yellow = { 0: '#ffbedd', 1: '#ffa657' };
 const blue = { 0: '#d2a8ff', 1: '#bc8cff' };
 const green = { 0: '#79c0ff' };
 const cyan = { 0: '#56d364' };
-const grey = { 0: '#c9d1d9', 1: '#b1bac4', 2: '#1A2437', 9: '#1A2437' };
+const grey = { 0: '#c9d1d9', 1: '#b1bac4', 2: '#1E293B', 9: '#1E293B' };
 
 const foregroundPrimary = grey[0];
 const backgroundPrimary = grey[9];

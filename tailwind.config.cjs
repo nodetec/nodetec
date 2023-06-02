@@ -2,7 +2,7 @@
 
 module.exports = {
   content: ["./src/**/*.{astro,html,js,jsx,md,mdx,svelte,ts,tsx,vue}"],
-  darkMode: 'class',
+  darkMode: "class",
   theme: {
     fontFamily: {
       sans: [
@@ -11,6 +11,9 @@ module.exports = {
           fontFeatureSettings: '"cv11", "ss01", "ss02"',
           fontVariationSettings: '"opsz" 32',
         },
+      ],
+      mono: [
+        ["JetBrains Mono Variable, monospace"],
       ],
     },
   },

@@ -1,5 +1,5 @@
 ---
-label: Client Relay Communication
+label: Communication
 slug: en/guides/nostr/nip-01/client-relay-communication
 order: 30
 ---

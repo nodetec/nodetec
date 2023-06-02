@@ -15,7 +15,11 @@ export async function getStaticPaths() {
 }
 
 const post = Astro.props;
+
+// console.log(post)
 const { Content, headings } = await post.render();
+
+console.log(await post.render())
 
 const docs = await getCollection("docs", ({ id }) => {
   return !id.endsWith("index.md");
@@ -60,7 +64,7 @@ function getNextItemByKey(objects: any, key: string, value: string) {
 
 const prev = getPreviousItemByKey(docs, "id", post.id);
 const next = getNextItemByKey(docs, "id", post.id);
-console.log(post)
+// console.log(post)
 ---
 
 <DocLayout headings={headings} next={next} prev={prev} {...post.data}>

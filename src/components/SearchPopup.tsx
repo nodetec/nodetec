@@ -43,7 +43,7 @@ export default function SearchPopup({
           });
         }
       } else {
-        console.log("item", item);
+        // console.log("item", item);
         // If no object with the same title exists, create a new one
         newArray.push({
           label: item.label,
