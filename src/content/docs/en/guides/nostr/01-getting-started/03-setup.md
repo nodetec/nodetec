@@ -21,7 +21,7 @@ We will need to install [Node.js](https://nodejs.org/en/) to run our application
 We will need to install [npm](https://www.npmjs.com/) to install for the `nostr-tools` package. npm is a package manager for Node.js.
 
 
-## Initialize a new Node.js project
+## Initialize Project
 
 We will need to initialize a new Node.js project to install the `nostr-tools` package. To do this, we will initialize a new Node.js project using the `npm init` command.
 
