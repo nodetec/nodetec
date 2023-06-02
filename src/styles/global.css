@@ -10,17 +10,18 @@
   @apply inline rounded border border-blue-200 bg-blue-200/40 px-0.5 py-[0.5px] dark:border-blue-400/30 dark:bg-blue-400/20;
 }
 
+.markdown .remark-code-title {
+  @apply relative z-20 -mb-7 mt-3 w-full rounded-t-md border-b border-slate-600 bg-slate-800 px-3 py-2 font-mono text-sm font-semibold text-slate-300;
+}
+
 .markdown pre {
-  @apply -z-10 mx-auto mb-3 rounded-md p-2 pl-3 font-mono shadow-xl sm:pt-2;
+  @apply mx-auto mb-3 rounded-md p-2 pl-3 font-mono shadow-xl sm:pt-2;
 }
 
 .markdown details pre {
   @apply border-0 font-mono shadow-none;
 }
 
-.markdown .remark-code-title {
-  @apply z-10 -mb-7 mt-3 w-full rounded-t-md border-b border-slate-600 bg-slate-800 px-3 py-2 font-mono text-sm font-semibold text-slate-300;
-}
 
 .markdown {
   /* @apply selection:bg-blue-200 selection:text-blue-500 dark:text-blue-100 dark:selection:bg-blue-200 flex w-full flex-col items-start justify-start px-4 leading-relaxed text-slate-900 dark:selection:text-slate-900; */
