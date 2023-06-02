@@ -50,7 +50,7 @@ h3[id],
 h4[id],
 h5[id],
 #content {
-  @apply scroll-mt-36 lg:scroll-mt-24;
+  @apply scroll-mt-36 lg:scroll-mt-28;
 }
 
 .markdown .callout p {
