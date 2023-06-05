@@ -8,7 +8,7 @@ order: 10
 
 Become a sovereign member of the Bitcoin network by learning how to build and maintain your own Bitcoin full node.
 
-Don't trust, verify.
+Don't trust, **verify**.
 
 ## Goal of this Guide
 
