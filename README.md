@@ -19,3 +19,6 @@ All commands are run from the root of the project, from a terminal:
 - support drafts
 - support multiple languages
 - fuzzy match for searches
+- use tailwind scrollbar
+- provide the same node and npm versions
+- use the same package-lock.json file
