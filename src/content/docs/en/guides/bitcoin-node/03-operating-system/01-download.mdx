@@ -1,0 +1,36 @@
+---
+label: Download
+slug: en/guides/bitcoin-node/operating-system/download
+order: 10
+---
+
+import Callout from "@components/mdx/Callout.tsx";
+
+# Download
+
+As stated previously, we're going to be using the [Debian](https://www.debian.org/) operating system for this guide. Specifically, we're going to be installing the **64-bit Debian 11 (Bullseye) Minimal Server** using the network install (netinst) image which you can download from the [Network install from a minimal CD](https://www.debian.org/CD/netinst/) page on the Debian website.
+
+When downloading the image make sure to choose the appropriate netinst image for your device's architecture the most common of which are **AMD64** and **ARM64**.
+
+Here are links to download the latest versions of the netinst images for the **AMD64** and **ARM64** architectures:
+
+- <a href="https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-11.7.0-amd64-netinst.iso">debian-11.7.0-amd64-netinst.iso</a>
+
+- <a href="https://cdimage.debian.org/debian-cd/current/arm64/iso-cd/debian-11.7.0-arm64-netinst.iso">debian-11.7.0-arm64-netinst.iso</a>
+
+A netinst image is a minimal image that allows us to boot the Debian installer and then downloads the rest of the system as needed from a repository.
+
+<Callout client:load type="info">
+  The way Debian uses the term CD can be confusing since they use it to describe a range of things that aren't specific to just CDs. All you need to know though is the netinst image we downloaded can be written to a CD or to a USB. If you're interested in learning more though check out the [What is a "CD image" anyway?](https://www.debian.org/CD/faq/#what-is) section from the Debian CD FAQ.
+</Callout>
+
+The minimal server allows us to build a customizable server which in our case is a Bitcoin full node using only the software packages we need which doesn't currently include a Graphical User Interface (GUI).
+
+If you prefer to use a GUI, then you can install a 64-bit Debian 11 image that comes with one, or you can manually install a GUI of your choice.
+
+<Callout client:load type="warning">
+  The set up of the node in this guide though will be under the assumption that no GUI is being used, so all of the commands will be run in a terminal.
+</Callout>
+
+Before proceeding with the installation, we're going to first verify the authenticity of the downloaded image.
+
