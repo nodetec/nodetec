@@ -1,0 +1,128 @@
+---
+label: Verification
+slug: en/guides/bitcoin-node/operating-system/verification
+order: 20
+---
+
+import Callout from "@components/mdx/Callout.tsx";
+
+# Verification
+
+We're now going to verify the authenticity of the downloaded Debian image which minimizes the possibility of the image being compromised. To verify the authenticity of the image we need to download a checksum file and a signature file for the version of Debian we're using. The checksum file is used to check that the image hasn't been corrupted during the download. The signature file is used to check that the hashes in the checksum file haven't been tampered with by ensuring they are ones created and released by Debian.
+
+## Download Verification Files
+
+Here are links to download the checksum and signature files which are used to verify the authenticity of the image:
+
+- [Debian Current AMD64 Network Install Files](https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/)
+
+- [Debian Current ARM64 Network Install Files](https://cdimage.debian.org/debian-cd/current/arm64/iso-cd/)
+
+The links above are for the most common architectures, i.e., **AMD64** and **ARM64**. If you're using a different architecture, then you'll need to download the corresponding checksum and signature files.
+
+Here's a link you can use to navigate to the checksum and signature files for your preferred architecture:
+
+- [Debian Current Architecture Directory](https://cdimage.debian.org/debian-cd/current/)
+
+<Callout client:load type="info">
+  The links above are for the current version of Debian, so if you're using an older version you'll need to download the corresponding checksum and signature files for that version.
+</Callout>
+
+To download the checksum and signature files right click the `SHA256SUMS` and the `SHA256SUMS.sign` links or the `SHA512SUMS` and the `SHA512SUMS.sign` links then save the links as files to the same directory where you downloaded the image. The image, checksum file, and signature file should be downloaded to the same directory to avoid any issues locating the files when running the commands below.
+
+<Callout client:load type="tip">
+  Debian provides both `SHA256` and `SHA512` checksum files, but you need to verify only one of them to verify the authenticity of image. Just be sure to use the matching tools, i.e., `sha256sum` or `sha512sum` when performing the verification. Also when downloading the checksum files make sure to remove any file extensions, i.e., the file names should be `SHA256SUM` or `SHA512SUM`. If they have a file extension and/or are given a different name the verificiation process will fail. We'll be using the `SHA512` checksum file in this example.
+</Callout>
+
+## Required Packages
+
+To perform the verification you'll need to have `gnupg` installed which is most likely already installed on your system, but if not here's how to install it on some common Linux distributions:
+
+### GnuPG
+
+Run the following command to install `gnupg` on Arch:
+
+```sh:Arch
+sudo pacman -S gnupg
+```
+
+Run the following command to install `gnupg` on Debian/Ubuntu:
+
+```sh:Debian/Ubuntu
+sudo apt install -y gnupg
+```
+
+## Import Debian CD Signing Key
+
+Now we need to import the Debian CD signing key used to sign the `SHA256SUMS` and `SHA512SUMS` files unless you're downloading the image to an existing Debian installation which should already have the signing key.
+
+Here's how to import the Debian CD signing key that has been used to sign releases in recent years:
+
+```sh:Import Debian Public Key
+gpg --keyserver keyring.debian.org --recv-keys 42468F4009EA8AC3
+```
+
+<Callout client:load type="tip">
+  The Debian CD signing key may be changed in the future, so you can refer to the [Verifying authenticity of Debian images](https://www.debian.org/CD/verify) page to get details about any key changes as well as more information about the Debian image verification process. You can also download the keys directly from the site by clicking on the provided links and saving the file to your device.
+</Callout>
+
+## Verify the Checksum File
+
+We're now ready to verify the checksum file which again we'll be demonstrating with the `SHA512SUMS` file.
+
+To verify the checksum file run the following command:
+
+```sh:Verify Checksum File
+gpg --verify SHA512SUMS.sign
+```
+
+You should see the following output if the verification was successful:
+
+```sh:Checksum Verification Output
+gpg: assuming signed data in 'SHA512SUMS'
+gpg: Signature made Sat 29 Apr 2023 04:48:07 PM EDT
+gpg:                using RSA key DF9B9C49EAA9298432589D76DA87E80D6294BE9B
+gpg: Good signature from "Debian CD signing key <debian-cd@lists.debian.org>" [unknown]
+gpg: WARNING: This key is not certified with a trusted signature!
+gpg:          There is no indication that the signature belongs to the owner.
+Primary key fingerprint: DF9B 9C49 EAA9 2984 3258  9D76 DA87 E80D 6294 BE9B
+```
+
+Unless you tell GnuPG to trust the key, you'll see a warning similar to the following:
+
+```sh:GnuPG Warning
+gpg: WARNING: This key is not certified with a trusted signature!
+gpg:          There is no indication that the signature belongs to the owner.
+```
+
+This warning means that the key is not certified by another third party authority. If the downloaded file was a fake, then the signature verification process would fail and you would be warned that the fingerprints don't match.
+
+When you get a warning like this it's also good practice to check the key against other sources, e.g., the [Verifying authenticity of Debian images](https://www.debian.org/CD/verify) page we mentioned earlier.
+
+## Verify the Image
+
+We can now verify the the Debian image by recomputing the `SHA512` hash of the file, compare it with the the corresponding hash in the `SHA512SUMS` file, and ensure they match exactly which you can do by running the following command:
+
+```sh:Verify the Image
+sha512sum --check SHA512SUMS
+```
+
+If the verification was successful you should see output similar to the following:
+
+```sh:Image Verification Output
+debian-xx.xx.xx-amd64-netinst.iso: OK
+sha512sum: debian-edu-xx.xx.xx-amd64-netinst.iso: No such file or directory
+debian-edu-xx.xx.xx-amd64-netinst.iso: FAILED open or read
+sha512sum: debian-mac-xx.xx.xx-amd64-netinst.iso: No such file or directory
+debian-mac-xx.xx.xx-amd64-netinst.iso: FAILED open or read
+sha512sum: WARNING: 2 listed files could not be read
+```
+
+Where the `xx.xx.xx` is replaced by whatever version of Debian you're verifying, and the `amd64` is replaced by whatever architecture the image is using.
+
+<Callout client:load type="info">
+  The `SHA512SUMS` file contains checksums for other versions of the Debian image which we did not download, i.e., the `edu netinst` and `mac netinst` images. This is why we see `No such file or directory` for those files. Unless you're using one of those images, you can ignore the output associated with them. If you want to learn more about these images, then check out the [What's in this directory](https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/) page.
+</Callout>
+
+After verifying the authenticity of the image, we're now ready to extract the image to an external media device, e.g., a USB and proceed with the installation.
+
