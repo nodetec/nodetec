@@ -1,0 +1,175 @@
+---
+label: Extraction
+slug: en/guides/bitcoin-node/operating-system/extraction
+order: 30
+---
+
+import Callout from "@components/mdx/Callout.tsx";
+
+# Extraction
+
+After downloading and verifying the image, we need to extract it to an external media device.
+
+The image we're using can be extracted to the following external media devices:
+
+- CD, DVD, or BD
+
+- USB drive
+
+We can extract the image by burning it to a CD, DVD, or BD or by writing the image to a USB drive.
+
+While CD, DVD, and BD are options, it's more common these days to write the image to a USB drive which allows us to boot into the Debian installer directly from the BIOS/EFI firmware of most personal computers (PCs). Since creating a bootable USB drive is the more common option, we're going to focus on that method in this guide.
+
+To create a bootable USB drive from the image we can use either one of the following options:
+
+- Use a live USB creator
+
+- Use the command-line utility `dd`
+
+## Using a Live USB Creator
+
+A live USB creator is a program that creates a portable, bootable, and virtualized USB drive running an OS which in our case is Debian.
+
+### Requirements
+
+To create a bootable USB drive from the image we've downloaded you'll need to have the following:
+
+- A USB drive
+
+- The verified image
+
+- A live USB creator installed on your current device
+
+### Live USB Creators
+
+There are a bunch of programs available that can be used to create a bootable USB drive.
+
+Here are some FOSS options:
+
+- [balenaEtcher](https://etcher.balena.io/)
+
+- [UNetbootin](https://unetbootin.github.io/)
+
+- [Ventoy](https://ventoy.net/en/index.html)
+
+Here are some of the relevant features for the live USB creators listed above to help you choose which program works best for you.
+
+#### balenEtcher
+
+- Cross-platform, i.e., available for download on Linux, macOS, and Windows
+
+- Drive validation after the flashing finishes which means your drive will boot without corruption
+
+- Simple user interface (UI) that provides a smooth experience while writing your image files
+
+#### UNetbootin
+
+- Cross-platform, i.e., available for download on Linux, macOS, and Windows
+
+- Provides the ability to load a wide range of system utilities
+
+- Has built-in support for a vareity of Linux distributions
+
+#### Ventoy
+
+- Cross-platform, i.e., available for download on Linux and Windows
+
+- Can create a multiboot USB drive with several OS options
+
+- Takes away the need to format your USB drive over and over again
+
+If you want to use balenaEtcher, then check out [How to Make a Bootable USB Drive With Etcher in Linux](https://www.makeuseof.com/create-bootable-usb-drive-with-etcher-linux/) if you have any questions or want to learn more.
+
+If you prefer to use a different live USB creator, then just follow along with the instructions provided by the program and/or look up a tutorial if you get stuck.
+
+<Callout client:load type="warning">
+  When creating a bootable USB drive the live USB creator will wipe all of the data on the selected USB drive, so be sure to back up any data contained on the USB drive before proceeding.
+</Callout>
+
+Once the live USB creator finishes, safely eject your newly created bootable USB drive.
+
+## Using dd
+
+If you're already using Linux and prefer to use the command-line interface (CLI) to create the bootable USB drive, then you can use the `dd` command.
+
+### Requirements
+
+To create a bootable USB drive from the image we've downloaded using the `dd` command you'll need to have the following:
+
+- A USB drive
+
+- The verified image
+
+- A device running Linux
+
+### Create Bootable USB
+
+```sh:Create Bootable USB
+sudo dd if=<path/to/image> of=<usb/drive> bs=16M status=progress oflag=sync
+```
+
+where:
+
+- `<path/to/image>` should be replaced with the path to the image you want to write to the USB drive
+
+- `</usb/drive>` should be replaced with the device name matching the USB drive you want to write the image to
+
+- `bs` specifies the block size to use in bytes
+
+- `status=progress` outputs the current progress of the operation in your terminal
+
+- `oflag=sync` flushes the cache so the operation is really finished when the command suceeds
+
+<Callout client:load type="warning">
+  When running the above command make sure you're using the correct device name, i.e., the name of the USB drive that you want to write the image to. This command will override the data on whatever device you select including your current system, so be sure to double check you've selected the correct device before running the command!
+</Callout>
+
+### Identify USB Device Name
+
+If you're not sure what the name of the USB drive is, then you can run the following command to see a list of all disk partitions on your system:
+
+```sh:List Disk Partitions
+sudo fdisk -l
+```
+
+After running the command above you should see output similar to the following:
+
+```sh:Disk Partitions List
+...
+Disk /dev/sda: 28.9 GiB, 31029460992 bytes, 60604416 sectors
+Disk model: USB 3.0 FD
+Units: sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+Disklabel type: dos
+Disk identifier: 0xbe4f2181
+
+Device     Boot Start      End  Sectors  Size Id Type
+/dev/sda1  *     2048 60604415 60602368 28.9G  b W95 FAT32
+```
+
+Here the disk of the USB drive is `/dev/sda` and the device name is `/dev/sda1`. Since the above command lists all of the disk partitions on your system, you'll need to identity the device based on the properties of the USB, e.g., the disk model, size, type, etc.
+
+<Callout client:load type="info">
+  The `...` in the output above is used to signify that the unrelated output from the command is being omitted.
+</Callout>
+
+If the USB drive is not showing up, then double check that you have correctly connected it to your device and/or try using a different USB port.
+
+### dd Output
+
+It may take some time to create the bootable USB drive depending on your system. Don’t interrupt the bootable USB creation, you will get output similar to this once the process is complete:
+
+```sh:dd Output
+402653184 bytes (403 MB, 384 MiB) copied, 20 s, 20.0 MB/s
+24+1 records in
+24+1 records out
+407896064 bytes (408 MB, 389 MiB) copied, 20.3747 s, 20.0 MB/s
+```
+
+If the `dd` command succeeded, then safely eject your newly created bootable USB drive.
+
+## Next Steps
+
+Now that we've created a bootable USB drive, we're ready to begin the installation of Debian.
+
