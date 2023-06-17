@@ -1,0 +1,90 @@
+---
+label: Installation
+slug: en/guides/bitcoin-node/operating-system/installation
+order: 40
+---
+
+import Callout from "@components/mdx/Callout.tsx";
+
+# Installation
+
+To start the installation of Debian we need to first boot into the bootable USB drive we created in the previous section.
+
+## Booting into the USB
+
+To boot into the USB drive plug it into the device you're using as your node. Turn the device on and enter your device's Basic Input/Output System (BIOS) or Unified Extensible Firmware Interface (UEFI) setup menu by pressing the setup keys specified by the manufacturer of your device during the power-on self-test (POST) process.
+
+The POST process ensures the components attached to the computer are ready to be used by the system. If everything checks out, then your device will hand over control to the specified OS which may or may not be the USB drive you plugged in depending on the boot priority of your device.
+
+Different devices use different setup keys, and during the POST process there's often a screen that mentions the setup key. If there isn't a screen or if the device loads too fast, then you can look up the device on your manufacturer's site or refer to your device's manual to get the setup keys.
+
+Here are some common setup keys:
+
+- `Esc`
+- `Delete` or `Del`
+- `F1`
+- `F2`
+- `F10`
+- `F11`
+- `F12`
+
+Once you enter your device's setup menu you can choose the USB drive you plugged in by selecting it from within the boot menu and/or by placing the USB drive as the first device in the boot priority then restarting your device.
+
+## Guide
+
+If you've never installed Debian before, then follow along with [How to Install a Debian 11 (Bullseye) Minimal Server](https://www.howtoforge.com/tutorial/debian-minimal-server/) which explains how to install a **64-bit Debian 11 (Bullseye) Minimal Server** in detail with many screenshots.
+
+There may be some differences with your installation depending on the version of Debian you're using. We used the `debian-12.0.0-amd64-netinst.iso` image and the installation steps were the same as in the provided guide.
+
+<Callout client:load type="warning">
+  For security reasons we're going to disable the `root` user by leaving the password empty during the installation instead of setting a password like in the provided guide.
+</Callout>
+
+Be sure to choose a secure password for the user. You can use a FOSS password mananger like [KeePass](https://keepass.info/) or [Bitwarden](https://bitwarden.com/) to generate and store your passwords.
+
+<Callout client:load type="tip">
+  When choosing the software to install you can select and deselect software using the spacebar, and you can move up and down the menu using the arrow keys.
+</Callout>
+
+## Base System Settings
+
+Here are the base system settings we used when setting up the OS. You're values may be differ depending on your preferences, e.g., your language, location, keymap, time zone, etc.
+
+- **Language**: English
+
+- **Location**: El Salvador
+
+- **Default locale settings**: en_US.UTF-8
+
+- **Keymap**: American English
+
+- **Hostname**: node
+
+- **Domain name**: node.com
+
+- **Root**: Disabled
+
+- **Full name**: Satoshi Nakamoto
+
+- **Username**: satoshi
+
+- **Partitioning method**: Guided - use entire disk
+
+- **Partitioning scheme**: All files in one partition
+
+- **Debain archive mirror country**: Costa Rica
+
+- **Debian archive mirror**: deb.debian.org
+
+- **HTTP proxy information**: None
+
+- **Participate in popularity-contest**: No
+
+- **Software selection**: SSH and standard system utilities
+
+- **Install GRUB boot loader**: Yes
+
+<Callout client:load type="tip">
+  These settings may change as the guide is developed, e.g., we may end up using a different partitioning method and scheme, use a swap file instead of a swap partition, not install the standard system utilities, etc.
+</Callout>
+
