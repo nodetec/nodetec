@@ -148,7 +148,7 @@ Device     Boot Start      End  Sectors  Size Id Type
 /dev/sda1  *     2048 60604415 60602368 28.9G  b W95 FAT32
 ```
 
-Here the disk of the USB drive is `/dev/sda` and the device name is `/dev/sda1`. Since the above command lists all of the disk partitions on your system, you'll need to identity the device based on the properties of the USB, e.g., the disk model, size, type, etc.
+Here the disk of the USB drive is `/dev/sda` and the device name is `/dev/sda1`. Since the above command lists all of the disk partitions on your system, you'll need to identity the device based on the properties of the USB drive, e.g., the disk model, size, type, etc.
 
 <Callout client:load type="info">
   The `...` in the output above is used to signify that the unrelated output from the command is being omitted.
@@ -158,7 +158,7 @@ If the USB drive is not showing up, then double check that you have correctly co
 
 ### dd Output
 
-It may take some time to create the bootable USB drive depending on your system. Don’t interrupt the bootable USB creation, you will get output similar to this once the process is complete:
+It may take some time to create the bootable USB drive depending on your system. Don’t interrupt the bootable USB drive creation, you will get output similar to this once the process is complete:
 
 ```sh:dd Output
 402653184 bytes (403 MB, 384 MiB) copied, 20 s, 20.0 MB/s
