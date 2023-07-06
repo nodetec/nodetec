@@ -46,7 +46,7 @@ Be sure to choose a secure password for the user. You can use a FOSS password ma
   When choosing the software to install you can select and deselect software using the spacebar, and you can move up and down the menu using the arrow keys.
 </Callout>
 
-You can ignore the part of the guide explaining how to login using the `root` user and everything after that. We'll be logging in with the user we created, going over how to install and the basics of using some common text editors, network configuration, and updating Debian in the following sections.
+You can ignore the part of the guide explaining how to login using the `root` user and everything after that. We'll be going over how to login with the user we created in this section instead. In the following sections we'll be going over the rest of the topics from the guide including how to install and the basics of using some common text editors, network configuration, and updating Debian.
 
 ## Base System Settings
 
@@ -88,5 +88,17 @@ Here are the base system settings we used when setting up the OS. You're values 
 
 <Callout client:load type="tip">
   These settings may change as the guide is developed, e.g., we may end up using a different partitioning method and scheme, use a swap file instead of a swap partition, not install the standard system utilities, etc.
+</Callout>
+
+## Login
+
+After completing the installation, you can select `Continue` to reboot the system and then remove the USB drive.
+
+Once the system reboots you'll be presented with the boot screen for the Grub boot loader. To boot into the system press the `Enter` key or wait a few seconds and the boot process will continue automatically.
+
+A login prompt should then be displayed. We'll login with the user we just created, i.e., `satoshi` by entering the username and the password we set during the installation.
+
+<Callout client:load type="tip">
+  Be sure to replace the username and password with whatever you set during the installation process.
 </Callout>
 
