@@ -1,0 +1,31 @@
+---
+label: Command Line
+slug: en/guides/bitcoin-node/remote-access/command-line
+order: 10
+---
+
+import Callout from "@components/mdx/Callout.tsx";
+
+# Command Line
+
+Before going over how to remotely access the device, we're going to first go over the basics of navigating and using the command line as well as provide some resources for those that want to learn more. The command line is the main way we'll be interacting with the node, so it's important to at least understand the basics.
+
+<Callout client:load type="tip">
+  If you're familiar with the command line, then you can skip this section. If you're interested in learning more about some common Linux commands though, then you can check out the provided resources.
+</Callout>
+
+To operate the command line you need to provide a command and pres the `Enter` key. The system will then output a repsonse on the line below the command you entered.
+
+- **Tab Completion:** To speed up the typing of commands and to minimize errors when typing you can use tab completion by pressing the `Tab` key while typing out a command, option, file name, directory name, etc. The shell environment will then automatically complete what you're typing or suggest options to you if more than one option is available. If multiple options are available you can cycle through them by pressing the `Tab` key and/or the arrow keys.
+
+- **Command History:** If you want to recall a previously entered command you can navigate your command history by using the `up arrow` (⬆️) key to go backwards in your command history and the `down arrow` (⬇️) key to go forward in your command history.
+
+- **Copy/Paste:** To copy text from the command line you can highlight the text you want to copy using your mouse, then press `Ctrl+Shift+C`. To paste copied text into the command line press `Ctrl+Shift+V`.
+
+- **Sudo Privileges:** The user we created doesn't have direct `sudo` ("substitute user, do") privileges, i.e., the ability to run a program with the security privileges of another user which is by default the superuser. If `sudo` privileges are required, e.g., when editing the system configuration, we need to place the `sudo` command before the command we want to run. 
+
+- **Common Commands:** If you're interested in learning about more commands, then check out the [40+ Most Used Linux Terminal Commands](https://www.makeuseof.com/tag/most-used-linux-terminal-commands/).
+
+<Callout client:load type="info">
+  When we create other users for specific services, they'll be unable to use the `sudo` command which increases the security of the system.
+</Callout>
