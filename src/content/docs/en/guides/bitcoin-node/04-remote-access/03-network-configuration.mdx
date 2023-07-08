@@ -1,0 +1,191 @@
+---
+label: Network Configuration
+slug: en/guides/bitcoin-node/remote-access/network-configuration
+order: 30
+---
+
+import Callout from "@components/mdx/Callout.tsx";
+
+# Network Configuration
+
+We're now going to configure the network of the node. By default the Debian installer configures the system to get the network settings using the **Dynamic Host Configuration Protocol (DHCP)** which dynamically assigns IP addresses to devices connected to a network. This means the IP addresses used by devices on the network can change, e.g., if the router and/or the devices are restarted.
+
+When we're attempting to SSH into the node from our client, i.e., our laptop or desktop we may have to first determine the IP address of the node before the connection can be established. To prevent having to potentially determine the IP address of the node when the router and/or device restarts or whenever the DHCP assigns the node a new IP address, we can set a **static IP address** for it by configuring the network.
+
+To perform the network configuration we're first going to determine the **IP address of the node**, the **netmask**, the **network address**, the **broadcast address**, and the **gateway address** which we'll be adding to the `interfaces` file located in the `/etc/network` directory.
+
+To determine these addresses we'll be using the `ip` command which should already be installed.
+
+## Determine Addresses
+
+To determine the **IP address of the node**, the **netmask**, the **network address**, and the **gateway address** we can run the following command:
+
+```sh:Determine IP Address, Netmask, Network Address, and Gateway Address
+ip route show
+```
+
+The above command should output something similar to the following:
+
+```sh:ip route show Output
+default via 192.168.0.1 dev enp0s3
+192.168.0.0/24 dev enp0s3 proto kernel scope link src 192.168.0.100
+```
+
+- The **gateway address** is `192.168.0.1` which is displayed after the `default via` text.
+
+- The **network address** is `192.168.0.0` which is displayed on the beginning of the second line.
+
+- The **network address** is postfixed with a `/24` which is the **Classless Inter-Domain Routing (CIDR)** notation. This notation is used to indicate the value of the **netmask** which in this case is `255.255.255.0`.
+
+- The **IP address** of the node is `192.168.0.100` which is displayed at the end of the second line.
+
+<Callout client:load type="warning">
+  The **IP address of your node**, **netmask**, **network address**, and **gateway address** may be different than the ones provided in the example above, so be sure to use the correct values when configuring the network for your node.
+</Callout>
+
+<Callout client:load type="tip">
+  If you don't know how to calculate the **netmask** from the CIDR notation, then you can use this [CIDR to IPv4 Conversion](https://www.ipaddressguide.com/cidr) tool to calculate it. Also, if you're interested in learning more about CIDR, then take a look at [What is CIDR Notation?](https://whatismyipaddress.com/cidr).
+</Callout>
+
+To determine the **broadcast address** we can run the following command:
+
+```sh:Determine Broadcast Address
+ip addr show
+```
+
+The above command should output something similar to the following:
+
+```sh:ip addr show Output
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+    inet6 ::1/128 scope host
+       valid_lft forever preferred_lft forever
+2: enp0s3: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000
+    link/ether 08:00:27:47:5d:af brd ff:ff:ff:ff:ff:ff
+    inet 192.168.0.100/24 brd 192.168.0.255 scope global dynamic enp0s3
+       valid_lft 2430sec preferred_lft 2430sec
+    inet6 2600:380:9235:9aae:a00:27ff:fe47:5daf/64 scope global dynamic mngtmpaddr
+       valid_lft 3480sec preferred_lft 3480sec
+    inet6 fe80::a00:27ff:fe47:5daf/64 scope link
+       valid_lft forever preferred_lft forever
+```
+
+The `ip addr show` command outputs the active network interfaces.
+
+The first network interface, i.e., `lo` is the loopback interface which is an internal virtual interface used by the computer to communicate with itself.
+
+The second interface, i.e., `enp0s3` is the active Ethernet adapter which the node is using to connect to the internet.
+
+The output of the `enp0s3` interface contains the **broadcast address** which in this case is `192.168.0.255` and can be found on the line starting with `inet` after the `brb` text.
+
+This command also outputs the **IP address of the node** postfixed with the CIDR notation, i.e. `192.168.0.100/24` which again is used to indicate the value of the **netmask**.
+
+<Callout client:load type="warning">
+  The adapter name and the **broadcast address** may be different than the ones provided in the example above, so be sure to use the correct values when configuring the network for your node.
+</Callout>
+
+## Edit Network Interfaces
+
+Now that we know the **IP address of the node**, the **netmask**, the **network address**, the **broadcast address**, and the **gateway address**, we can edit the `interfaces` file located in the `/etc/network` directory to use a **static IP address** for the node.
+
+### Open the interfaces File
+
+To open the `interfaces` file run the following command:
+
+```sh:Open interfaces File
+sudo nano /etc/network/interfaces
+```
+
+<Callout client:load type="tip">
+  You can replace `nano` with your preferred text editor.
+</Callout>
+
+### Initial Content of interfaces File
+
+Here's the `interfaces` file with DHCP enabled that was generated by the Debian installer:
+
+```sh:interfaces File with DHCP Enabled
+# This file describes the network interfaces available on your system
+# and how to activate them. For more information, see interfaces(5).
+
+source /etc/network/interfaces.d/*
+
+# The loopback network interface
+auto lo
+iface lo inet loopback
+
+# The primary network interface
+allow-hotplug enp0s3
+iface enp0s3 inet dhcp
+```
+
+<Callout client:load type="info">
+  Your `interfaces` file may look a little different depending on the network adapters you're using, if you're using IPv6, etc.
+</Callout>
+
+### Content of interfaces File using a Static IP
+
+Here's the updated `interfaces` file using a **static IP address**:
+
+```sh:interfaces File with Static IP Address
+# This file describes the network interfaces available on your system
+# and how to activate them. For more information, see interfaces(5).
+
+source /etc/network/interfaces.d/*
+
+# The loopback network interface
+auto lo
+iface lo inet loopback
+
+# The primary network interface
+allow-hotplug enp0s3
+iface enp0s3 inet static
+	address 192.168.0.100
+	netmask 255.255.255.0
+	network 192.168.0.0
+	broadcast 192.168.0.255
+	gateway 192.168.0.1
+```
+
+Here we replaced `dhcp` with `static` on the line containing `iface enp0s3 inet`, and we added the **IP address of the node**, the **netmask**, the **network address**, the **broadcast address**, and the **gateway address**.
+
+<Callout client:load type="warning">
+  Be sure to replace the **IP address of the node**, the **netmask**, the **network address**, the **broadcast address**, and the **gateway address** with the values you determined for your node.
+</Callout>
+
+### Enable Auto Network Updates
+
+To prevent having to reboot the system when making changes to the network, we can edit the `interfaces` file by replacing `allow-hotplug` with `auto`.
+
+Here's what the `interfaces` file looks like after adding auto network updates:
+
+```sh:interfaces File with Auto Network Updates
+# This file describes the network interfaces available on your system
+# and how to activate them. For more information, see interfaces(5).
+
+source /etc/network/interfaces.d/*
+
+# The loopback network interface
+auto lo
+iface lo inet loopback
+
+# The primary network interface
+auto enp0s3
+iface enp0s3 inet static
+	address 192.168.0.100
+	netmask 255.255.255.0
+	network 192.168.0.0
+	broadcast 192.168.0.255
+	gateway 192.168.0.1
+```
+
+## Restart Network
+
+After making the above changes to the `interfaces` file, we can now restart the network by running the following command:
+
+```sh:Restart Network
+sudo systemctl restart networking
+```
+
