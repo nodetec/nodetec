@@ -1,0 +1,503 @@
+---
+label: Security
+slug: en/guides/bitcoin-node/remote-access/security
+order: 50
+---
+
+import Callout from "@components/mdx/Callout.tsx";
+
+# Security
+
+To increase the security of **SSH**, we're going to do the following:
+
+- Change the default port the SSH server listens on
+
+- Disable `root` login on the SSH server
+
+- Implement public key authentication
+
+- Disable password authentication
+
+To implement these security improvements, we're going to edit the SSH configuration files which are located in the `etc/ssh` directory on the node.
+
+## Configuration Files
+
+To navigate to the SSH configuration files on the node run the following command:
+
+```sh:Navigate to SSH Coniguration Files
+cd /etc/ssh
+```
+
+To see all of the files and directories in the `ssh` directory run the following command:
+
+```sh:List Directory Content
+ls
+```
+
+The output of the command should look something like this:
+
+```sh:ssh Directory Content
+moduli        sshd_config.d           ssh_host_ed25519_key.pub
+ssh_config    ssh_host_ecdsa_key      ssh_host_rsa_key
+ssh_config.d  ssh_host_ecdsa_key.pub  ssh_host_rsa_key.pub
+sshd_config   ssh_host_ed25519_key
+```
+
+There are several files and directories within the `ssh` directory, and the ones you're most likely to edit are:
+
+- `ssh_config` which defines the SSH rules for clients like how to connect to a server, how to transfer files to a server, etc.
+
+- `sshd_config` which defines the SSH rules for servers like what port the server listens on, denying specific users from communicating with the server, etc.
+
+In this section we're going to focus on editing the `sshd_config` file since we want to improve the security of the SSH server, i.e., the node.
+
+To open the `sshd_config` file run the following command:
+
+```sh:Open sshd_config File
+sudo nano sshd_config
+```
+
+## Change Default Port
+
+As stated in the previous section, it's possible to change the default port the SSH server listens on. This increases the security of the node by reducing the risk of automated attacks that target the default listening port, i.e., `port 22`.
+
+### Determine Port
+
+Again, you can determine the listening port of the SSH server by running the following command:
+
+```sh:Check SSH Status
+sudo systemctl status ssh
+```
+
+The output of the command should look similar to this:
+
+```sh:SSH Status Output
+● ssh.service - OpenBSD Secure Shell server
+     Loaded: loaded (/lib/systemd/system/ssh.service; enabled; preset: enabled)
+     Active: active (running) since Wed 2023-07-12 13:22:41 CST; 3min 21s ago
+       Docs: man:sshd(8)
+             man:sshd_config(5)
+    Process: 515 ExecStartPre=/usr/sbin/sshd -t (code=exited, status=0/SUCCESS)
+   Main PID: 518 (sshd)
+      Tasks: 1 (limit: 2315)
+     Memory: 8.3M
+        CPU: 68ms
+     CGroup: /system.slice/ssh.service
+             └─518 "sshd: /usr/sbin/sshd -D [listener] 0 of 10-100 startups"
+
+Jul 12 13:22:41 btc-node systemd[1]: Starting ssh.service - OpenBSD Secure Shell server...
+Jul 12 13:22:41 btc-node sshd[518]: Server listening on 0.0.0.0 port 22.
+Jul 12 13:22:41 btc-node sshd[518]: Server listening on :: port 22.
+Jul 12 13:22:41 btc-node systemd[1]: Started ssh.service - OpenBSD Secure Shell server.
+Jul 12 13:24:12 btc-node sshd[550]: Accepted password for satoshi from 192.168.0.130 port 42850 ssh2
+Jul 12 13:24:12 btc-node sshd[550]: pam_unix(sshd:session): session opened for user satoshi(uid=1000) by (uid=0)
+Jul 12 13:24:12 btc-node sshd[550]: pam_env(sshd:session): deprecated reading of user environment enabled
+```
+
+From the output of the command we can determine the listening port by looking at the following line:
+
+```sh:Identify Port
+Jul 12 13:22:41 btc-node sshd[518]: Server listening on 0.0.0.0 port 22.
+```
+
+From the above line we see that the SSH server is listening on `port 22`.
+
+### Edit Port
+
+To change the default listening port for the node look for the following line in the `sshd_config` file:
+
+```sh:Default Port
+#Port 22
+```
+
+Uncomment the line and change the port from `22` to a port that isn't reserved for other protocols, e.g., `2222`.
+
+Here's what the line looks like after changing the listening port to be `2222`:
+
+```sh:Custom Port
+Port 2222
+```
+
+We can now save the file and exit.
+
+For the changes to take effect we need to restart the SSH server which we can do by running the following command:
+
+```sh:Restart SSH Server
+sudo systemctl restart ssh
+```
+
+### Check Custom Port
+
+To check that the default listening port was correctly updated run the following command to see the status of the SSH server:
+
+```sh:Check SSH Status
+sudo systemctl status ssh
+```
+
+From the output of the command you should see a line that looks similar to the following and shows the listening port as being `2222`:
+
+```sh:Identify Port
+Jul 17 10:01:40 btc-node sshd[1870]: Server listening on 0.0.0.0 port 2222.
+```
+
+### Using the Custom Port
+
+Now when we attempt to access the node through SSH, we need to specify the port as `2222` or else the request will be refused.
+
+First, exit the current SSH server session by running the following command:
+
+```sh:Exit SSH Server
+exit
+```
+
+Now, close the terminal you used to SSH into the node on your client and open a new terminal.
+
+When you attempt to access the node again using SSH the connection will be refused and you'll see output similar to the following:
+
+```sh:Connection Refused
+ssh: connect to host btc-node.local port 22: Connection refused
+```
+
+To be able to access the node again using SSH, we need to specify the port in the command we use to access the node:
+
+```sh:SSH into Node using an IP Address and Custom Port
+ssh -p <port-number> <username>@<ip-address>
+```
+
+Here `<username>` should be replaced with the `username` you set during the installation, e.g., `satoshi`, `<ip-address>` should be replaced with the IP address of your node, e.g., `192.168.0.100`, and `<port-number>` should be replaced with the port number you set in the `sshd_config` file on the node.
+
+To SSH into my node, I would run the following command:
+
+```sh:SSH into my Node using an IP Address and Custom Port
+ssh -p 2222 satoshi@192.168.0.100
+```
+
+<Callout client:load type="tip">
+  If you configured you're client to use an alias for the **static IP address** of the node, then you can access your node using the alias along with the custom port instead of the IP address. Take a look at [Using an Alias](https://nodetec.co/en/guides/bitcoin-node/remote-access/secure-shell#using-an-alias) from the previous section to see an example of how to SSH into the node with an alias.
+</Callout>
+
+## Disable root Login
+
+If someone were able to login as the `root` user on the node through SSH, then they could compromise the node in numerous ways.
+
+By default password and keyboard-interactive authentication are disabled for the `root` user, i.e., they can login using public key authentication.
+
+If you followed along with the [Installation](/en/guides/bitcoin-node/operating-system/installation) section, then the `root` user should be disabled. Since the `root` user is already disabled, accessing the node using SSH with the `root` user should not work.
+
+However, if you ever decide to enable a `root` user in the future, here's how to disable the `root` login over SSH for your node for all authentication methods.
+
+First, navigate to the `/etc/ssh` directory on the node and open the `sshd_config` file like we previously did.
+
+### Edit root Login
+
+To ensure the `root` login is disabled for SSH for all authentication methods look for the following line in the `sshd_config` file:
+
+```sh:PermitRootLogin
+#PermitRootLogin prohibit-password
+```
+
+Uncomment the line and change the value from `prohibit-password` to `no`.
+
+Here's what the line looks like after disabling the `root` login:
+
+```sh:PermitRootLogin Disabled
+PermitRootLogin no
+```
+
+We can now save the file and exit.
+
+For the changes to take effect we need to restart the SSH server which we can do by running the following command:
+
+```sh:Restart SSH Server
+sudo systemctl restart ssh
+```
+
+Now, even if you were to create a `root` user in the future, they'll be unable to access the node using SSH.
+
+<Callout client:load type="info">
+  If you're interested in learning more about `PermitRootLogin`, then you can take a look at the [PermitRootLogin](https://man.openbsd.org/sshd_config#PermitRootLogin) documentation.
+</Callout>
+
+## Public Key Authentication
+
+Since the node will be visible from the internet and not just present on a LAN, it needs to be secured against various attacks, e.g., brute forcing your SSH login password.
+
+To improve the security of the SSH login, we're going to set up public key authentication and disable password authentication. This improves the security of the SSH login by reducing the possibility of unauthorized access since an SSH key pair will be used to login to the server. Therefore, only someone with physical possession of the private key can easily login to the server.
+
+Since anyone with the private key will be able to login to the server, it's important to properly secure the private key by using secure key management practices and to use a passphrase which is used to encrypt the private key.
+
+### Generate SSH Key Pair
+
+Before generating the SSH key pair, we're going to first check for any existing key pairs on the client since we don't want to overwrite any existing keys.
+
+To check for existing key pairs you can run the following command on your client:
+
+```sh:Check for Existing Key Pairs
+ls ~/.ssh/id_*.pub
+```
+
+If there are existing keys, then you'll see files that look something like `id_dsa.pub`, `id_ecdsa.pub`, `id_ed25519.pub`, or `id_rsa.pub`. You have the option of using your existing keys with your node and skipping the generation of a new key pair unless you prefer to use a key pair specifically for your node and/or you want to upgrade your existing key pair to use a more secure algorithm.
+
+If there are no existing keys, then you'll see output that looks something like `No such file or directory` or `no matches found`.
+
+When generating a new key pair you can backup any old keys and/or use a different name for the key pair when generating it. This ensures you won't accidentially overwrite any existing key pairs.
+
+There were four algorithms you could use to generate your SSH key pair, but now only three are considered secure:
+
+- **DSA**: This algorithm in its original form is unsafe and is no longer an option to use when generating a key pair. If your existing key uses this algorithm you should upgrade it!
+
+- **RSA**: The security depends on the key size. A key size of at least 3072 (default value) or 4096 bits is considered safe. Anything less than that should be upgraded. If you don't require any compatibility with older systems, then it's recommended to upgrade to a more secure algorithm.
+
+- **ECDSA**: The security depends on how well your client can generate a random number. There are also concerns about the trustworthiness of the National Institute of Standards and Technology (NIST) produced curves that are used in the algorithm. Take a look at [Security dangers of the NIST curves](https://www.hyperelliptic.org/tanja/vortraege/20130531.pdf) for more details.
+
+- **Ed25519**: Offers better security than ECDSA, RSA, and DSA, so it's the recommended algorithm to use today. The only drawback is older systems may not support it, but that shouldn't be a concern for the node.
+
+#### Ed25519
+
+The following command can be used to generate a new SSH key pair using the Ed25519 algorithm:
+
+```sh:Generate Ed25519 SSH Key Pair
+ssh-keygen -t ed25519 -a 256 -f ~/.ssh/id_ed25519_btc_node -C "satoshi@btc-node.local"
+```
+
+- `-t`: Specifies the type of key to create which in our case is `ed25519`.
+
+- `-a`: Specifies the number of Key Derivation Function (KDF) rounds. A higher number increases the resistance to brute force cracking of the passphrase used to encrypt the private key. A lower number results in a faster passphrase verification. A value of at least `100` is recommended.
+
+- `-f`: Specifies the file names used for the generated private and public key files. If you want the key pair to be discovered automatically by the SSH agent, it should be stored in the default location, i.e., the `~/.ssh` directory.
+
+- `-C`: Specifies an optional comment to use in the public key file. It's only for informational purposes, and it's usually set to `<username>@<hostname.domain>` where `<username>` can be replaced with the `username` you set for your node during the installation, and `<hostname.domain>` can be replaced with the `hostname` and domain name of your node.
+
+<Callout client:load type="info">
+  There is no need to set the key size for Ed25519 since all of them are 256 bits.
+</Callout>
+
+<Callout client:load type="tip">
+  If you want to keep the use case of your key pair ambiguous, then don't use a file name and comment that identify the use case of the key. Instead, you can make the file name and comment something less conspicuos or don't include a comment at all.
+</Callout>
+
+#### RSA
+
+If you prefer to use RSA to generate your key pair, then you can use the following command:
+
+```sh:Generate RSA SSH Key Pair
+ssh-keygen -t rsa  -b 4096 -f ~/.ssh/id_rsa_btc_node -C "satoshi@btc-node.local"
+```
+
+- `-t`: Specifies the type of key to create which in our case is `rsa`.
+
+- `-b`: Specifies the bit size of the key pair. The maximum size is `16384`. A higher number increases the security of the key pair; however, it also makes the key larger and they're are diminishing returns when increasing the size. Again, if you're concern is security, it's recommended to use Ed25519.
+
+- `-f`: Specifies the file names used for the generated private and public key files. If you want the key pair to be discovered automatically by the SSH agent, it should be stored in the default location, i.e., the `~/.ssh` directory.
+
+- `-C`: Specifies an optional comment to use in the public key file. It's only for informational purposes, and it's usually set to `<username>@<hostname.domain>` where `<username>` can be replaced with the `username` you set for your node during the installation, and `<hostname.domain>` can be replaced with the `hostname` and domain name of your node.
+
+<Callout client:load type="tip">
+  Again, if you want to keep the use case of your key pair ambiguous, then don't use a file name and comment that identify the use case of the key. Instead, you can make the file name and comment something less conspicuos or don't include a comment at all.
+</Callout>
+
+#### Passphrase
+
+After generating the SSH key pair, you'll now be prompted to enter an optional passphrase which will look something like this:
+
+```sh:Passphrase Prompt
+Generating public/private ed25519 key pair.
+Enter passphrase (empty for no passphrase):
+```
+
+It's recommended to use a secure passphrase to encrypt your private key. If someone or malicious software gets access to your client with the private key stored in plaintext, then they'll easily be able to take the private key and login to the node.
+
+After entering your passphrase, you'll then be prompted to confirm the passphrase by entering it again.
+
+<Callout client:load type="tip">
+  As mentioned in a previous section, you can use a FOSS password mananger like [KeePass](https://keepass.info/) or [Bitwarden](https://bitwarden.com/) to generate and store your passwords/passphrases.
+</Callout>
+
+However, if you want to avoid the inconvenience of having to enter the passphrase every time you login to the server and if you plan on using any automated processes with your node, then you can leave the passphrase empty by pressing the `Enter` key when prompted.
+
+#### ssh-keygen Output
+
+After entering and confirming the passphrase, you'll be presented with output that looks something like this:
+
+```sh:ssh-keygen Output
+Your identification has been saved in /home/client-username/.ssh/id_ed25519_btc_node
+Your public key has been saved in /home/client-username/.ssh/id_ed25519_btc_node.pub
+The key fingerprint is:
+SHA256:at7y+ERgt6vR9jnkrhC9m4iCCL6HnYkVkkZPjUHvJo4 satoshi@btc-node.local
+The key's randomart image is:
++--[ED25519 256]--+
+|  .o+            |
+| . o..           |
+|. +  .o .        |
+| + o.. + .       |
+|. ...o. S        |
+|. o.o  = o.      |
+|+E=.o = *o       |
+|o+.= +.X +o.     |
+| .o.. =+Bo+.     |
++----[SHA256]-----+
+```
+
+To view the newly created SSH key pair, you can run the following command to list all files starting with `id_` in the default location, i.e., the `~/.ssh` directory:
+
+```sh:List SSH Key Pair
+ls ~/.ssh/id_*
+```
+
+The output of the above command will look something like this:
+
+```sh:List Output
+/home/client-username/.ssh/id_ed25519_btc_node
+/home/client-username/.ssh/id_ed25519_btc_node.pub
+```
+
+<Callout client:load type="info">
+  The file names, i.e., `id_ed25519_btc_node` and `id_ed25519_btc_node.pub` will be whatever you set in the `ssh-keygen` command and `client-username` will be replaced by whatever the `username` is for your client.
+</Callout>
+
+### Copy Public Key
+
+Now that we have generated the SSH key pair on the client, we need to copy the public key to the node.
+
+We can copy the public key to the node by using the following command:
+
+```sh:Copy Public Key to Node
+ssh-copy-id -i <path/to/public-key-file> -p <port-number> <username>@<ip-address>
+```
+
+Again, `<username>` should be replaced with the `username` you set during the installation, e.g., `satoshi`, `<ip-address>` should be replaced with the IP address of your node, e.g., `192.168.0.100`, and `<port-number>` should be replaced with the port number you set in the `sshd_config` file on the node.
+
+The `<path/to/public-key-file>` should be replaced with the path to the public key you're using with your node which will be located in the `~/.ssh` directory if you used the default location when generating the key pair.
+
+<Callout client:load type="tip">
+  Again, if you configured you're client to use an alias for the **static IP address** of the node, then you can access your node using the alias along with the custom port instead of the IP address. Take a look at [Using an Alias](https://nodetec.co/en/guides/bitcoin-node/remote-access/secure-shell#using-an-alias) from the previous section to see an example of how to SSH into the node with an alias.
+</Callout>
+
+To copy the public key to my node, I would run the following command:
+
+```sh:Copy Public Key to my Node
+ssh-copy-id -i ~/.ssh/id_ed25519_btc_node.pub -p 2222 satoshi@192.168.0.100
+```
+
+<Callout client:load type="warning">
+  Be sure to copy the public key, i.e., the file ending in `.pub` and not the private key!
+</Callout>
+
+After running the `ssh-copy-id` command you'll initially be prompted to enter the SSH login password, e.g.,
+
+```:Password Prompt
+/usr/bin/ssh-copy-id: INFO: Source of key(s) to be installed: "/home/client-username/.ssh/id_ed25519_btc_node.pub"
+/usr/bin/ssh-copy-id: INFO: attempting to log in with the new key(s), to filter out any that are already installed
+/usr/bin/ssh-copy-id: INFO: 1 key(s) remain to be installed -- if you are prompted now it is to install the new keys
+satoshi@192.168.0.100's password:
+```
+
+Once you successfully authenticate the user you'll see output similar to:
+
+```sh:Password Prompt Success Output
+Number of key(s) added: 1
+
+Now try logging into the machine, with:   "ssh -p '2222' 'satoshi@192.168.0.100'"
+and check to make sure that only the key(s) you wanted were added.
+```
+
+The public key will be appended to the `authorized_keys` file on the node which will be created if it doesn't exist, and the connection will be closed.
+
+### Login using SSH Key Pair
+
+We're now going to SSH into the node and we shouldn't be prompted to enter the SSH login password since we're using public key authentication:
+
+```sh:SSH into Node using Public Key Authentication
+ssh -p <port-number> <username>@<ip-address>
+```
+
+To SSH into my node, I would run the following command:
+
+```sh:SSH into my Node using Public Key Authentication
+ssh -p 2222 satoshi@192.168.0.100
+```
+
+<Callout client:load type="tip">
+  If you encrypted your private key, then you'll be prompted to enter the passphrase used to encrypt the private key when logging into your node with SSH. After entering the passphrase to decrypt the private key, you may have to wait a few seconds for the decryption to finish.
+</Callout>
+
+### Authorized Keys
+
+After successfully logging into the node with SSH, a `.ssh` directory should have been created if it didn't already exist with an `authorized_keys` file placed inside out it.
+
+To locate the `authorized_keys` file on the node run the following command:
+
+```sh:List .ssh Directory
+ls ~/.ssh
+```
+
+The output of the above command will look something like this:
+
+```sh:List Output
+authorized_keys
+```
+
+The `authorized_keys` file contains all of the public keys that have been copied to the node.
+
+To view and edit the content of the `authorized_keys` file you can run the following command:
+
+```sh:Open authorized_keys
+nano ~/.ssh/authorized_keys
+```
+
+The content of the file will look something like this:
+
+```sh:authorized_keys File
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAII/k+0mtb7mFvALTvsZOs5ESuJaS+zDbL7P2xQzPkBNN satoshi@btc-node.local
+```
+
+The file consists of the public key as well as any comment you may have added to it when generating the SSH key pair, e.g., `satoshi@btc-node.local`.
+
+If you ever want to remove a public key, then open the `authorized_keys` file and delete the line containing the public key you want to remove.
+
+If you ever want to add more public keys, then you can just copy the public keys like we just did, and they'll be appended to the `authorized_keys` file.
+
+## Disable Password Authentication
+
+To add another layer of security to the node, we're going to disable the password authentication for SSH which means only public key authentication will be used to login to the node. Preventing password authentication protects the node from various attacks like attempting to brute force or guess the SSH login password.
+
+Before disabling password authentication, make sure you're able to login with public key authentication and the user you're logging in with has `sudo` privileges which should be the case if you've been following along.
+
+To start SSH into the node using public key authentication if you're not already logged in.
+
+Next, we need to open the SSH configuration files on the node by running the following command:
+
+```sh:Open sshd_config File
+sudo nano ~/etc/ssh/sshd_config
+```
+
+To disable tunneled clear text passwords locate the `PasswordAuthentication` keyword, uncomment it, and set it to `no` as follows:
+
+```sh:Disable Password Authentication
+PasswordAuthentication no
+```
+
+To disable challenge-response passwords locate the `KbdInteractiveAuthentication` keyword and set it to `no` as follows:
+
+```sh:Disable Challenge-response Authentication
+KbdInteractiveAuthentication no
+```
+
+<Callout client:load type="info">
+  If you're using an older version of SSH, then to disable challenge-response authentication locate the `ChallengeResponseAuthentication` keyword and set it `no`. The `ChallengeResponseAuthentication` keyword is a legacy keyword and has been replaced by the `KbdInteractiveAuthentication` keyword.
+</Callout>
+
+After editing the file, save and exit.
+
+For the changes to take effect we need to restart the SSH server which we can do by running the following command:
+
+```sh:Restart SSH Server
+sudo systemctl restart ssh
+```
+
+Now, if you attempt to SSH into the node from a client that doesn't have access to the private key from the SSH key pair you generated, then the login attempt will be refused without giving the option of entering the SSH login password.
+
+<Callout client:load type="warning">
+  If you lose access to your SSH keys, then you will be unable to access the node without using a monitor and keyboard to login and reset the SSH settings. Be sure to securely backup the passphrase for the private key if you used one as well as the SSH keys using, e.g., a USB.
+</Callout>
+

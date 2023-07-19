@@ -33,7 +33,7 @@ The client is where the **SSH** session is displayed and used to issues commands
 By default the **SSH** server listens on the standard **Transmission Control Protocol (TCP)** port 22.
 
 <Callout client:load type="tip">
-  It's possible to change the default port the **SSH** server listens on which increases the security of your node by reducing the risk of automated attacks.
+  It's possible to change the default port the **SSH** server listens on which increases the security of your node by reducing the risk of automated attacks. We'll go over how to change the port in the next section.
 </Callout>
 
 ## Installation
@@ -381,4 +381,6 @@ sudo nano known_hosts
 After opening the file, you can search for the known host(s) you want to edit using, e.g., the IP address or `hostname` of the **SSH** server.
 
 To remove a known host you can delete the line from the file then save and exit.
+
+Now that we can access the node through **SSH**, we're going to go over some configuration to increase the security of **SSH**.
 
