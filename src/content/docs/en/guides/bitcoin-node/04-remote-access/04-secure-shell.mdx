@@ -12,7 +12,7 @@ import Callout from "@components/mdx/Callout.tsx";
 
 This means we'll no longer need to connect a monitor or keyboard to our node to be able to access it since we'll be able to run the commands remotely from our client.
 
-**SSH** provides the following security features:
+SSH provides the following security features:
 
 - Strong password authentication
 
@@ -20,7 +20,7 @@ This means we'll no longer need to connect a monitor or keyboard to our node to 
 
 - Encrypted data communications between two computers, i.e., a client and server over an open network, e.g., the internet
 
-**SSH** gives us the ability to manage systems and applications remotely by providing the following functionality:
+SSH gives us the ability to manage systems and applications remotely by providing the following functionality:
 
 - Remote login over an open network
 
@@ -28,19 +28,19 @@ This means we'll no longer need to connect a monitor or keyboard to our node to 
 
 - Move files from one computer to another
 
-The client is where the **SSH** session is displayed and used to issues commands to the server (usually from a terminal) and the **SSH** server is where the session is being run. **SSH** implementations often include support for application protocols that are used for terminal emulation and file transfers.
+The client is where the SSH session is displayed and used to issues commands to the server (usually from a terminal) and the SSH server is where the session is being run. SSH implementations often include support for application protocols that are used for terminal emulation and file transfers.
 
-By default the **SSH** server listens on the standard **Transmission Control Protocol (TCP)** port 22.
+By default the SSH server listens on the standard **Transmission Control Protocol (TCP)** port 22.
 
 <Callout client:load type="tip">
-  It's possible to change the default port the **SSH** server listens on which increases the security of your node by reducing the risk of automated attacks. We'll go over how to change the port in the next section.
+  It's possible to change the default port the SSH server listens on which increases the security of your node by reducing the risk of automated attacks. We'll go over how to change the port in the next section.
 </Callout>
 
 ## Installation
 
-To be able to **SSH** into our node, we'll need to have it installed on both our client and the node.
+To be able to SSH into our node, we'll need to have it installed on both our client and the node.
 
-We'll be using [OpenSSH](https://www.openssh.com/) which is a FOSS implementation of the **SSH** protocol.
+We'll be using [OpenSSH](https://www.openssh.com/) which is a FOSS implementation of the SSH protocol.
 
 ### Node
 
@@ -52,27 +52,27 @@ sudo apt install -y openssh-server
 
 ### Client
 
-If you're using Linux, then **SSH** is most likely already installed. If not here's how to install it on your client for some common Linux distributions.
+If you're using Linux, then SSH is most likely already installed. If not here's how to install it on your client for some common Linux distributions.
 
-Run the following command to install **SSH** on Arch:
+Run the following command to install SSH on Arch:
 
 ```sh:Arch
 sudo pacman -S openssh
 ```
 
-Run the following command to install **SSH** on Debian/Ubuntu:
+Run the following command to install SSH on Debian/Ubuntu:
 
 ```sh:Debian/Ubuntu
 sudo apt install -y openssh-client
 ```
 
 <Callout client:load type="info">
-  If you're using Debian/Ubuntu on your client and ever plan on using it as an **SSH** server, then you can also install `openssh-server` as well using the same command we used for the node.
+  If you're using Debian/Ubuntu on your client and ever plan on using it as an SSH server, then you can also install `openssh-server` as well using the same command we used for the node.
 </Callout>
 
 ## SSH Server Status
 
-To check the `status` of the **SSH** server running on the node run the following command:
+To check the `status` of the SSH server running on the node run the following command:
 
 ```sh:Check SSH Status
 sudo systemctl status ssh
@@ -103,7 +103,7 @@ Jul 12 13:24:12 btc-node sshd[550]: pam_unix(sshd:session): session opened for u
 Jul 12 13:24:12 btc-node sshd[550]: pam_env(sshd:session): deprecated reading of user environment enabled
 ```
 
-From the output of the command we'll be able to determine the following about the **SSH** server:
+From the output of the command we'll be able to determine the following about the SSH server:
 
 - If the server is running
 
@@ -119,9 +119,9 @@ If we look at the following line:
 Active: active (running) since Wed 2023-07-12 13:22:41 CST; 3min 21s ago
 ```
 
-Then we see that the **SSH** server is currently running since the status shows `active (running)`.
+Then we see that the SSH server is currently running since the status shows `active (running)`.
 
-If you see `inactive (dead)`, then your **SSH** server isn't running.
+If you see `inactive (dead)`, then your SSH server isn't running.
 
 ### Check if SSH Server is Enabled
 
@@ -131,9 +131,9 @@ If we look at the following line:
 Loaded: loaded (/lib/systemd/system/ssh.service; enabled; preset: enabled)
 ```
 
-Then we see that the **SSH** server is set to automatically start on boot since the service is `enabled`.
+Then we see that the SSH server is set to automatically start on boot since the service is `enabled`.
 
-If you see `disabled`, then your **SSH** server isn't set to automatically start on boot.
+If you see `disabled`, then your SSH server isn't set to automatically start on boot.
 
 ### Check the Listening Port
 
@@ -143,11 +143,11 @@ If we look at the following line:
 Jul 12 13:22:41 btc-node sshd[518]: Server listening on 0.0.0.0 port 22.
 ```
 
-Then we see that the **SSH** server is listening on `port 22`.
+Then we see that the SSH server is listening on port `22`.
 
 ## Start SSH Server
 
-If the **SSH** server isn't running, then run the following command to start the service:
+If the SSH server isn't running, then run the following command to start the service:
 
 ```sh:Start SSH Server
 sudo systemctl start ssh
@@ -155,7 +155,7 @@ sudo systemctl start ssh
 
 ## Stop SSH Server
 
-If you want to stop the **SSH** server, then run the following command:
+If you want to stop the SSH server, then run the following command:
 
 ```sh:Stop SSH Server
 sudo systemctl stop ssh
@@ -163,7 +163,7 @@ sudo systemctl stop ssh
 
 ## Enable SSH Server
 
-If the **SSH** server isn't enabled to automatically start on boot, then run the following command:
+If the SSH server isn't enabled to automatically start on boot, then run the following command:
 
 ```sh:Enable SSH Server
 sudo systemctl enable ssh
@@ -171,7 +171,7 @@ sudo systemctl enable ssh
 
 ## Disable SSH Server
 
-If you want to disable the **SSH** server to automatically start on boot, then run the following command:
+If you want to disable the SSH server to automatically start on boot, then run the following command:
 
 ```sh:Disable SSH Server
 sudo systemctl disable ssh
@@ -179,19 +179,19 @@ sudo systemctl disable ssh
 
 ## Accessing the SSH Server
 
-When we want to **SSH** into the node from our client we have a few different commands we can run depending on your network configuration.
+When we want to SSH into the node from our client we have a few different commands we can run depending on your network configuration.
 
 ### Using an IP Address
 
-When we’re attempting to **SSH** into the node from our client we can run the following command which uses an IP address:
+When we’re attempting to SSH into the node from our client we can run the following command which uses an IP address:
 
 ```sh:SSH into Node using an IP Address
 ssh <username>@<ip-address>
 ```
 
-Here `<username>` should be replaced with the `username` you set during the installation, e.g., `satoshi`, and `<ip-address>` should be replaced with the IP address of your node, e.g., `192.168.0.100`. If you configured a **static IP address** for your node in the previous section, then you should use that for the `<ip-address>`.
+Here `<username>` should be replaced with the `username` you set during the installation, e.g., `satoshi`, and `<ip-address>` should be replaced wth the IP address of your node, e.g., `192.168.0.100`. If you configured a static IP address for your node in the previous section, then you should use that for the `<ip-address>`.
 
-To **SSH** into my node, I would run the following command:
+To SSH into my node, I would run the following command:
 
 ```sh:SSH into my Node using an IP Address
 ssh satoshi@192.168.0.100
@@ -199,7 +199,7 @@ ssh satoshi@192.168.0.100
 
 ### Using an Alias
 
-If you configured you're client to use an alias for the **static IP address** of the node, then you can access your node using **SSH** by running either one of the following commands:
+If you configured you're client to use an alias for the static IP address of the node, then you can access your node using SSH by running either one of the following commands:
 
 ```sh:SSH into Node using an Alias
 ssh <username>@<hostname.domain>
@@ -211,9 +211,9 @@ or
 ssh <username>@<hostname>
 ```
 
-Here `<username>` should be replaced with the `username` you set for your node during the installation, e.g., `satoshi`, and `<hostname.domain>` should be replaced with the `hostname` and **domain name** of your node, e.g., `btc-node` and `local`.
+Here `<username>` should be replaced with the `username` you set for your node during the installation, e.g., `satoshi`, and `<hostname.domain>` should be replaced with the `hostname` and domain name of your node, e.g., `btc-node` and `local`.
 
-To **SSH** into my node, I would run either one of the following commands:
+To SSH into my node, I would run either one of the following commands:
 
 ```sh:SSH into my Node using an Alias
 ssh satoshi@btc-node.local
@@ -226,12 +226,12 @@ ssh satoshi@btc-node
 ```
 
 <Callout client:load type="tip">
-  If you're having issues make sure **SSH** is installed and running on both your node and client, your node and client are connected to the same **local area network (LAN)**, and if you're using a **virtual private network (VPN)** try disabling it.
+  If you're having issues make sure SSH is installed and running on both your node and client, your node and client are connected to the same **local area network (LAN)**, and if you're using a **virtual private network (VPN)** try disabling it.
 </Callout>
 
 ### Determine IP Address from Node
 
-If you didn't configure a **static IP address** and you have access to a monitor and keyboard, then you can run the following command on your node to determine its IP address:
+If you didn't configure a static IP address and you have access to a monitor and keyboard, then you can run the following command on your node to determine its IP address:
 
 ```sh:Determine IP Address
 hostname -I
@@ -239,23 +239,23 @@ hostname -I
 
 ### Determine IP Address from Client
 
-If you didn't set a **static IP address** and you don't have access to a monitor or keyboard to use with your node, then you can determine the IP address by using [Network Mapper (Nmap)](https://nmap.org/) which is a FOSS tool for network discovery.
+If you didn't set a static IP address and you don't have access to a monitor or keyboard to use with your node, then you can determine the IP address by using [Network Mapper (Nmap)](https://nmap.org/) which is a FOSS tool for network discovery.
 
-Here's how to install **Nmap** on your client for some common Linux distributions:
+Here's how to install Nmap on your client for some common Linux distributions:
 
-Run the following command to install **Nmap** on Arch:
+Run the following command to install Nmap on Arch:
 
 ```sh:Arch
 sudo pacman -S nmap
 ```
 
-Run the following command to install **Nmap** on Debian/Ubuntu:
+Run the following command to install Nmap on Debian/Ubuntu:
 
 ```sh:Debian/Ubuntu
 sudo apt install -y nmap
 ```
 
-After installing **Nmap**, you need to determine the **subnet** you're connected to which can be done by running the following command:
+After installing Nmap, you need to determine the **subnet** you're connected to which can be done by running the following command:
 
 ```sh:Determine Subnet
 ip route show
@@ -268,19 +268,19 @@ default via 192.168.0.1 dev wlo1 proto dhcp src 192.168.0.23 metric 600
 192.168.0.0/24 dev wlo1 proto kernel scope link src 192.168.0.23 metric 600
 ```
 
-From the output you can determine the **subnet** which is `192.168.0.0/24` which is displayed on the beginning of the second line.
+From the output you can determine the subnet which is `192.168.0.0/24` which is displayed on the beginning of the second line.
 
-Now that you have determined the **subnet**, you can scan your whole **subnet** range using the `nmap` command which may take a few seconds:
+Now that you have determined the subnet, you can scan your whole subnet range using the `nmap` command which may take a few seconds:
 
 ```sh:Scan Subnet Range
 nmap -sn 192.168.0.0/24
 ```
 
 <Callout client:load type="warning">
-  Be sure to replace the **subnet** `192.168.0.0/24` with your **subnet**.
+  Be sure to replace the subnet `192.168.0.0/24` with your subnet.
 </Callout>
 
-The above command scans all IP address in the **subnet** range and pings them to see if they respond. For each device that responds to the ping, the output shows the IP address and potentially the hostname for each device:
+The above command scans all IP address in the subnet range and pings them to see if they respond. For each device that responds to the ping, the output shows the IP address and potentially the hostname for each device:
 
 ```sh:nmap Output
 Starting Nmap 7.94 ( https://nmap.org ) at 2023-07-14 13:25 EDT
@@ -296,12 +296,12 @@ Nmap done: 256 IP addresses (3 hosts up) scanned in 8.58 seconds
 From the output you can determine the IP address with the `hostname` of `btc-node` has an IP address of `192.168.0.100`.
 
 <Callout client:load type="tip">
-  Depending on the configuration of your node, client, router, etc. you may not be able to see the hostnames for each device, if that is the case one option is to try each IP address when using **SSH** which isn't ideal. It's recommended to set a **static IP address** for your node and an alias for the **static IP address** on your client, so you don't have to determine the IP address of the node each time you want to access it using **SSH**.
+  Depending on the configuration of your node, client, router, etc. you may not be able to see the hostnames for each device, if that is the case one option is to try each IP address when using SSH which isn't ideal. It's recommended to set a static IP address for your node and an alias for the static IP address on your client, so you don't have to determine the IP address of the node each time you want to access it using SSH.
 </Callout>
 
 ### Confirm Fingerprint
 
-When you first attempt to **SSH** into the node from your client you'll be prompted with the **SSH** server fingerprint and asked to confim the connection.
+When you first attempt to SSH into the node from your client you'll be prompted with the SSH server fingerprint and asked to confim the connection.
 
 The prompt will look something like this:
 
@@ -316,16 +316,16 @@ Are you sure you want to continue connecting (yes/no/[fingerprint])?
 To confirm the connection answer the prompt by typing `yes` and press the `Enter` key.
 
 <Callout client:load type="tip">
-  The IP address and the fingerprint in the example above will be replaced with the IP address of your node and the fingerprint generated by your **SSH** server.
+  The IP address and the fingerprint in the example above will be replaced with the IP address of your node and the fingerprint generated by your SSH server.
 </Callout>
 
-After answering `yes` and establishing the connection the **SSH** server fingerprint will be stored in the client's `known_hosts` file which is located in the `.ssh` hidden directory.
+After answering `yes` and establishing the connection the SSH server fingerprint will be stored in the client's `known_hosts` file which is located in the `.ssh` hidden directory.
 
 When reconnecting you won't be prompted with the fingerprint confirmation again unless the IP address of the node changes or if you use an alias for the node instead of the IP address.
 
 ### Enter Password
 
-You'll now be prompted to enter the password for the user you're using with **SSH**, e.g., `satoshi` which should be the password you set for your user during the installation.
+You'll now be prompted to enter the password for the user you're using with SSH, e.g., `satoshi` which should be the password you set for your user during the installation.
 
 The prompt will look something like this:
 
@@ -338,23 +338,23 @@ satoshi@192.168.0.100's password:
   The `username` and IP address in the example above will be replaced with the IP address of your node and the `username` you set during the installation.
 </Callout>
 
-After entering the password if everything goes right, you will have successfully accessed your node using **SSH**, and you will be presented with the following output:
+After entering the password if everything goes right, you will have successfully accessed your node using SSH, and you will be presented with the following output:
 
 ```sh:SSH Success Output
 Warning: Permanently added '192.168.0.100' (ED25519) to the list of known hosts.
 ```
 
-The output above means you have added the **SSH** server with an IP address of `192.168.0.100` to the list of known hosts which can be found on your client in the `known_hosts` file which we'll discuss in more detail below.
+The output above means you have added the SSH server with an IP address of `192.168.0.100` to the list of known hosts which can be found on your client in the `known_hosts` file which we'll discuss in more detail below.
 
 <Callout client:load type="tip">
-  If after entering the password correctly you see something like `Connection closed by 192.168.0.100 port 22`, then the connection timed out. Just run the **SSH** command for accessing your node again and enter the password when prompted to access your node.
+  If after entering the password correctly you see something like `Connection closed by 192.168.0.100 port 22`, then the connection timed out. Just run the SSH command for accessing your node again and enter the password when prompted to access your node.
 </Callout>
 
 You're now able to manage and monitor your node by running any commands from your client.
 
 ## Exit SSH Server
 
-To exit the **SSH** server session run the following command:
+To exit the SSH server session run the following command:
 
 ```sh:Exit SSH Server
 exit
@@ -378,9 +378,9 @@ To open the `known_hosts` file run the following command:
 sudo nano known_hosts
 ```
 
-After opening the file, you can search for the known host(s) you want to edit using, e.g., the IP address or `hostname` of the **SSH** server.
+After opening the file, you can search for the known host(s) you want to edit using, e.g., the IP address or `hostname` of the SSH server.
 
 To remove a known host you can delete the line from the file then save and exit.
 
-Now that we can access the node through **SSH**, we're going to go over some configuration to increase the security of **SSH**.
+Now that we can access the node through SSH, we're going to go over some configuration to increase the security of SSH.
 

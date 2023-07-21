@@ -18,7 +18,7 @@ To determine these addresses we'll be using the `ip` command which should alread
 
 ## Determine Addresses
 
-To determine the **IP address of the node**, the **netmask**, the **network address**, and the **gateway address** we can run the following command:
+To determine the IP address of the node, the netmask, the network address, and the gateway address we can run the following command:
 
 ```sh:Determine IP Address, Netmask, Network Address, and Gateway Address
 ip route show
@@ -31,23 +31,23 @@ default via 192.168.0.1 dev enp0s3
 192.168.0.0/24 dev enp0s3 proto kernel scope link src 192.168.0.100
 ```
 
-- The **gateway address** is `192.168.0.1` which is displayed after the `default via` text.
+- The gateway address is `192.168.0.1` which is displayed after the `default via` text.
 
-- The **network address** is `192.168.0.0` which is displayed on the beginning of the second line.
+- The network address is `192.168.0.0` which is displayed on the beginning of the second line.
 
-- The **network address** is postfixed with a `/24` which is the **Classless Inter-Domain Routing (CIDR)** notation. This notation is used to indicate the value of the **netmask** which in this case is `255.255.255.0`.
+- The network address is postfixed with a `/24` which is the **Classless Inter-Domain Routing (CIDR)** notation. This notation is used to indicate the value of the netmask which in this case is `255.255.255.0`.
 
-- The **IP address** of the node is `192.168.0.100` which is displayed at the end of the second line.
+- The IP address of the node is `192.168.0.100` which is displayed at the end of the second line.
 
 <Callout client:load type="warning">
-  The **IP address of your node**, **netmask**, **network address**, and **gateway address** may be different than the ones provided in the example above, so be sure to use the correct values when configuring the network for your node.
+  The IP address of your node, netmask, network address, and gateway address may be different than the ones provided in the example above, so be sure to use the correct values when configuring the network for your node.
 </Callout>
 
 <Callout client:load type="tip">
-  If you don't know how to calculate the **netmask** from the CIDR notation, then you can use this [CIDR to IPv4 Conversion](https://www.ipaddressguide.com/cidr) tool to calculate it. Also, if you're interested in learning more about CIDR, then take a look at [What is CIDR Notation?](https://whatismyipaddress.com/cidr).
+  If you don't know how to calculate the netmask from the CIDR notation, then you can use this [CIDR to IPv4 Conversion](https://www.ipaddressguide.com/cidr) tool to calculate it. Also, if you're interested in learning more about CIDR, then take a look at [What is CIDR Notation?](https://whatismyipaddress.com/cidr).
 </Callout>
 
-To determine the **broadcast address** we can run the following command:
+To determine the broadcast address we can run the following command:
 
 ```sh:Determine Broadcast Address
 ip addr show
@@ -78,17 +78,17 @@ The first network interface, i.e., `lo` is the loopback interface which is an in
 
 The second interface, i.e., `enp0s3` is the active Ethernet adapter which the node is using to connect to the internet.
 
-The output of the `enp0s3` interface contains the **broadcast address** which in this case is `192.168.0.255` and can be found on the line starting with `inet` after the `brb` text.
+The output of the `enp0s3` interface contains the broadcast address which in this case is `192.168.0.255` and can be found on the line starting with `inet` after the `brb` text.
 
-This command also outputs the **IP address of the node** postfixed with the CIDR notation, i.e. `192.168.0.100/24` which again is used to indicate the value of the **netmask**.
+This command also outputs the IP address of the node postfixed with the CIDR notation, i.e. `192.168.0.100/24` which again is used to indicate the value of the netmask.
 
 <Callout client:load type="warning">
-  The adapter name and the **broadcast address** may be different than the ones provided in the example above, so be sure to use the correct values when configuring the network for your node.
+  The adapter name and the broadcast address may be different than the ones provided in the example above, so be sure to use the correct values when configuring the network for your node.
 </Callout>
 
 ## Edit Network Interfaces
 
-Now that we know the **IP address of the node**, the **netmask**, the **network address**, the **broadcast address**, and the **gateway address**, we can edit the `interfaces` file located in the `/etc/network` directory to use a **static IP address** for the node.
+Now that we know the IP address of the node, the netmask, the network address, the broadcast address, and the gateway address, we can edit the `interfaces` file located in the `/etc/network` directory to use a static IP address for the node.
 
 To open the `interfaces` file run the following command:
 
@@ -121,7 +121,7 @@ iface enp0s3 inet dhcp
   Your `interfaces` file may look a little different depending on the network adapters you're using, if you're using IPv6, etc.
 </Callout>
 
-Here's the updated `interfaces` file using a **static IP address**:
+Here's the updated `interfaces` file using a static IP address:
 
 ```sh:interfaces File with Static IP Address
 # This file describes the network interfaces available on your system
@@ -143,10 +143,10 @@ iface enp0s3 inet static
 	gateway 192.168.0.1
 ```
 
-Here we replaced `dhcp` with `static` on the line containing `iface enp0s3 inet`, and we added the **IP address of the node**, the **netmask**, the **network address**, the **broadcast address**, and the **gateway address**.
+Here we replaced `dhcp` with `static` on the line containing `iface enp0s3 inet`, and we added the IP address of the node, the netmask, the network address, the broadcast address, and the gateway address.
 
 <Callout client:load type="warning">
-  Be sure to replace the **IP address of the node**, the **netmask**, the **network address**, the **broadcast address**, and the **gateway address** with the values you determined for your node.
+  Be sure to replace the IP address of the node, the netmask, the network address, the broadcast address, and the gateway address with the values you determined for your node.
 </Callout>
 
 To prevent having to reboot the system when making changes to the network, we can edit the `interfaces` file by replacing `allow-hotplug` with `auto`.
@@ -245,9 +245,9 @@ After rebooting the node, the command prompt should now display the updated `hos
 
 ## Hosts
 
-We're now going to set up an alias for the node on our client. By setting up an alias we won't have to remember the **static IP address** of the node when accessing it using SSH.
+We're now going to set up an alias for the node on our client. By setting up an alias we won't have to remember the static IP address of the node when accessing it using SSH.
 
-If you're using a common distribution of Linux on your client, then you should be able to configure the `hosts` file located in the `/etc` directory to use an alias for the **static IP address** of the node.
+If you're using a common distribution of Linux on your client, then you should be able to configure the `hosts` file located in the `/etc` directory to use an alias for the static IP address of the node.
 
 To open the `hosts` file on your client run the following command:
 
@@ -267,7 +267,7 @@ ff02::1 ip6-allnodes
 ff02::2 ip6-allrouters
 ```
 
-We're going to update the `hosts` file by adding the alias for the **static IP address** of the node underneath the line containing the localhost address `127.0.1.1`.
+We're going to update the `hosts` file by adding the alias for the static IP address of the node underneath the line containing the localhost address `127.0.1.1`.
 
 After updating the `hosts` file, it should look something like this:
 
@@ -282,40 +282,40 @@ ff02::1 ip6-allnodes
 ff02::2 ip6-allrouters
 ```
 
-Here we're using the **static IP address** of the node, i.e., `192.168.0.100` along with the `hostname` and the **domain name** of the node as the alias, i.e., `btc-node.local`.
+Here we're using the static IP address of the node, i.e., `192.168.0.100` along with the `hostname` and the **domain name** of the node as the alias, i.e., `btc-node.local`.
 
 <Callout client:load type="info">
-  The **domain name** of the node was set during the installation as `local`. The **domain name** of `local` is used to represent the node is on our local network, i.e., home network. As stated in the Debian installer the **domain name** is the part of your internet address to the right of your `hostname`, and it usually ends in `.com`, `.net`, `.edu`, `.org`, etc. Since we're setting up the node to operate on a home network, we can make somehting up.
+  The domain name of the node was set during the installation as `local`. The domain name of `local` is used to represent the node is on our local network, i.e., home network. As stated in the Debian installer the domain name is the part of your internet address to the right of your `hostname`, and it usually ends in `.com`, `.net`, `.edu`, `.org`, etc. Since we're setting up the node to operate on a home network, we can make somehting up.
 </Callout>
 
 <Callout client:load type="warning">
-  Be sure to replace the **static IP address** of the node, i.e., `192.168.0.100`, `btc-node`, and `local` with the **static IP address** of your node, your `hostname`, and your **domain name**, respectively. Also, `client-hostname` will be replaced by the `hostname` of your client.
+  Be sure to replace the static IP address of the node, i.e., `192.168.0.100`, `btc-node`, and `local` with the static IP address of your node, your `hostname`, and your domain name, respectively. Also, `client-hostname` will be replaced by the `hostname` of your client.
 </Callout>
 
 ## Check Configuration
 
-To check the network configuration, we can use the `hostname` command to check the values for the **static IP address** of the node, the `hostname`, the **domain name**, and the **Fully Qualified Domain Name (FQDN)**.
+To check the network configuration, we can use the `hostname` command to check the values for the static IP address of the node, the `hostname`, the domain name, and the **Fully Qualified Domain Name (FQDN)**.
 
 <Callout client:load type="info">
-  The **FQDN** is a part of the **uniform resource locator (URL)**. It is the full name of an entity in the internet framework and includes the `hostname` and the **domain name**. Since the node is operating on our home network, it will only be accessible by computers that are on the same network. If you're interested in learning more, then check out [FQDN (Fully Qualified Domain Name): What It Is, Examples, and More](https://www.hostinger.com/tutorials/fqdn).
+  The FQDN is a part of the **uniform resource locator (URL)**. It is the full name of an entity in the internet framework and includes the `hostname` and the domain name. Since the node is operating on our home network, it will only be accessible by computers that are on the same network. If you're interested in learning more, then check out [FQDN (Fully Qualified Domain Name): What It Is, Examples, and More](https://www.hostinger.com/tutorials/fqdn).
 </Callout>
 
 ### Static IP Address
 
-To check the **static IP address** of the node run the following command:
+To check the static IP address of the node run the following command:
 
 ```sh:Check Static IP Address
 hostname -I
 ```
 
-The output of the command should be the **static IP address** you set for your node, e.g.,
+The output of the command should be the static IP address you set for your node, e.g.,
 
 ```sh:Static IP Adress
 192.168.0.100 2600:380:902d:44d7:a00:27ff:fe47:5daf
 ```
 
 <Callout client:load type="tip">
-  The **static IP address** of the node is the first part of the output, i.e., `192.168.0.100`.
+  The static IP address of the node is the first part of the output, i.e., `192.168.0.100`.
 </Callout>
 
 ### hostname
@@ -334,13 +334,13 @@ btc-node
 
 ### Domain Name
 
-To check the **domain name** run the following command:
+To check the domain name run the following command:
 
 ```sh:Check Domain Name
 hostname -d
 ```
 
-The output of the command should be the **domain name** you set for your node, e.g.,
+The output of the command should be the domain name you set for your node, e.g.,
 
 ```sh:Domain Name
 local
@@ -348,17 +348,17 @@ local
 
 ### FQDN
 
-To check the **FQDN** run the following command:
+To check the FQDN run the following command:
 
 ```sh:Check FQDN
 hostname -f
 ```
 
-The output of the command should be the **FQDN** for your node which is determined by the `hostname` and the **domain name** you set for your node, e.g.,
+The output of the command should be the FQDN for your node which is determined by the `hostname` and the domain name you set for your node, e.g.,
 
 ```sh:FQDN
 btc-node.local
 ```
 
-After setting a **static IP address** for the node, a `hostname`, and a **domain name**, and updating the `hosts` file on our client, we're now ready to SSH into the node.
+After setting a static IP address for the node, a `hostname`, and a domain name, and updating the `hosts` file on our client, we're now ready to SSH into the node.
 

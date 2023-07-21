@@ -1,0 +1,432 @@
+---
+label: Firewall
+slug: en/guides/bitcoin-node/security/firewall
+order: 20
+---
+
+import Callout from "@components/mdx/Callout.tsx";
+
+# Firewall
+
+By setting up a firewall we'll be able to monitor, allow, and block incoming and outgoing network traffic based on security rules that we define. Multiple network ports are open and listening for incoming connections by default which leaves the node open to various network based attacks. By monitoring and gaining control over which ports are open and closed we'll be able to mitigate many of the network based attacks.
+
+We'll be using the [Uncomplicated Firewall (UFW)](https://launchpad.net/ufw) which is a firewall configuration tool that allows us to easily manage a [netfilter](https://www.netfilter.org/) firewall by using the provided `ufw` command.
+
+## Installation
+
+To install UFW on the node run the following command:
+
+```sh:Install UFW
+sudo apt install -y ufw
+```
+
+<Callout client:load type="tip">
+  If you're getting errors, then try rebooting the system using `sudo reboot`.
+</Callout>
+
+## UFW Status
+
+To check the `status` of UFW on the node run the following command:
+
+```sh:Check UFW Status
+sudo ufw status
+```
+
+The output of the command should look similar to:
+
+```sh:UFW Status Output
+Status: inactive
+```
+
+The output indicates if the firewall is `active` or `inactive`. Here, the output is `inactive`. To activate the firewall we need to enable UFW.
+
+## Default Policy
+
+Before enabling UFW and activating the firewall, we're going to first discuss the default policies for incoming and outgoing network traffic. The default policies determine how traffic that doesn't match a specific rule is controlled.
+
+By default, UFW is configured to deny all incoming connections and to allow all outgoing connections. This means no one can establish a connection with the server while an application running on the server can establish a connection outside of the server.
+
+The following commands can be run to reset the default behavior of UFW for incoming and outgoing connections.
+
+### Deny Incoming
+
+To deny all incoming connections run the following command:
+
+```sh:Deny Incoming
+sudo ufw default deny incoming
+```
+
+The output of the command should look similar to:
+
+```sh:Deny Incoming Output
+Default incoming policy changed to 'deny'
+(be sure to update your rules accordingly)
+```
+
+### Allow Outgoing
+
+To allow all outgoing connections run the following command:
+
+```sh:Allow Outgoing
+sudo ufw default allow outgoing
+```
+
+The output of the command should look similar to:
+
+```sh:Allow Outgoing Output
+Default outgoing policy changed to 'allow'
+(be sure to update your rules accordingly)
+```
+
+## Allow Incoming SSH Connections
+
+When UFW is enabled by default it will block all incoming connections to the node. With the current configuration of UFW we'll be disconnected once we enable it since we're using SSH to access the node. Therefore, we need to first allow incoming SSH connections before we enable UFW.
+
+For now only incoming SSH connections will be allowed. We'll update the firewall as needed as we install and configure more software throughout the guide.
+
+To allow incoming SSH connections we need to open the port the node is using for SSH.
+
+If you're using the default port for the SSH server, i.e., port `22`, then you can run the following command to allow incoming SSH connections:
+
+```sh:Allow Incoming SSH Connections on Default Port
+sudo ufw allow ssh
+```
+
+If you changed the default port for the SSH server, then run the following command to allow incoming SSH connections on the custom port:
+
+```sh:Allow Incoming SSH Connections on Custom Port
+sudo ufw allow <port-number>
+```
+
+Here `<port-number>` should be replaced with the custom listening port number you set for the SSH server, e.g., `2222`.
+
+The output of the command should look similar to:
+
+```sh:Allow Incoming SSH Connections Output
+Rules updated
+Rules updated (v6)
+```
+
+## Allow Incoming SSH Connections from a Specific IP Address
+
+If you only want to allow incoming SSH connections from a specific IP address, e.g., the IP address of the client you use to access the node, then you can run the following command:
+
+```sh:Allow Incoming SSH Connections from a Specific IP Address
+sudo ufw allow from <client-ip-address> proto tcp to any port <port-number>
+```
+
+Here we included a `from` parameter which specifies the source of the connection, i.e., `<client-ip-address>`. We then need to specify the destination address using the `to` parameter. Now, to set the rule to SSH only we need to limit the protocol, i.e., `proto` to `tcp` and use the `port` parameter set to the `<port-number>` which is prefixed with `any`.
+
+Be sure to replace `<client-ip-address>` with the IP address of your client, e.g., `192.168.0.130` and `<port-number>` with the custom listening port number you set for the SSH server, e.g., `2222`.
+
+The output of the command should look similar to:
+
+```sh:Allow Incoming SSH Connections from a Specific IP Address Output
+Rules updated
+```
+
+<Callout client:load type="warning">
+  If you configure the firewall to allow the incoming SSH connections to only come from a specific IP address, then you need to make sure your client keeps the same IP address. This can be done by setting a static IP address for your client. If your router or your ISP assigns a new IP address to your client, then you'll need to reassign it to the IP address you configured with the firewall or access the node with a monitor and keyboard to reset the IP address.
+</Callout>
+
+## Allow Incoming SSH Connections from a Specific Subnet
+
+If you want to allow incoming SSH connections from a specific subnet, e.g., the subnet for the client(s) you use to access the node, then you can run the following command:
+
+```sh:Allow Incoming SSH Connections from a Specific Subnet
+sudo ufw allow from <client-subnet> proto tcp to any port <port-number>
+```
+
+Here the `from` parameter specifies the subnet for the client(s) you use to access the node instead of a specific IP address. Everything else remains the same as the previous command.
+
+Be sure to replace `<client-subnet>` with the subnet of your client(s) using CIDR notation, e.g., `192.168.0.0/24` and `<port-number>` with the custom listening port number you set for the SSH server, e.g., `2222`.
+
+The output of the command should look similar to:
+
+```sh:Allow Incoming SSH Connections from a Specific Subnet Output
+Rules updated
+```
+
+<Callout client:load type="warning">
+  If you configure the firewall to allow the incoming SSH connections to only come from a specific subnet, then you need to make sure your subnet remains the same for your client(s). If your router or your ISP assigns a new subnet for your client(s), then you'll need to reset it to the subnet configured with the firewall or access the node with a monitor and keyboard to reset the subnet.
+</Callout>
+
+## UFW Logging
+
+By default, UFW will keep logs using `low` mode which means it logs all the packets that are blocked or allowed by the rules we set.
+
+### Disable Logging
+
+If you don't have a valid reason to keep UFW's logging active, then you should disable the logging because it can take up GBs of the node's storage.
+
+```sh:Disable Logging
+sudo ufw logging off
+```
+
+The output of the command should look similar to:
+
+```sh:Disable Logging Output
+Logging disabled
+```
+
+### Enable Logging
+
+If you want to enable logging, then you can run the following command:
+
+```sh:Enable Logging
+sudo ufw logging on
+```
+
+The output of the command should look similar to:
+
+```sh:Enable Logging Output
+Logging enabled
+```
+
+## Enable UFW
+
+After setting the incoming SSH connections rules and setting the logging preference, we're now ready to enable UFW which will activate it and apply the rules we set.
+
+To enable UFW run the following command:
+
+```sh:Enable UFW
+sudo ufw enable
+```
+
+After running the above command, you may receive a warning message that looks similar to:
+
+```sh:Warning Message
+Command may disrupt existing ssh connections. Proceed with operation (y|n)?
+```
+
+If you successfully configured the rules for the incoming SSH connections, then enter `y` and press the `Enter` key.
+
+You should then see output that looks similar to:
+
+```sh:Enable UFW Output
+Firewall is active and enabled on system startup
+```
+
+To check the `status` of UFW on the node run the following command:
+
+```sh:Check UFW Status
+sudo ufw status
+```
+
+The output of the command should look similar to:
+
+```sh:UFW Status Output
+Status: active
+
+To                                  Action               From
+--                                  ------               ----
+<port-number>                       ALLOW                Anywhere
+<port-number>/tcp                   ALLOW                <client-ip-address>
+<port-number>/tcp                   ALLOW                <client-subnet>
+<port-number> (v6)                  ALLOW                Anywhere (v6)
+```
+
+Here `<port-number>` will be replaced with the listening port number for your SSH server, `<client-ip-address>` will be replaced with the IP address of your client, and `<client-subnet>` will be replaced with the subnet of your client.
+
+The output of the command for my node looks like:
+
+```sh:UFW Status Output for my Node
+Status: active
+
+To                         Action      From
+--                         ------      ----
+2222                       ALLOW       Anywhere
+2222/tcp                   ALLOW       192.168.0.130
+2222/tcp                   ALLOW       192.168.0.0/24
+2222 (v6)                  ALLOW       Anywhere (v6)
+```
+
+We're displaying all of the rules for each scenario we described above for the incoming SSH connections for demonstration purposes. In production you're only going to want to set one of the rules described above depending on your preferred configuration.
+
+Now let's dicuss each rule displayed in the status output:
+
+- The rules `<port-number> ALLOW Anywhere` and `<port-number> (v6) ALLOW Anywhere (v6)` are set by allowing all incoming SSH connections on the port number you specified.
+
+- The rule `<port-number>/tcp ALLOW <client-ip-address>` is set by allowing incoming SSH connections for the specific IP address of your client on the port number you specified.
+
+- The rule `<port-number>/tcp ALLOW <client-subnet>` is set by allowing incoming SSH connections for the subnet of your client(s) on the port number you specified.
+
+Since we only want to include one of these rules in production, let's discuss how we can delete rules from the firewall.
+
+## Delete Rules
+
+If you want to remove a rule you set for the firewall, e.g., you set the firewall to allow incoming SSH connections from a specific IP address or a specific subnet, then you can delete the rules you previously set by using the `delete` parameter.
+
+One way to delete a rule is to first determine the rule ID, then specify it when using the `delete` parameter.
+
+### List All Rules
+
+To list all of the rules and the corresponding rule IDs for the firewall you can run the following command:
+
+```sh:List All Rules
+sudo ufw status numbered
+```
+
+The output of the command will look like this if you enabled all of the rules described above:
+
+```sh:List All Rules Output
+Status: active
+
+     To                                  Action      From
+     --                                  ------      ----
+[ 1] <port-number>                       ALLOW IN    Anywhere
+[ 2] <port-number>/tcp                   ALLOW IN    <client-ip-address>
+[ 3] <port-number>/tcp                   ALLOW IN    <client-subnet>
+[ 4] <port-number> (v6)                  ALLOW IN    Anywhere (v6)
+```
+
+The output of the command for my node looks like:
+
+```sh:List All Rules Output for my Node
+Status: active
+
+     To                         Action      From
+     --                         ------      ----
+[ 1] 2222                       ALLOW IN    Anywhere
+[ 2] 2222/tcp                   ALLOW IN    192.168.0.130
+[ 3] 2222/tcp                   ALLOW IN    192.168.0.0/24
+[ 4] 2222 (v6)                  ALLOW IN    Anywhere (v6)
+```
+
+### Use the Rule ID
+
+To delete a rule by specifying a rule ID, run the following command:
+
+```sh:Delete a Rule Using ID
+sudo ufw delete <rule-number>
+```
+
+If you want to, e.g., delete the rule for allowing incoming SSH connections on the specific IP address for your client, then you can replace `<rule-number>` with a `2` in the command above.
+
+```sh:Delete a Rule Using ID Example
+sudo ufw delete 2
+```
+
+After running the above command, you'll be presented with a prompt asking you to confirm the deletion of the rule that should look similar to:
+
+```sh:Delete Rule Confirmation
+Deleting:
+ allow from <client-ip-address> to any port <port-number> proto tcp
+Proceed with operation (y|n)?
+```
+
+Here `<port-number>` will be replaced with the listening port number for your SSH server and `<client-ip-address>` will be replaced with the IP address of your client.
+
+If you want to delete the rule, then enter `y` and press the `Enter` key.
+
+After deleting the rule you'll see output similar to:
+
+```sh:Delete Rule Output
+Rule deleted
+```
+
+### Use Actual Rule
+
+To delete a rule by specifying the actual rule, run the following command:
+
+```sh:Delete a Rule Using the Actual Rule
+sudo ufw delete <rule>
+```
+
+If you want to, e.g., delete the rule for allowing incoming SSH connections on a specific subnet for your client(s), then you can replace `<rule>` with the actual rule we set, i.e., `sudo ufw allow from <client-subnet> proto tcp to any port <port-number>`.
+
+```sh:Delete a Rule Using the Actual Rule Example
+sudo ufw delete allow from <client-subnet> proto tcp to any port <port-number>
+```
+
+After running the above command, you'll be presented with a prompt asking you to confirm the deletion of the rule that should look similar to:
+
+```sh:Delete Rule Confirmation
+Deleting:
+ allow from <client-subnet> to any port <port-number> proto tcp
+Proceed with operation (y|n)?
+```
+
+Here `<port-number>` will be replaced with the listening port number for your SSH server and `<client-subnet>` will be replaced with the subnet of your client.
+
+If you want to delete the rule, then enter `y` and press the `Enter` key.
+
+After deleting the rule you'll see output similar to:
+
+```sh:Delete Rule Output
+Rule deleted
+```
+
+## Check UFW Status
+
+After setting and deleting the rules, you can check the `status` by running the following command:
+
+```sh:Check UFW Status
+sudo ufw status
+```
+
+The output of the command should look similar to:
+
+```sh:UFW Status Output
+Status: active
+
+To                                  Action               From
+--                                  ------               ----
+<port-number>                       ALLOW                Anywhere
+<port-number> (v6)                  ALLOW                Anywhere (v6)
+```
+
+Here, the rule for allowing incoming SSH connections from all IP addresses on a specified port number is displayed which is the configuration we'll be using going forward.
+
+The output of the command for my node looks like:
+
+```sh:UFW Status Output for my Node
+Status: active
+
+To                         Action      From
+--                         ------      ----
+2222                       ALLOW       Anywhere
+2222 (v6)                  ALLOW       Anywhere (v6)
+```
+
+## Enable UFW on Boot
+
+UFW should already be enabled to start automatically on boot, but if it isn't then run the following command:
+
+```sh:Enable UFW on Boot
+sudo systemctl enable ufw
+```
+
+The output of the command should look similar to:
+
+```sh:Enable UFW on Boot Output
+Synchronizing state of ufw.service with SysV service script with /lib/systemd/systemd-sysv-install.
+Executing: /lib/systemd/systemd-sysv-install enable ufw
+```
+
+## Disable UFW on Boot
+
+If you want to disable the automatic start on boot, then run the following command:
+
+```sh:Disable UFW on Boot
+sudo systemctl disable ufw
+```
+
+The output of the command should look similar to:
+
+```sh:Disable UFW on Boot Output
+Synchronizing state of ufw.service with SysV service script with /lib/systemd/systemd-sysv-install.
+Executing: /lib/systemd/systemd-sysv-install disable ufw
+Removed "/etc/systemd/system/multi-user.target.wants/ufw.service".
+```
+
+<Callout client:load type="warning">
+  In production you'll want UFW to start automatically on boot, so be sure to enable it.
+</Callout>
+
+## Locked Out
+
+<Callout client:load type="tip">
+  If you lock yourself out from being able to login using SSH after configuring the firewall, then connect a monitor and keyboard to the node which will allow you to fix the firewall settings.
+</Callout>
+

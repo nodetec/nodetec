@@ -1,12 +1,12 @@
 ---
-label: Security
-slug: en/guides/bitcoin-node/remote-access/security
-order: 50
+label: SSH Configuration
+slug: en/guides/bitcoin-node/security/ssh-configuration
+order: 10
 ---
 
 import Callout from "@components/mdx/Callout.tsx";
 
-# Security
+# SSH Configuration
 
 To increase the security of **SSH**, we're going to do the following:
 
@@ -59,7 +59,7 @@ sudo nano sshd_config
 
 ## Change Default Port
 
-As stated in the previous section, it's possible to change the default port the SSH server listens on. This increases the security of the node by reducing the risk of automated attacks that target the default listening port, i.e., `port 22`.
+As stated in the previous section, it's possible to change the default port the SSH server listens on. This increases the security of the node by reducing the risk of automated attacks that target the default listening port, i.e., port `22`.
 
 ### Determine Port
 
@@ -100,7 +100,7 @@ From the output of the command we can determine the listening port by looking at
 Jul 12 13:22:41 btc-node sshd[518]: Server listening on 0.0.0.0 port 22.
 ```
 
-From the above line we see that the SSH server is listening on `port 22`.
+From the above line we see that the SSH server is listening on port `22`.
 
 ### Edit Port
 
@@ -173,7 +173,7 @@ ssh -p 2222 satoshi@192.168.0.100
 ```
 
 <Callout client:load type="tip">
-  If you configured you're client to use an alias for the **static IP address** of the node, then you can access your node using the alias along with the custom port instead of the IP address. Take a look at [Using an Alias](https://nodetec.co/en/guides/bitcoin-node/remote-access/secure-shell#using-an-alias) from the previous section to see an example of how to SSH into the node with an alias.
+  If you configured you're client to use an alias for the static IP address of the node, then you can access your node using the alias along with the custom port instead of the IP address. Take a look at [Using an Alias](https://nodetec.co/en/guides/bitcoin-node/remote-access/secure-shell#using-an-alias) from the previous section to see an example of how to SSH into the node with an alias.
 </Callout>
 
 ## Disable root Login
@@ -182,7 +182,9 @@ If someone were able to login as the `root` user on the node through SSH, then t
 
 By default password and keyboard-interactive authentication are disabled for the `root` user, i.e., they can login using public key authentication.
 
-If you followed along with the [Installation](/en/guides/bitcoin-node/operating-system/installation) section, then the `root` user should be disabled. Since the `root` user is already disabled, accessing the node using SSH with the `root` user should not work.
+<Callout client:load type="tip">
+  If you followed along with the [Installation](/en/guides/bitcoin-node/operating-system/installation) section, then the `root` user should be disabled. Since the `root` user is already disabled, accessing the node using SSH with the `root` user should not work.
+</Callout>
 
 However, if you ever decide to enable a `root` user in the future, here's how to disable the `root` login over SSH for your node for all authentication methods.
 
@@ -370,7 +372,7 @@ Again, `<username>` should be replaced with the `username` you set during the in
 The `<path/to/public-key-file>` should be replaced with the path to the public key you're using with your node which will be located in the `~/.ssh` directory if you used the default location when generating the key pair.
 
 <Callout client:load type="tip">
-  Again, if you configured you're client to use an alias for the **static IP address** of the node, then you can access your node using the alias along with the custom port instead of the IP address. Take a look at [Using an Alias](https://nodetec.co/en/guides/bitcoin-node/remote-access/secure-shell#using-an-alias) from the previous section to see an example of how to SSH into the node with an alias.
+  Again, if you configured you're client to use an alias for the static IP address of the node, then you can access your node using the alias along with the custom port instead of the IP address. Take a look at [Using an Alias](https://nodetec.co/en/guides/bitcoin-node/remote-access/secure-shell#using-an-alias) from the previous section to see an example of how to SSH into the node with an alias.
 </Callout>
 
 To copy the public key to my node, I would run the following command:
@@ -500,4 +502,6 @@ Now, if you attempt to SSH into the node from a client that doesn't have access 
 <Callout client:load type="warning">
   If you lose access to your SSH keys, then you will be unable to access the node without using a monitor and keyboard to login and reset the SSH settings. Be sure to securely backup the passphrase for the private key if you used one as well as the SSH keys using, e.g., a USB.
 </Callout>
+
+We're now going to set up a firewall for the node which will increase the security of the node since it allows us to restrict what traffic the node accepts and which applications are allowed to send data out.
 
