@@ -1,0 +1,46 @@
+---
+label: Neovim
+slug: en/guides/bitcoin-node/text-editors/neovim
+order: 30
+---
+
+import Callout from "@components/mdx/Callout.tsx";
+
+# Neovim
+
+If you're interested in using an enhanced version of `vim` that includes more features, then check out `nvim`.
+
+## Install
+
+Here's how to install `nvim`:
+
+```sh:Install Neovim
+sudo apt install neovim
+```
+
+## Open
+
+To open a file using `nvim` you can run the following command:
+
+```sh:Open a File
+nvim file-name
+```
+
+Be sure to replace `file-name` with whatever file you want to open and to include `sudo` before the command if the file requires `sudo` privileges to edit it.
+
+## Save
+
+To save a file you need to be in Command mode which you can enter by pressing the `Esc` key, then type `:w` and press `Enter`.
+
+## Exit
+
+To exit a file you need to be in Command mode which you can enter by pressing the `Esc` key, then type `:q` and press `Enter`.
+
+<Callout client:load type="tip">
+  If you want to write and exit the file, then you can combine the above commands into one command by pressing the `Esc` key to enter Command mode then type `:wq` and press `Enter`.
+</Callout>
+
+## Resources
+
+- [Neovim](https://neovim.io/)
+
