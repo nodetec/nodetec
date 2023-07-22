@@ -13,28 +13,38 @@ import mdx from "@astrojs/mdx";
 // https://astro.build/config
 export default defineConfig({
   vite: {
-    plugins: [nodePolyfills()]
+    plugins: [nodePolyfills()],
   },
   integrations: [tailwind(), react(), mdx()],
   markdown: {
     remarkPlugins: [remarkCodeTitles],
-    rehypePlugins: [[rehypeExternalLinks, {
-      target: "_blank",
-      rel: ["noreferrer noopener"]
-      // content: {
-      //   type: "text",
-      //   value: "↗",
-      // },
-    }], rehypeSlug, [rehypeAutolinkHeadings, {
-      properties: {
-        class: "heading-link heading-link--hidden---effects",
-        "data-heading-link": true
-      },
-      behavior: "wrap"
-    }]],
+    rehypePlugins: [
+      [
+        rehypeExternalLinks,
+        {
+          target: "_blank",
+          rel: ["noreferrer noopener"],
+          // content: {
+          //   type: "text",
+          //   value: "↗",
+          // },
+        },
+      ],
+      rehypeSlug,
+      [
+        rehypeAutolinkHeadings,
+        {
+          properties: {
+            class: "heading-link heading-link--hidden---effects",
+            "data-heading-link": true,
+          },
+          behavior: "wrap",
+        },
+      ],
+    ],
     shikiConfig: {
-      theme: theme
-    }
+      theme: theme,
+    },
   },
-  site: `https://nodetec.co`
+  site: `https://nodetec.co`,
 });
