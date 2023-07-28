@@ -6,6 +6,7 @@ import {
   CheckCircleIcon,
   BoltIcon,
   XMarkIcon,
+  XCircleIcon,
 } from "@heroicons/react/24/solid";
 import { useStore } from "@nanostores/react";
 import { connected } from "../store/lightning";
@@ -21,7 +22,8 @@ const PRESET_AMOUNTS = [
 export default function Lightning() {
   let [isOpen, setIsOpen] = useState(false);
   const defaultTipAmount = 100 as Satoshis;
-  const [isTipSuccessOpen, setIsTipSuccessOpen] = useState(false);
+  const [isTipConfirmationOpen, setIsTipConfirmationOpen] = useState(false);
+  const [isTipSuccess, setIsTipSuccess] = useState(true);
   const [tipInputValue, setTipInputValue] =
     useState<Satoshis>(defaultTipAmount);
   const [tipMessage, setTipMessage] = useState<string>();
@@ -74,12 +76,14 @@ export default function Lightning() {
         const result = await webln.sendPayment(invoice);
         setTippedAmount(tipInputValue);
         setPaymentHash(result.paymentHash);
+        setIsTipSuccess(true);
       } catch (e) {
         console.log("Tip Error:", e);
+        setIsTipSuccess(false);
       }
     }
     setIsOpen(!isOpen);
-    setIsTipSuccessOpen(!isTipSuccessOpen);
+    setIsTipConfirmationOpen(!isTipConfirmationOpen);
   };
 
   return (
@@ -224,11 +228,11 @@ export default function Lightning() {
           </div>
         </Dialog>
       </Transition.Root>
-      <Transition.Root show={isTipSuccessOpen} as={Fragment}>
+      <Transition.Root show={isTipConfirmationOpen} as={Fragment}>
         <Dialog
           className="fixed z-50"
-          open={isTipSuccessOpen}
-          onClose={() => setIsTipSuccessOpen(false)}
+          open={isTipConfirmationOpen}
+          onClose={() => setIsTipConfirmationOpen(false)}
         >
           <div
             className="fixed inset-0 bg-black/30 backdrop-blur-sm"
@@ -247,30 +251,42 @@ export default function Lightning() {
             >
               <Dialog.Panel className="fixed w-full max-w-sm -translate-y-1/4 transform rounded-lg bg-slate-50 p-6 text-base font-semibold shadow-xl dark:bg-slate-800 md:max-w-md">
                 <button
-                  onClick={() => setIsTipSuccessOpen(false)}
+                  onClick={() => setIsTipConfirmationOpen(false)}
                   className="absolute right-5 top-5 z-10 flex h-8 w-8 items-center justify-center text-slate-500 outline-none hover:text-slate-600 hover:dark:text-slate-300"
                 >
                   <XMarkIcon className="h-5 w-5" aria-hidden="true" />
                 </button>
 
                 <div className="flex items-center justify-center pb-4 text-xl">
-                  <Dialog.Title>Success</Dialog.Title>
+                  {isTipSuccess ? (
+                    <Dialog.Title>Success</Dialog.Title>
+                  ) : (
+                    <Dialog.Title>Failed</Dialog.Title>
+                  )}
                 </div>
-                <h4 className="flex items-center justify-center gap-2 rounded-md bg-green-100 py-4 text-center text-lg text-green-300 dark:bg-green-400/25">
-                  <CheckCircleIcon className="h-5 w-5" aria-hidden="true" />
-
-                  {`You sent ${tippedAmount} sats!`}
-                </h4>
-                <h5 className="text overflow-x-scroll rounded-md py-4 text-center">
-                  <div className="flex w-full cursor-text items-center justify-start rounded-md bg-slate-100 dark:bg-slate-700">
-                    <div className="mr-2 whitespace-nowrap py-2 pl-2">
-                      Payment Hash:
+                {isTipSuccess ? (
+                  <h4 className="flex items-center justify-center gap-2 rounded-md bg-green-100 py-4 text-center text-lg text-green-300 dark:bg-green-400/25">
+                    <CheckCircleIcon className="h-5 w-5" aria-hidden="true" />
+                    {`You sent ${tippedAmount} sats!`}
+                  </h4>
+                ) : (
+                  <h4 className="flex items-center justify-center gap-2 rounded-md bg-red-100 py-4 text-center text-lg text-red-300 dark:bg-red-400/25">
+                    <XCircleIcon className="h-5 w-5" aria-hidden="true" />
+                    {`Transaction failed!`}
+                  </h4>
+                )}
+                {isTipSuccess && (
+                  <h5 className="text overflow-x-scroll rounded-md py-4 text-center">
+                    <div className="flex w-full cursor-text items-center justify-start rounded-md bg-slate-100 dark:bg-slate-700">
+                      <div className="mr-2 whitespace-nowrap py-2 pl-2">
+                        Payment Hash:
+                      </div>
+                      <div className="whitespace-nowrap rounded-md bg-slate-100 py-4 pr-4 dark:bg-slate-700">
+                        {paymentHash}
+                      </div>
                     </div>
-                    <div className="whitespace-nowrap rounded-md bg-slate-100 py-4 pr-4 dark:bg-slate-700">
-                      {paymentHash}
-                    </div>
-                  </div>
-                </h5>
+                  </h5>
+                )}
               </Dialog.Panel>
             </Transition.Child>
           </div>

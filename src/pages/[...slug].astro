@@ -19,7 +19,7 @@ const post = Astro.props;
 // console.log(post)
 const { Content, headings } = await post.render();
 
-console.log(await post.render())
+// console.log(await post.render())
 
 const docs = await getCollection("docs", ({ id }) => {
   return !id.endsWith("index.md");
