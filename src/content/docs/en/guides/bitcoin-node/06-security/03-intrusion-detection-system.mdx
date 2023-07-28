@@ -1,0 +1,763 @@
+---
+label: Intrusion Detection System
+slug: en/guides/bitcoin-node/security/intrusion-detection-system
+order: 30
+---
+
+import Callout from "@components/mdx/Callout.tsx";
+
+# Intrusion Detection System
+
+To further increase the security of the SSH login, we can use an Intrusion Detection System (IDS) which is an application that monitors a network or systems for malicious activity or policy violations. We'll use the FOSS IDS [Fail2Ban](https://www.fail2ban.org/wiki/index.php/Main_Page) for our node.
+
+Fail2Ban monitors system logs for automated attacks on servers. When a possible attack is identified using default parameters or parameters we set, it will block the IP address of the attacker for a set amount of time or permanently.
+
+Fail2Ban is primarily focused on SSH attacks, but it can be configured to work with any service susceptible to an automated network attack that uses log files.
+
+<Callout client:load type="tip">
+  You can also receive alerts through email by installing Sendmail using the following command: `sudo apt install -y sendmail-bin sendmail`.
+</Callout>
+
+<Callout client:load type="warning">
+  Fail2Ban isn't a replacement for hardening your server by using, e.g., public key authentication. It should be used along with the security improvements we went over in [SSH Configuration](/en/guides/bitcoin-node/security/ssh-configuration).
+</Callout>
+
+## Installation
+
+To install Fail2Ban on the node run the following command:
+
+```sh:Install Fail2Ban
+sudo apt install -y fail2ban
+```
+
+The service should automatically start once the installation completes.
+
+## Check Status
+
+To check the `status` of Fail2Ban on the node run the following command:
+
+```sh:Check Status
+sudo systemctl status fail2ban
+```
+
+The output of the command should look similar to:
+
+```sh:Status Output
+● fail2ban.service - Fail2Ban Service
+     Loaded: loaded (/lib/systemd/system/fail2ban.service; enabled; preset: enabled)
+     Active: active (running) since Tue 2023-07-25 11:25:45 CST; 2s ago
+       Docs: man:fail2ban(1)
+   Main PID: 836 (fail2ban-server)
+      Tasks: 5 (limit: 2315)
+     Memory: 35.6M
+        CPU: 130ms
+     CGroup: /system.slice/fail2ban.service
+             └─836 /usr/bin/python3 /usr/bin/fail2ban-server -xf start
+
+Jul 25 11:25:45 btc-node systemd[1]: Started fail2ban.service - Fail2Ban Service.
+Jul 25 11:25:45 btc-node fail2ban-server[836]: 2023-07-25 11:25:45,185 fail2ban.configreader   [836]: WARNING 'allowipv6' not defined in 'Definition'. Using default one: 'auto'
+Jul 25 11:25:45 btc-node fail2ban-server[836]: Server ready
+```
+
+<Callout client:load type="error">
+  If you see output similar to: `Active: failed (Result: exit-code)` instead of `Active: active (running)`, then an error occurred that we need to resolve before we can activate Fail2Ban. Take a look at [Resolve Error(s)](/en/guides/bitcoin-node/security/intrusion-detection-system#resolve-errors) to determine how to view the full error(s) and how to resolve some common errors.
+</Callout>
+
+## Configuration
+
+Fail2Ban provides default configuration files located in the `/etc/fail2ban` directory. The default configuration files end with a `.conf` file extension.
+
+To see all of the files and directories in the `fail2ban` directory run the following command:
+
+```sh:List Directory Content
+ls /etc/fail2ban
+```
+
+The output of the command should look somethig like this:
+
+```sh:fail2ban Directory Content
+action.d       filter.d   paths-arch.conf    paths-opensuse.conf
+fail2ban.conf  jail.conf  paths-common.conf
+fail2ban.d     jail.d     paths-debian.conf
+```
+
+There are several files and directories within the `fail2ban` directory, and the ones you're most likely to interact with are:
+
+- `fail2ban.conf` which contains the default configuration profile for Fail2Ban.
+
+- `jail.conf` which contains the configuration for various "jails". Jails describe how various services, e.g., SSH, HTTP, FTP, etc. are handled by specifying whether they're enabled or disabled as well as setting combinations of filters and actions.
+
+It's not recommended to modify the `.conf` files directly since the changes may be overwitten when the package is updated.
+
+To avoid the changes being overwitten, we can create files with the same file names but with a `.local` file extension instead of the `.conf` file extension. Fail2Ban reads the `.conf` files first, then it reads the `.local` files which means any changes we make in the `.local` files will be applied after the settings in the `.conf` files.
+
+The easiest way to apply our own configurations is to copy the `.conf` files to `.local` files then modify the files.
+
+<Callout client:load type="info">
+  It's also possible to build a `.local` configuration file from scratch, i.e., without copying the contents of the `.conf` file. The `.local` file only needs to contain the settings from the `.conf` file that you want to overwrite.
+</Callout>
+
+### fail2ban.local
+
+The default settings of the `fail2ban.conf` file provide a reasonable working setup, so you most likely won't have to change anything.
+
+However, if you do want to apply any changes you should first create a `fail2ban.local` file by copying the `fail2ban.conf` file:
+
+```sh:Copy fail2ban.conf
+sudo cp /etc/fail2ban/fail2ban.conf /etc/fail2ban/fail2ban.local
+```
+
+Here's how to open the `fail2ban.local` file:
+
+```sh:Open fail2ban.local
+sudo nano /etc/fail2ban.local
+```
+
+#### Options
+
+Here's an overview of some of the options you can set in the file:
+
+- `loglevel`: Sets the level of detail provided by Fail2Ban's logs. The level can be set to:
+  - `CRITICAL`
+  - `ERROR`
+  - `WARNING`
+  - `NOTICE`
+  - `INFO` (Default)
+  - `DEBUG`
+
+- `logtarget`: Sets the target for the log output. The target can be set to:
+  - `STDOUT`
+  - `STDERR`
+  - `SYSLOG`
+  - `SYSOUT`
+  - `SYSTEMD-JOURNAL`
+  - `FILE` (Default - `/var/log/fail2ban.log`)
+
+- `syslogsocket`: Sets the syslog socket file which is only used when the `logtarget` is `SYSLOG`. The syslog socket file can be set to:
+  - `auto` (Default)
+  - `FILE`
+
+- `socket`: Sets the socket file that is used to communicate with the daemon. The socket file can be set to:
+  - `FILE` (Default - `/var/run/fail2ban/fail2ban.sock`)
+
+- `pidfile`: Sets the file used to store the process ID (PID) of the Fail2Ban server. The PID file can be set to:
+  - `FILE` (Default - `/var/run/fail2ban/fail2ban.pid`)
+
+- `dbfile`: Sets the file used to store Fail2Ban persistent data. The persistent data file can be set to:
+  - `None` (Disables the database)
+  - `:memory:` (Database is stored in memory and is lost when Fail2Ban stops)
+  - `FILE` (Default - `/var/lib/fail2ban/fail2ban.sqlite3`)
+
+- `dbpurgeage`: Sets the time when bans should be purged from the database. The value can be set to:
+  - `SECONDS` (Default - `86400`, i.e., 24 hours)
+
+<Callout client:load type="info">
+  If you're interested in learning more about the configurable options, then take a look at the comments in the `fail2ban.conf` file and the [Fail2Ban](https://www.fail2ban.org/wiki/index.php/Main_Page) website.
+</Callout>
+
+### jail.local
+
+The default settings of the `jail.conf` file provide a reasonable working setup, so you most likely won't have to change anything.
+
+However, if you do want to apply any changes you should first create a `jail.local` file by copying the `jail.conf` file:
+
+```sh:Copy jail.conf
+sudo cp /etc/fail2ban/jail.conf /etc/fail2ban/jail.local
+```
+
+Here's how to open the `jail.local` file:
+
+```sh:Open jail.local
+sudo nano /etc/jail.local
+```
+
+#### Sections
+
+The `jail.local` file consists of the following main sections:
+
+- `[INCLUDES]`: Used to import configuration settings from other files
+
+- `[DEFAULT]`: Where global options are set which can be overridden for each individual jail
+
+- `[MISCELLANEOUS OPTIONS]`: Where various default options are set which includes `ignoreip`, `bantime`, `findtime`, `maxentry`, etc.
+
+- `[ACTIONS]`: Where default action options are set which includes `protocol`, `banaction`, `banaction_allports`, `action` etc.
+
+- `[JAILS]`: Where options are set for specific jails, e.g., SSH servers, HTTP servers, FTP servers, etc. which override any previously set default options
+
+We'll be discussing how to set some of these options below.
+
+#### Whitelist an IP Address
+
+You can whitelist, i.e., prevent the banning of individual IP addresses, ranges of IP addresses, or specified hosts by setting the `ignoreip` option. You may want to, e.g., whitelist the IP address of the client you'll be using to connect to the node assuming your client's IP address remains the same.
+
+By default, the `ignoreip` option ignores the `localhost`, i.e., `127.0.0.1/8 ::1`.
+
+To whitelist an IP address for all jails you have enabled you can set the `ignoreip` option found in the `[MISCELLANEOUS OPTIONS]` section as follows:
+
+```sh:Whitelist an IP Address
+# "ignoreip" can be a list of IP addresses, CIDR masks or DNS hosts. Fail2ban
+# will not ban a host which matches an address in this list. Several addresses
+# can be defined using space (and/or comma) separator.
+ignoreip = 127.0.0.1/8 ::1 <ip-address>
+```
+
+Here we uncommented the line `ignoreip = 127.0.0.1/8 ::1` and added the IP address, i.e., `<ip-address>` which should be replaced with the IP address of the device you want to whitelist, e.g., the client being used to connect to your node.
+
+To whitelist the IP address of my client, I would add the following IP address:
+
+```sh:Whitelist the IP Address of my Client
+# "ignoreip" can be a list of IP addresses, CIDR masks or DNS hosts. Fail2ban
+# will not ban a host which matches an address in this list. Several addresses
+# can be defined using space (and/or comma) separator.
+ignoreip = 127.0.0.1/8 ::1 192.168.0.130
+```
+
+<Callout client:load type="warning">
+  If the IP address of your client changes, then the device will no longer be whitelisted if you're using a specific IP address. Also, if you want the possibility of banning the IP address of your client, then don't set the `ignoreip` option with its IP address.
+</Callout>
+
+#### Ban Settings
+
+The values of `bantime`, `findtime`, and `maxentry` found in the `[MISCELLANEOUS OPTIONS]` section are used to define ban time and ban conditions.
+
+The `bantime` option is used to set the duration of the ban of an IP address. When no suffix is provided, e.g., `m` for minutes, `h` for hours, `d` for days, etc. then the value defaults to seconds. By default, the `bantime` value is set to `10m`, i.e., 10 minutes.
+
+If you want to set a longer `bantime` for all jails you have enabled, then you can set the `bantime` option found in the `[MISCELLANEOUS OPTIONS]` section as follows:
+
+```sh:Set a Longer Default bantime
+# "bantime" is the number of seconds that a host is banned.
+bantime = 1d
+```
+
+Here we changed the default `bantime` from `10m` to `1d`.
+
+<Callout client:load type="tip">
+  To permanently ban an IP address you can use a negative number for the `bantime`, e.g., `-1`.
+</Callout>
+
+The `findtime` option is used to set the duration between the number of failures before a ban is enacted. E.g., if Fail2Ban is set to ban an IP address after `5` failures which is set by the `maxentry` option, then those failures must occur within the `findtime` duration for the ban to be enacted.
+
+If you want to change the `findtime` for all jails you have enabled, then you can set the `findtime` option found in the `[MISCELLANEOUS OPTIONS]` section as follows:
+
+```sh:Set a Longer Default findtime
+# A host is banned if it has generated "maxentry" during the last "findtime"
+# seconds.
+findtime = 1d
+```
+
+Here we changed the default `findtime` from `10m` to `1d`.
+
+The `maxentry` option is used to set the number of failures before an IP address is banned.
+
+If you want to change the `maxentry` for all jails you have enabled, then you can set the `maxentry` option found in the `[MISCELLANEOUS OPTIONS]` section as follows:
+
+```sh:Set a Shorter Default maxentry
+# "maxentry" is the number of failures before a host get banned.
+maxentry = 3
+```
+
+Here we changed the default `maxentry` from `5` to `3`.
+
+#### Jails
+
+Along with the options discussed above, you can also set options for specific jails. Fail2Ban provides jail configurations for numerous services, e.g., SSH, HTTP, FTP, etc. that can be customized for your needs. You can also create your own jails.
+
+The jail configurations check the specified log entries for entries that match a specified search pattern. If the entires match the search pattern, then they're counted towards a predefined condition. Once the predefined condition is met, the corresponding actions are executed.
+
+The only jail enabled by default is SSH, and the default action is to ban the offending IP address. We'll be looking at the SSH options including the default action and filter as well as how to customize some of the options them for our needs.
+
+The initial SSH jail configuration will look something like this:
+
+```sh:Initial SSH Jail Configuration
+#
+# SSH servers
+#
+
+[sshd]
+
+# To use more aggressive sshd modes set filter parameter "mode" in jail.local:
+# normal (default), ddos, extra or aggressive (combines all).
+# See "tests/files/logs/sshd" or "filter.d/sshd.conf" for usage example and details.
+#mode   = normal
+port    = ssh
+logpath = %(sshd_log)s
+backend = %(sshd_backend)s
+```
+
+The initial SSH jail configuration explicitly sets the following options:
+
+- `mode`: This specifies the filter parameter mode used with the service. The default value is `normal`. If you want to use a more aggressive mode, then you can set the value to `ddos` or `extra` which combines all filters.
+
+- `port`: This specifies the port Fail2Ban uses when referencing the service. If you're using the default port, then the service name can be used here, e.g., `ssh`. If you're using a custom port for the service, then you should specify that port number here.
+
+- `logpath`: This specifies the location of the service's logs.
+
+- `backend`: This specifies the backend used with the service.
+
+<Callout client:load type="error">
+  As mentioned previously, if you're experiencing an error with activating Fail2Ban, then take a look at [Resolve Error(s)](/en/guides/bitcoin-node/security/intrusion-detection-system#resolve-errors) which goes over updating the `backend` option to `systemd` which may resolve your activation error.
+</Callout>
+
+The `enabled` option is being set to `true` in the `/etc/fail2ban/jail.d` directory in the `defaults-debian.conf` file which should look similar to:
+
+```sh:Default Debian Configuration
+[sshd]
+enabled = true
+```
+
+Any options that aren't explicitly set in the SSH jail configuration will use the applicable default options specified in the `DEFAULT` section, e.g., if you don't set a `maxentry` option in the SSH jail configuration, the default `maxentry` value will be used.
+
+The default `action` to take is specified in the `ACTIONS` section and should look something like:
+
+```sh:Default Action
+# Choose default action.  To change, just override value of 'action' with the
+# interpolation to the chosen action shortcut (e.g.  action_mw, action_mwl, etc) in jail.local
+# globally (section [DEFAULT]) or per specific section
+action = %(action_)s
+```
+
+Here the default `action` is set to `%(action_)s`.
+
+If we search for `action_`, then we'll see something similar to:
+
+```sh:Default Action Value
+# The simplest action to take: ban only
+action_ = %(banaction)s[port="%(port)s", protocol="%(protocol)s", chain="%(chain)s"]
+```
+
+Here we see the default `action_` is to simply ban the IP address of the attacker.
+
+The default `action_` is defined using the following options:
+
+- `banaction`: This specifies the banning action, e.g., `iptables`, `iptables-new`, `iptables-multiport`, `shorewall`, etc. The SSH jail configuration uses the default value of `iptables-multiport`.
+
+- `port`: The port Fail2Ban uses when referencing the service. The SSH jail configuration uses the default value of `ssh` unless you're using a custom port number.
+
+- `protocol`: This specifies the protocol used with the service, e.g., `tcp`. The SSH jail configuration uses the default value of `tcp`.
+
+- `chain`: This specifies the chain where jumps would need to be added in the ban-actions expecting parameter chain. The SSH jail configuration uses the default value of `<known/chain>`.
+
+The default `filter` to use is specified in the `MISCELLANEOUS OPTIONS` section and should look something like:
+
+```sh:Default Filter
+# "filter" defines the filter to use by the jail.
+# By default jails have names matching their filter name
+#
+filter = %(__name__)s[mode=%(mode)s]
+```
+
+Here the default `filter` is set to `%(__name__)s[mode=%(mode)s]`.
+
+The default `filter` is defined using the following options:
+
+- `__name__`: This specifies the name of the jail which by default matches the filter name. The SSH jail configuration uses `sshd` as its name.
+
+- `mode`: This specifies the filter parameter mode used with the service. The SSH jail configuration uses the default value of `normal`.
+
+<Callout client:load type="info">
+  The filters are located in the `/etc/fail2ban/filter.d` directory in a file with the same name as the jail, e.g., the SSH jail configuration uses the name `sshd`, so the file is named `sshd.conf`. You shouldn't have to edit the filters. However, if you're working on a custom setup and have experience with regular expressions, then you can edit the file to fine-tune the filters for your needs.
+</Callout>
+
+If you changed the default port for the SSH server, then you need to update the `port` option for the SSH jail configuration which can be done by editing the configuration as follows:
+
+```sh:Updated SSH Jail Configuration
+#
+# SSH servers
+#
+
+[sshd]
+
+# To use more aggressive sshd modes set filter parameter "mode" in jail.local:
+# normal (default), ddos, extra or aggressive (combines all).
+# See "tests/files/logs/sshd" or "filter.d/sshd.conf" for usage example and details.
+#mode   = normal
+port    = <port-number>
+logpath = %(sshd_log)s
+backend = %(sshd_backend)s
+```
+
+Here `<port-number>` should be replaced with the custom listening port number you set for the SSH server, e.g., `2222`.
+
+Now save and exit the file.
+
+To apply the changes restart Fail2Ban by running the following command:
+
+```sh:Restart Fail2Ban
+sudo systemctl restart fail2ban
+```
+
+## Fail2Ban Client
+
+Fail2Ban provides a command line tool `fail2ban-client` which you can use to interact with the Fail2Ban service including performing configuration like we did previously.
+
+The tool can be used to:
+
+- Check the version of Fail2Ban
+
+- Start and stop the server
+
+- Check the status of the server
+
+- Check the status of a specific jail
+
+- Reload the server
+
+- Reload a specific jail
+
+- Ban/unban IP addresses
+
+- And more
+
+Here are a few examples of how to use the tool.
+
+<Callout client:load type="warning">
+  You should always use `fail2ban-client` and should never have to call `fail2ban-server` directly.
+</Callout>
+
+### Check Version
+
+To check the `version` of Fail2Ban run the following command:
+
+```sh:Check Version
+sudo fail2ban-client version
+```
+
+The output of the command should look similar to:
+
+```sh:Version Output
+1.0.2
+```
+
+### Start Server
+
+To start the Fail2Ban server and jails run the following command:
+
+```sh:Start Server
+sudo fail2ban-client start
+```
+
+The output of the command should look similar to:
+
+```sh:Start Server Output
+2023-07-25 13:54:12,796 fail2ban.configreader   [855]: WARNING 'allowipv6' not defined in 'Definition'. Using default one: 'auto'
+Server ready
+```
+
+### Stop Server
+
+To stop the Fail2Ban server run the following command:
+
+```sh:Stop Server
+sudo fail2ban-client stop
+```
+
+The output of the command should look similar to:
+
+```sh:Stop Server Output
+Shutdown successful
+```
+
+### Check Status
+
+To check the `status` of Fail2Ban run the following command:
+
+```sh:Check Status
+sudo fail2ban-client status
+```
+
+The output of the command should look similar to:
+
+```sh:Status Output
+Status
+|- Number of jail:	1
+`- Jail list:	sshd
+```
+
+Here we see the status of the server which shows the number of jails and the list of jails we have enabled.
+
+### Check Specific Jail Status
+
+You can check the `status` of a specific jail by using the following command:
+
+```sh:Check Specific Jail Status
+sudo fail2ban-client status <jail>
+```
+
+Here `<jail>` should be replaced with the name of the jail you want to check the status of.
+
+E.g., if you want to check the status of the `sshd` jail, then you would run the following command:
+
+```sh:Check sshd Jail Status
+sudo fail2ban-client status sshd
+```
+
+The output should look similar to:
+
+```sh:sshd Jail Status Output
+Status for the jail: sshd
+|- Filter
+|  |- Currently failed:	0
+|  |- Total failed:	0
+|  `- Journal matches:	_SYSTEMD_UNIT=sshd.service + _COMM=sshd
+`- Actions
+   |- Currently banned:	0
+   |- Total banned:	0
+   `- Banned IP list:
+```
+
+Here we see the status of the `sshd` jail which shows no filter failures have occurred and no IP addresses have been banned.
+
+### Reload the Server
+
+To reload the Fail2Ban server and the configuration files run the following command:
+
+```sh:Reload Server
+sudo fail2ban-client reload
+```
+
+The output of the command should look similar to:
+
+```sh:Reload Server Output
+2023-07-25 14:50:17,358 fail2ban.configreader   [921]: WARNING 'allowipv6' not defined in 'Definition'. Using default one: 'auto'
+OK
+```
+
+### Reload a Specific Jail
+
+To reload a specific Fail2Ban jail run the following command:
+
+```sh:Reload Specific Jail
+sudo fail2ban-client reload <jail>
+```
+
+Here `<jail>` should be replaced with the name of the jail you want to reload.
+
+E.g., if you want to reload the `sshd` jail, then you would run the following command:
+
+```sh:Reload sshd Jail
+sudo fail2ban-client reload sshd
+```
+
+The output should look similar to:
+
+```sh:Reload sshd Jail Output
+2023-07-25 15:00:28,779 fail2ban.configreader   [1021]: WARNING 'allowipv6' not defined in 'Definition'. Using default one: 'auto'
+OK
+```
+
+### Ban an IP Address
+
+To manually ban an IP address run the following command:
+
+```sh:Ban an IP Address
+sudo fail2ban-client set <jail> banip <ip-address>
+```
+
+Here `<jail>` should be replaced with the name of the jail you want to ban the IP address from accessing and `<ip-address>` should be replaced with the IP address you want to ban.
+
+E.g., if you want to ban the IP address `192.168.0.121` from accessing the `sshd` jail, then you would run the following command:
+
+```sh:Ban an IP Address from sshd Jail
+sudo fail2ban-client set sshd banip 192.168.0.121
+```
+
+If you want to check the list of banned IP addresses, then you can run the command used to check the status of a specific jail.
+
+E.g., if you check the status of the `sshd` jail after banning the IP address `192.168.0.121` the output should look similar to:
+
+```sh:sshd Jail Status Output
+Status for the jail: sshd
+|- Filter
+|  |- Currently failed:	0
+|  |- Total failed:	0
+|  `- Journal matches:	_SYSTEMD_UNIT=sshd.service + _COMM=sshd
+`- Actions
+   |- Currently banned:	1
+   |- Total banned:	1
+   `- Banned IP list:	192.168.0.121
+```
+
+Here we see the status of the `sshd` jail which shows we have one IP address that is currently banned. i.e., `192.168.0.121`, and the total number of banned IP addresses is one.
+
+### Unban an IP Address
+
+To manually unban an IP address run the following command:
+
+```sh:Unban an IP Address
+sudo fail2ban-client set <jail> unbanip <ip-address>
+```
+
+Here `<jail>` should be replaced with the name of the jail you want to unban the IP address from and `<ip-address>` should be replaced with the IP address you want to unban.
+
+E.g., if you want to unban the IP address `192.168.0.121` from accessing the `sshd` jail, then you would run the following command:
+
+```sh:Unban an IP Address from sshd Jail
+sudo fail2ban-client set sshd unbanip 192.168.0.121
+```
+
+To check the IP address was unbanned you can run the command used to check the status of a specific jail.
+
+E.g., if you check the status of the `sshd` jail after unbanning the IP address `192.168.0.121` the output should look similar to:
+
+```sh:sshd Jail Status Output
+Status for the jail: sshd
+|- Filter
+|  |- Currently failed:	0
+|  |- Total failed:	0
+|  `- Journal matches:	_SYSTEMD_UNIT=sshd.service + _COMM=sshd
+`- Actions
+   |- Currently banned:	0
+   |- Total banned:	1
+   `- Banned IP list:
+```
+
+Here we see the status of the `sshd` jail which shows we have zero IP address that are currently banned. The total number of IP addresses that have been banned is one since we previously banned this IP address.
+
+### View All Options
+
+To view all available options of the `fail2ban-client` tool run the following command:
+
+```sh:View All Options
+fail2ban-client --help
+```
+
+## Locked Out
+
+<Callout client:load type="tip">
+  If you lock yourself out from being able to login using SSH after installing and configuring Fail2Ban, then try accessing the node using a different IP address with the correct login credentials or connect a monitor and keyboard to the node which will allow you to update the Fail2Ban settings, e.g., to [Unban an IP Address](/en/guides/bitcoin-node/security/intrusion-detection-system#unban-an-ip-address).
+</Callout>
+
+## Resolve Error(s)
+
+If you're seeing `Active: failed (Result: exit-code)` when checking the status of Fail2Ban, and you're unable to view the full error message, then you can run the following command:
+
+```sh:Check Status using Less
+sudo systemctl status fail2ban | less
+```
+
+Here we're piping the output of the `status` command to the `less` command which is a terminal pager that allows us to navigate through the output using the arrow keys.
+
+To navigate vertically through the output of the `status` command, we can use the `up arrow` (⬆️) key and the `down arrow` (⬇️). To navigate horizontally through the output, we can use the `left arrow` (⬅️) key and the `right arrow` (➡️) key. To quit the `less` terminal pager, press the `q` key.
+
+Now that we can navigate through the output, we can view the whole error and attempt to resolve it.
+
+### Fix Missing Log File for sshd Jail
+
+After running the above command, you may see the output similar to:
+
+```sh:Status Output using Less
+× fail2ban.service - Fail2Ban Service
+     Loaded: loaded (/lib/systemd/system/fail2ban.service; enabled; preset: enabled)
+     Active: failed (Result: exit-code) since Mon 2023-07-24 11:12:44 CST; 55min ago
+   Duration: 100ms
+       Docs: man:fail2ban(1)
+    Process: 1050 ExecStart=/usr/bin/fail2ban-server -xf start (code=exited, status=255/EXCEPTION)
+   Main PID: 1050 (code=exited, status=255/EXCEPTION)
+        CPU: 90ms
+
+Jul 24 11:12:44 btc-node systemd[1]: Started fail2ban.service - Fail2Ban Service.
+Jul 24 11:12:44 btc-node fail2ban-server[1050]: 2023-07-24 11:12:44,937 fail2ban.configreader   [1050]: WARNING 'allowipv6' not defined in 'Definition'. Using default one: 'auto'
+Jul 24 11:12:44 btc-node fail2ban-server[1050]: 2023-07-24 11:12:44,954 fail2ban                [1050]: ERROR   Failed during configuration: Have not found any log file for sshd jail
+Jul 24 11:12:44 btc-node fail2ban-server[1050]: 2023-07-24 11:12:44,959 fail2ban                [1050]: ERROR   Async configuration of server failed
+Jul 24 11:12:44 btc-node systemd[1]: fail2ban.service: Main process exited, code=exited, status=255/EXCEPTION
+Jul 24 11:12:44 btc-node systemd[1]: fail2ban.service: Failed with result 'exit-code'.
+```
+
+Let's take a closer look at the two errors:
+
+```sh:Errors
+[1050]: ERROR   Failed during configuration: Have not found any log file for sshd jail
+[1050]: ERROR   Async configuration of server failed
+```
+
+Here we see the "async configuration of the server failed" since we "have not found any log file for sshd jail".
+
+To resolve this issue we're going to change the backend value for the sshd jail in the `jail.local` file which should be located in the `/etc/fail2ban` directory.
+
+If you haven't created a `jail.local` file, then you first need to run the following command:
+
+```sh:Copy jail.conf
+sudo cp /etc/fail2ban/jail.conf /etc/fail2ban/jail.local
+```
+
+After creating the `jail.local` file, we can open the file by running the following command:
+
+```sh:Open jail.local
+sudo nano /etc/jail.local
+```
+
+Next we need to navigate to the `SSH servers` section in the file which will look something like this:
+
+```sh:SSH Servers Section
+#
+# SSH servers
+#
+
+[sshd]
+
+# To use more aggressive sshd modes set filter parameter "mode" in jail.local:
+# normal (default), ddos, extra or aggressive (combines all).
+# See "tests/files/logs/sshd" or "filter.d/sshd.conf" for usage example and details.
+#mode   = normal
+port    = ssh
+logpath = %(sshd_log)s
+backend = %(sshd_backend)s
+```
+
+To fix the error, we're going to comment out the `backend = %(sshd_backend)s` line and place `backend = systemd` underneath it. After making the change, the `SSH servers` section should look like this:
+
+```sh:Updated SSH Servers Section
+#
+# SSH servers
+#
+
+[sshd]
+
+# To use more aggressive sshd modes set filter parameter "mode" in jail.local:
+# normal (default), ddos, extra or aggressive (combines all).
+# See "tests/files/logs/sshd" or "filter.d/sshd.conf" for usage example and details.
+#mode   = normal
+port    = ssh
+logpath = %(sshd_log)s
+#backend = %(sshd_backend)s
+backend = systemd
+```
+
+Now we can save and exit the file.
+
+To apply the changes we can restart Fail2Ban by running the following command:
+
+```sh:Restart Fail2Ban
+sudo systemctl restart fail2ban
+```
+
+After restarting Fail2Ban, let's check the status to make sure the changes we made fixed the issue.
+
+To check the `status` of Fail2Ban run the following command:
+
+```sh:Check Status using Less
+sudo systemctl status fail2ban | less
+```
+
+The output of the command should look similar to:
+
+```sh:Status Output using Less
+● fail2ban.service - Fail2Ban Service
+     Loaded: loaded (/lib/systemd/system/fail2ban.service; enabled; preset: enabled)
+     Active: active (running) since Tue 2023-07-25 15:54:15 CST; 6s ago
+       Docs: man:fail2ban(1)
+   Main PID: 745 (fail2ban-server)
+      Tasks: 5 (limit: 2315)
+     Memory: 39.4M
+        CPU: 113ms
+     CGroup: /system.slice/fail2ban.service
+             └─745 /usr/bin/python3 /usr/bin/fail2ban-server -xf start
+
+Jul 25 15:54:15 btc-node systemd[1]: Started fail2ban.service - Fail2Ban Service.
+Jul 25 15:54:15 btc-node fail2ban-server[745]: 2023-07-25 15:54:15,901 fail2ban.configreader   [745]: WARNING 'allowipv6' not defined in 'Definition'. Using default one: 'auto'
+Jul 25 15:54:15 btc-node fail2ban-server[745]: Server ready
+```
+
+We're now seeing `Active: active (running)` when checking the status of Fail2Ban, and you're unable to view the full error message, so the error has been successfully resolved.
+
