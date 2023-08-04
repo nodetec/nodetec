@@ -1,0 +1,318 @@
+---
+label: Denial-of-Service
+slug: en/guides/bitcoin-node/security/denial-of-service
+order: 40
+---
+
+import Callout from "@components/mdx/Callout.tsx";
+
+# Denial-of-Service
+
+A **Denial-of-Service (DoS)** attack is an attempt to shut down a device or network by making it inaccessible to its intended users.
+
+The two primary strategies used to carry out DoS attacks are:
+
+- **Flooding**: Involves overwhelming a device or network with too much traffic which causes it to slow down and eventually stop
+
+- **Crashing services**: Exploits vulnerabilities in the device or network’s security which causes it to shut down
+
+In both cases the DoS attack prevents the intended users of the device or network from being able to use the service in a reliable manner as expected.
+
+Unlike other attacks, DoS attacks don't usually result in stolen, destroyed, and/or corrupted data. However, this doesn't mean they shouldn't be a concern. If you're frequently experiencing DoS attacks, then you'll be unable to use the device or network reliably which makes it difficult and in some cases impossible to use them.
+
+Along with the other security improvements we've made, we're going to discuss some basic steps we can take which can help mitigate and prevent flooding attacks and attacks intended to crash services.
+
+Before discussing the basic mitigation and prevention steps, we're going to first discuss some common flooding attacks.
+
+<Callout client:load type="warning">
+  These are just the basic steps you can take to mitigate and prevent some simple DoS attacks. To handle more sophiscated DoS attacks, we'll need to implement more advanced prevention, detection, and mitigation techniques.
+</Callout>
+
+<Callout client:load type="info">
+  Along with DoS attacks, there are also Distributed Denial-of-Service (DDoS) attacks which are more difficult to prevent and mitigate. DoS attacks typically are performed by a single external system; whereas, a DDoS attack invloves numerous malicious external systems working together. This makes finding the source of the attack more difficult since the attackers can be distributed geographically as well as more difficult to stop.
+</Callout>
+
+## Flooding Attacks
+
+Here are some common flooding attacks:
+
+- **UDP flood**: Here random ports on the targeted host are overwhelmed with User Datagram Protocol (UDP) packets which causes the host to crash since it's unable to handle all of the incoming traffic. The host will check for applications associated with the datagrams and when it's unable to find any it will send back a “Destination Unreachable” packet. As the number of UDP packets received and answered increases, the host becomes overwhelmed and unresponsive to legitimate clients.
+
+- **TCP SYN flood**: Here the three-way handshake process used by TCP, i.e. SYNchronize (SYN), SYNchronize-ACKnowledgement (SYN-ACK), and ACKnowledge (ACK) is overwhelmed with SYN packets sent to multiple or every port on the targeted host usually from a spoofed IP address. From the host's perspective it's receiving legitimate requests to establish multiple connections, so it will respond with an SYN-ACK packet for each request. The attacker then doesn't send the expected ACK, or if the IP address is spoofed, then they never receive the SYN-ACK packet. Before the connection times out, another SYN packet will be received which leaves a large number of connections half-open. These half-open connections overwhelm the host and legitimate clients are denied.
+
+- **HTTP flood**: Here the attacker overwhelms the host with what appears to be legitimate HTTP GET and POST requests. The host will attempt to respond to each request which can cause it to become unresponsive to legitimate clients.
+
+- **Ping flood**: Here the host is overwhelmed with Internet Control Message Protocol (ICMP) echo request packets, i.e., pings. The host responds to the request packets with an equal number of reply packets. For the attack to take place the attacker needs to know the IP address of the target.
+
+## Flooding Attack Mitigations
+
+We're now going to discuss some basic flooding attack mitigations that we can take when experiencing a DoS attack.
+
+### Increase Open Files Limit
+
+One of the basic mitigations we can take when experiencing a DoS attack is to increase the open files limit on the node. This mitigation can resolve the error: `Too many open files` which is caused by the node being overwhelmed with too many requests.
+
+<Callout client:load type="warning">
+  This mitigation will only be helpful if the DoS attack doesn't increase the volume of requests to the node which will eventually cause the same error if the increased open files limit is reached again.
+</Callout>
+
+Depending on the resources of your node and how often you're accessing it, it's also possible to receive this error from only legitimate requests. Therefore, it's worth increasing the open files limit on your node even though this basic mitigation won't prevent a more advanced and prolonged DoS attack.
+
+#### File Descriptors
+
+Before discussing how to increase the open files limit, we're going to first discuss **file descriptors** in Linux which will give us a better understanding of how to to check the data usage and limits of the node.
+
+In Linux everything is represented as a file from regular text files to network sockets. These files are described using file descriptors which use non-negative integers to identify open files in Linux. We can view a table of open file descriptors for every process running in Linux, and as more files or network sockets are opened more resources will be taken up on the node until it reaches the open files limit.
+
+#### Check Open File Descriptors
+
+We can check the number of file descriptors used by different processes to determine where the node's resources are being allocated.
+
+##### Global Usage
+
+To check the total number of file descriptors open on the node, we can use the following command:
+
+```sh:Global Usage
+awk '{print $1}' /proc/sys/fs/file-nr
+```
+
+The output should look similar to:
+
+```sh:Global Usage Output
+576
+```
+
+##### Specific Process Usage
+
+We can also check the file descriptor usage of a specific process by running the following command:
+
+```sh:Specific Process Usage
+sudo lsof -p <pid>
+```
+
+Here `<pid>` should be replaced with the process identifier (PID) of the process you're checking.
+
+To determine the PID for a specific process we can run the following command:
+
+```sh:Determine PID
+pidof <process-name>
+```
+
+Here `<process-name>` should be replaced with the name of whatever process you want to determine the PID for.
+
+E.g., we can determine the PID for `sshd` by running the following command:
+
+```sh:Determine PID for sshd
+pidof sshd
+```
+
+After determining the PID, we can run the following command to view the process usage for `sshd` with a PID of `535`:
+
+```sh:sshd Process Usage
+sudo lsof -p 535
+```
+
+The output should look similar to:
+
+```sh:sshd Process Usage Output
+COMMAND PID USER   FD   TYPE             DEVICE SIZE/OFF    NODE NAME
+sshd    535 root  cwd    DIR                8,1     4096       2 /
+sshd    535 root  rtd    DIR                8,1     4096       2 /
+sshd    535 root  txt    REG                8,1  1261336 1195355 /usr/sbin/sshd
+...
+sshd    535 root    3u  IPv4              14041      0t0     TCP *:2222 (LISTEN)
+sshd    535 root    4u  IPv6              14052      0t0     TCP *:2222 (LISTEN)
+```
+
+From the output we can determine the file that each file descriptor belongs to under the `NAME` column, and the type of each file descriptor under the `TYPE` column. By looking at the entries with types of `IPv4` and `IPv6`, we can see that network sockets are also represented using file descriptors in Linux.
+
+<Callout client:load type="info">
+  Here the `...` is being used to suppress the entire output of the command.
+<Callout/>
+
+#### Check Limits
+
+Each process in Linux has specified limits which control how many file descriptors it can have open at a time. One of these limits is a **soft limit** which can be changed by any unprivileged user and can never exceed the other limit, i.e., the **hard limit**. An unprivileged user is able to lower the hard limit but not raise it again; whereas, a user with `sudo` privileges can raise and lower the limit as needed.
+
+##### Session
+
+To check the soft limit for the current session run the following command:
+
+```sh:Current Session Soft Limit
+ulimit -Sn
+```
+
+The output should look similar to:
+
+```sh:Current Session Soft Limit Output
+1024
+```
+
+To check the hard limit for the current session run the following command:
+
+```sh:Current Session Hard Limit
+ulimit -Hn
+```
+
+The output should look similar to:
+
+```sh:Current Session Hard Limit Output
+1048576
+```
+
+##### Specific Process
+
+We can also check the soft and hard limits for a specific process using the PID by running the following command:
+
+```sh:Specific Process Limits
+grep "Max open files" /proc/<pid>/limits
+```
+
+Here `<pid>` should be replaced with the PID of the process you're checking.
+
+E.g., for the `sshd` process with a PID of `535`, we would run the following command:
+
+```sh:sshd Process Limits
+grep "Max open files" /proc/535/limits
+```
+
+The output should look similar to:
+
+```sh:sshd Process Limits Output
+Max open files            1024                 524288           files
+```
+
+Here the second value, i.e., `1024` represents the soft limit for the specified process, and the third value, i.e., `524288` represents the hard limit for the specified process.
+
+##### Global
+
+To check the total number of file descriptors that can be open by all the processes combined on the system, i.e., the global limit run the following command:
+
+```sh:Global Limit
+cat /proc/sys/fs/file-max
+```
+
+The output should look similar to:
+
+```sh:Global Limit Output
+9223372036854775807
+```
+
+#### Increase Limits
+
+Now that we have a better understanding of file descriptors and how to check the data usage and limits of the node, we're now going to discuss how to increase the open files limit.
+
+##### Session
+
+We can configure the limit for the current session by running the following command:
+
+```sh:Set Current Session Limit
+ulimit -n <limit>
+```
+
+Here `<limit>` should be replaced with the limit you want to set for the current session, e.g., `2048`.
+
+After setting the limit, the soft and hard limits for the session will be set to whatever value you passed to the above command.
+
+To check the soft and hard limits, you can run the commands we discussed above.
+
+As mentioned previously after setting the limit you'll be unable to increase the hard limit for this session unless you're using a user with `sudo` privileges.
+
+##### Global
+
+We can also configure the soft and hard limits globally for all processes by creating a `limits.conf` file in the `/etc/security/limits.d` directory and adding the preferred limits to it.
+
+To create the file run the following command:
+
+```sh:Create limits.conf
+sudo touch /etc/security/limits.d/limits.conf
+```
+
+Open the file by running the following command:
+
+```sh:Open limits.conf
+sudo nano /etc/security/limits.d/limits.conf
+```
+
+Then add the following lines to the file:
+
+```sh:Increasing Open File Limits
+*         soft    nofile      <soft-limit>
+*         hard    nofile      <hard-limit>
+root      soft    nofile      <soft-limit>
+root      hard    nofile      <hard-limit>
+```
+
+Here `*` and `root` represent the domain the limits affect. The `<domain>` can be a username, a group name, `*`, i.e., wildcard which represents the default entry. The group and wildcard limits are not applied to the `root` user, so you must use the literal name `root` to apply limits to it.
+
+<Callout client:load type="tip">
+  Even though we're not using a `root` user, we're still going to add it to the `limits.conf` file in case we ever want to enable it.
+</Callout>
+
+The `type` of limit we're setting can be either `soft` or `hard`.
+
+We're using the value of `nofile` for `item` which is used to specify that we're setting the max number of open file descriptors.
+
+Here `<soft-limit>` and `<hard-limit>` should be replaced with your preferred soft and hard open file limits for your node. The soft limit will be the actual limit that is enforced, while the hard limit acts as a ceiling for the soft limit. The values will depend on how much of your node's resources you expect to use. If you set the limit too low and are experiencing issues, then you can always update this file to meet your needs.
+
+After editing the file, save the changes and exit.
+
+<Callout client:load type="tip">
+  To view more information about configuring the `limits.conf` file take a look at the `limits.conf` file in the `/etc/security` directory.
+</Callout>
+
+E.g., here's how to increase the soft limit to be the same value as the hard limit for my node:
+
+```sh:Increasing Open File Limits for my Node
+*         soft    nofile      1048576
+*         hard    nofile      1048576
+root      soft    nofile      1048576
+root      hard    nofile      1048576
+```
+
+After editing the `limits.conf` file, we're now going to edit `common-session` and `common-session-noninteractive` files which are located in the `/etc/pam.d` directory.
+
+Open the `common-session` file by running the following command:
+
+```sh:Open common-session File
+sudo nano /etc/pam.d/common-session
+```
+
+Then add the following line to the end of the file above the last comment:
+
+```sh:Update common-session File
+session	required	pam_limits.so
+```
+
+Now save and exit the file.
+
+Next open the `common-session-noninteractive` file by running the following command:
+
+```sh:Open common-session-noninteractive File
+sudo nano /etc/pam.d/common-session-noninteractive
+```
+
+Then add the following line to the end of the file above last comment:
+
+```sh:Update common-session-noninteractive File
+session	required	pam_limits.so
+```
+
+Now save and exit the file.
+
+If the updated limits are not being applied, then you can reboot the node by running the following command:
+
+```sh:Reboot Node
+sudo reboot
+```
+
+## Crashing Services Preventions
+
+A basic way to prevent DoS attacks that attempt to crash services on a device or network due to security exploits in the services is to make sure all software that you download and install has been verified before running it and updated frequently.
+
+Along with new features, updates to software is also released to fix and improve security issues that are found in the software. Therefore, be sure to frequently update the node's OS as well as the software you install on the node.
+
+<Callout client:load type="warning">
+  Even though updates usually are released to fix and improve security issues, it's worth mentioning that these updates can still introduce new security issues as well. This is why when it comes to updating software that's handling sensitive data like Bitcoin it's worth waiting for the software to be tested in production before installing it yourself.
+</Callout>
+
