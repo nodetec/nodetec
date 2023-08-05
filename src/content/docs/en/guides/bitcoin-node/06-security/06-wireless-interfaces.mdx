@@ -1,0 +1,134 @@
+---
+label: Wireless Interfaces
+slug: en/guides/bitcoin-node/security/wireless-interfaces
+order: 60
+---
+
+import Callout from "@components/mdx/Callout.tsx";
+
+# Wireless Interfaces
+
+The device you're using for your node may come with various wireless interfaces built-in, e.g., WiFi and Bluetooth. While wireless interface support is preferred for the majority of devices we use on a regular basis, a security-focused device like our Bitcoin node should have as few of them enabled as possible.
+
+Wireless interfaces are another attack surface that can be used to compromise the security of your node, so it's recommended to disable all wireless interfaces. However, if you have to use these wireless interfaces for your node to operate or if a feature you prefer to use requires them, then you can leave them enabled.
+
+Even if you leave some or all of these wireless interfaces enabled, it's still worth knowing how to disable them in case you want to improve the security of your node in the future.
+
+## WiFi
+
+If you're running your node using a wired network connection which is recommended since it will increase the download and upload speeds of the node, then you should disable WiFi.
+
+We'll be using the FOSS command line tool [nmcli](https://linux.die.net/man/1/nmcli) to control the [NetworkManager](https://networkmanager.dev/) program and to view details about the network status.
+
+By using nmcli we'll be able to create, display, edit, delete, activate, and deactivate network connections as well as to control and display the status of network devices without the need of a GUI.
+
+<Callout client:load type="info">
+  We'll be going over how to check the WiFi status as well as how to disable and enable WiFi, but if you're interested in learning more about nmcli, then you can view the manual page (man page) by running the following command `man nmcli`.
+</Callout>
+
+### Install nmcli
+
+To install the nmcli tool we need to install the `network-manager` package which can be done by running the following command:
+
+```sh:Install network-manager
+sudo apt install -y network-manager
+```
+
+<Callout client:load type="tip">
+  The `network-manager` package installs the command line tool nmcli as well as nmtui which is a text UI for controlling NetworkManager. If you're interested in using nmtui, then you can run `nmtui` to enter the text UI.
+</Callout>
+
+### Check Status
+
+To check if WiFi is enabled run the following command:
+
+```sh:Check Status
+nmcli radio wifi
+```
+
+If WiFi is enabled the output should look similar to:
+
+```sh:Enabled Output
+enabled
+```
+
+If it's disabled the output should look similar to:
+
+```sh:Disabled Output
+disabled
+```
+
+### Disable
+
+To disable WiFi run the following command:
+
+```sh:Disable
+sudo nmcli radio wifi off
+```
+
+### Enable
+
+To enable WiFi run the following command:
+
+```sh:Enable
+sudo nmcli radio wifi on
+```
+
+## Bluetooth
+
+If you're not using and have no plans to use Bluetooth to enable some feature on your node, then it's recommended to disable it.
+
+### Check Status
+
+To check if Bluetooth is enabled run the following command:
+
+```sh:Check Status
+sudo service bluetooth status
+```
+
+If Bluetooth is enabled the output should look similar to:
+
+```sh:Enabled Output
+○ bluetooth.service - Bluetooth service
+     Loaded: loaded (/lib/systemd/system/bluetooth.service; enabled; pr>
+     Active: inactive (dead)
+       Docs: man:bluetoothd(8)
+```
+
+If it's disabled the output should look similar to:
+
+```sh:Disabled Output
+○ bluetooth.service - Bluetooth service
+     Loaded: loaded (/lib/systemd/system/bluetooth.service; disabled; p>
+     Active: inactive (dead)
+       Docs: man:bluetoothd(8)
+```
+
+### Disable
+
+To disable Bluetooth run the following command:
+
+```sh:Disable
+sudo systemctl disable bluetooth
+```
+
+### Enable
+
+To enable Bluetooth run the following command:
+
+```sh:Enable
+sudo systemctl enable bluetooth
+```
+
+## Reboot Node
+
+After enabling/disabling the wireless interfaces, you'll most likely need to reboot your node for the changes to take effect.
+
+To reboot the node you can run the following command:
+
+```sh:Reboot Node
+sudo systemctl reboot
+```
+
+After rebooting the node, be sure to check the status for each wireless interface using the provided commands above to make sure the changes were applied correctly.
+
