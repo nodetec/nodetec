@@ -265,15 +265,232 @@ rm -rf nginx-self-signed.pub.crt test.txt cipher.txt test.txt.sig
 
 ## NGINX
 
-🚧 Under Construction!!! 🚧
+NGINX is FOSS used for web serving, reverse proxying, caching, media streaming, and more. As mentioned above we'll be using it as a reverse proxy that is configured to use SSL/TLS using the self-signed certificate we just created.
 
 ### Installation
 
+NGINX gives us the option of choosing between the following versions:
 
+- **Mainline**: This version includes all of the latest features and bug fixes, and it's always up to date. Even though this version tends to be reliable, it also contains some experimental modules as well as the possibility of introducing new bugs.
+
+- **Stable**: This version doesn't include all of the latest features, but it does contain all of the known critical bug fixes. It's recommended to use this version with all production servers.
+
+Since we'll be using our node in a production environment, we'll be using the stable version.
+
+<Callout client:load type="info">
+  NGINX modules basically add more functionality to NGINX. There are core modules supported by NGINX as well as third-party modules which are created and maintained by members of the NGINX community. It's possible to gain more control over which modules you install depending on your chosen NGINX installation method.
+</Callout>
+
+Here are the NGINX installation methods:
+
+- **Prebuilt Debian package from OS Respository**: This is the quickest method but the package may be outdated and less flexible since it includes almost all of the NGINX modules.
+
+- **Prebuilt Debian Package from NGINX Repository**: This method requires a little more work since you have to initially set up the `apt` repository, but the package will always be the latest version when updating. The install also includes almost all of the NGINX modules as well.
+
+- **Compile from Source**: This method requires the most work, but it gives you the most flexibility since you can customize which modules you install from NGINX and other third parties. It also gives you the ability to apply the latest security patches.
+
+We'll be going over how to install NGINX using the first two options listed above.
+
+<Callout client:load type="tip">
+  If the installation methods described here are not working, then you can refer to [Installing NGINX Open Source](https://docs.nginx.com/nginx/admin-guide/installing-nginx/installing-nginx-open-source/).
+</Callout>
+
+#### Prebuilt Debian Package from OS Repository
+
+Before installing NGINX, we're going to fetch the information about the latest versions of the packages available for our system by running the following command:
+
+```sh:Update apt
+sudo apt update
+```
+
+After running the above command, we're now able to install the latest version of NGINX from the OS repository.
+
+To install NGINX from the OS respository run the following command:
+
+```sh:Install using OS Repository
+sudo apt install -y nginx
+```
+
+#### Prebuilt Debian Package from NGINX Repository
+
+Before installing the prebuilt Debian package from the NGINX repository, we need to first install the following dependencies which may already be installed on your system:
+
+```sh:Install Dependencies
+sudo apt install -y curl gnupg2 ca-certificates lsb-release debian-archive-keyring
+```
+
+Next, we need to import an official NGINX signing key which allows `apt` to verify the authenticity of the package which we can do by running the following command:
+
+```sh:Import NGINX Signing Key
+curl https://nginx.org/keys/nginx_signing.key | gpg --dearmor \
+    | sudo tee /usr/share/keyrings/nginx-archive-keyring.gpg >/dev/null
+```
+
+Now we need to verify the file we downloaded contains the proper key which we can do by running the following command:
+
+```sh:Verify NGINX Signing Key
+gpg --dry-run --quiet --no-keyring --import --import-options import-show /usr/share/keyrings/nginx-archive-keyring.gpg
+```
+
+The output should look like this:
+
+```sh:Verification Output
+pub   rsa2048 2011-08-19 [SC] [expires: 2024-06-14]
+      573BFD6B3D8FBC641079A6ABABF5BD827BD9BF62
+uid                      nginx signing key <signing-key@nginx.com>
+```
+
+If the output doesn't contain the following fingerprint `573B FD6B 3D8F BC64 1079 A6AB ABF5 BD82 7BD9 BF62`, then you should remove the imported signing key.
+
+<Callout client:load type="tip">
+  The NGINX signing key may be changed in the future, so you can refer to the [nginx: Linux packages](https://nginx.org/en/linux_packages.html#Debian) page to see if the key has been changed. The page also goes over the installation process as well.
+</Callout>
+
+We're now going to set up `apt` to use the stable version by running the following command:
+
+```sh:Set Up apt to Use Stable Version
+echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] \
+http://nginx.org/packages/debian `lsb_release -cs` nginx" \
+    | sudo tee /etc/apt/sources.list.d/nginx.list
+```
+
+We now need to set up the repository pinning to prefer the package from the NGINX repository instead of the OS repository by running the following command:
+
+```sh:Set Up Repository Pinning
+echo -e "Package: *\nPin: origin nginx.org\nPin: release o=nginx\nPin-Priority: 900\n" \
+    | sudo tee /etc/apt/preferences.d/99nginx
+```
+
+After setting up the respository pinning, we're going to fetch the information about the latest versions of the packages available for our system by running the following command:
+
+```sh:Update apt
+sudo apt update
+```
+
+After running the above command, we're now able to install the latest version of NGINX from the NGINX repository.
+
+To install the latest NGINX package from the NGINX respository run the following command:
+
+```sh:Install using NGINX Repository
+sudo apt install -y nginx
+```
+
+### Check Version
+
+After installing NGINX, you can check the version by running the following command:
+
+```sh:Check Version
+sudo nginx -v
+```
+
+The output should look similar to:
+
+```sh:Version Output
+nginx version: nginx/1.24.0
+```
+
+### Check NGINX Status
+
+To check the `status` of NGINX run the following command:
+
+```sh:Check NGINX Status
+sudo systemctl status nginx
+```
+
+The output should look similar to:
+
+```sh:NGINX Status Output
+○ nginx.service - nginx - high performance web server
+     Loaded: loaded (/lib/systemd/system/nginx.service; enabled; preset: enabled)
+     Active: inactive (dead)
+       Docs: https://nginx.org/en/docs/
+```
+
+From the output of the command we’re able to determine the following about NGINX:
+
+- If it's running
+
+- If it's set to automatically start on boot
+
+#### Check if NGINX is Running
+
+If we look at the following line:
+
+```sh:Check if NGINX is Running
+Active: inactive (dead)
+```
+
+Then we see that NGINX isn't currently running since the status shows `inactive (dead)`.
+
+If you see `active (running)`, then NGINX is running.
+
+#### Check if NGINX is Enabled
+
+If we look at the following line:
+
+```sh:Check if NGINX is Enabled
+Loaded: loaded (/lib/systemd/system/nginx.service; enabled; preset: enabled)
+```
+
+Then we see that NGINX is set to automatically start on boot since the srevice is `enabled`.
+
+If you see `disabled`, then NGINX isn't set to automatically start on boot.
+
+### Enable NGINX
+
+If NGINX isn't enabled to automatically start on boot, then run the following command:
+
+```sh:Enable NGINX
+sudo systemctl enable nginx
+```
+
+### Disable NGINX
+
+If you want to disable NGINX from automatically starting on boot, then run the following command:
+
+```sh:Disable NGINX
+sudo systemctl disable nginx
+```
+
+### Start NGINX
+
+If NGINX isn’t running, then run the following command to start the service:
+
+```sh:Start NGINX
+sudo systemctl start nginx
+```
+
+<Callout client:load type="tip">
+  If you're getting an error when starting NGINX, try rebooting the system using `sudo systemctl reboot`.
+</Callout>
+
+### Stop NGINX
+
+If you want to stop NGINX, then run the following command:
+
+```sh:Stop NGINX
+sudo systemctl stop nginx
+```
+
+### Reload NGINX
+
+We can also load configuration updates without performing a complete reboot of NGINX by running the following command:
+
+```sh:Reboot NGINX
+sudo systemctl reboot nginx
+```
+
+### Restart NGINX
+
+If you want to restart NGINX which completely stops then starts the service, then you can run the following command:
+
+```sh:Restart NGINX
+sudo systemctl restart nginx
+```
 
 ### Configuration
 
-
+🚧 Under Construction!!! 🚧
 
 ### Test
 
