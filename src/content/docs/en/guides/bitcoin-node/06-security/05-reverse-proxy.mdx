@@ -488,7 +488,216 @@ If you want to restart NGINX which completely stops then starts the service, the
 sudo systemctl restart nginx
 ```
 
-### Configuration
+### Configuration Files
+
+By default NGINX is configured to handle HTTP traffic. Since we're going to use NGINX as a reverse proxy configured to use SSL/TLS, we're going to update the configuration to handle TCP and UDP traffic instead.
+
+To update the configuration we need to update the `nginx.conf` file which can be found in the `/etc/nginx` directory.
+
+Here's how to open the `nginx.conf` file:
+
+```sh:Open nginx.conf File
+sudo nano /etc/nginx/nginx.conf
+```
+
+The content of the file should look similar to:
+
+```sh:nginx.conf File
+
+user  nginx;
+worker_processes  auto;
+
+error_log  /var/log/nginx/error.log notice;
+pid        /var/run/nginx.pid;
+
+
+events {
+    worker_connections  1024;
+}
+
+
+http {
+    include       /etc/nginx/mime.types;
+    default_type  application/octet-stream;
+
+    log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+                      '$status $body_bytes_sent "$http_referer" '
+                      '"$http_user_agent" "$http_x_forwarded_for"';
+
+    access_log  /var/log/nginx/access.log  main;
+
+    sendfile        on;
+    #tcp_nopush     on;
+
+    keepalive_timeout  65;
+
+    #gzip  on;
+
+    include /etc/nginx/conf.d/*.conf;
+}
+```
+
+#### Directives
+
+The configuration file consists of **directives** and their paramters. There are single-line directives, e.g., `user  nginx;` that each end with a semicolon as well as directives that act as **containers** which group togther related directives by enclosing them in curly braces, i.e., `{}`. These containers are commonly referred to as **blocks**.
+
+Here's an example of of a container from the configuration file:
+
+```sh:Container Example
+events {
+    worker_connections  1024;
+}
+```
+
+#### Contexts
+
+There are also a few top-level containers that are used to group together directives that apply to different traffic types which are referred to as **contexts**.
+
+Here are some common contexts:
+
+- `events`: General connection processing
+
+- `http`: HTTP traffic
+
+- `mail`: Mail traffic
+
+- `stream`: TCP and UDP traffic
+
+From the configuration file we can see there is an `http` context which is used to handle HTTP traffic:
+
+```sh:Context Example
+http {
+    include       /etc/nginx/mime.types;
+    default_type  application/octet-stream;
+
+    log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+                      '$status $body_bytes_sent "$http_referer" '
+                      '"$http_user_agent" "$http_x_forwarded_for"';
+
+    access_log  /var/log/nginx/access.log  main;
+
+    sendfile        on;
+    #tcp_nopush     on;
+
+    keepalive_timeout  65;
+
+    #gzip  on;
+
+    include /etc/nginx/conf.d/*.conf;
+}
+```
+
+Directives that are placed outside of these contexts are said to be in the **main** context.
+
+#### Feature-Specific Configuration Files
+
+To make the configuration updates easier to maintain, it's recommended to split the configuration updates into **feature-specific** files placed in the `/etc/nginx/conf.d` directory. These feature-specific files can then be referenced in the `nginx.conf` file using the `include` directive.
+
+If we take a look at the configuration file we see the following `include` directives:
+
+```sh:Include Directives
+include       /etc/nginx/mime.types;
+...
+include /etc/nginx/conf.d/*.conf;
+```
+
+The first include directive is being used to reference **Multipurpose Internet Mail Extensions (MIME) types**. MIME types are a way of identifying files based on their format and content. MIME types were originally created for emails. Today this standard is used for identifying the format and content for many more protocols and is now referred to as **Internet Media Types** or **Content-types**.
+
+The second include directive is being used to reference all of the files located in the `/etc/nginx/conf.d` directory that end with the `.conf` file extension. The ability to reference all of the files ending with a `.conf` file extension is accomplished by using the `*` wildcard.
+
+To view the content located in the `conf.d` directory, we can run the following command:
+
+```sh:List Content of conf.d
+ls /etc/nginx/conf.d
+```
+
+The output should look similar to:
+
+```sh:List Output
+default.conf
+```
+
+From the output we can see there is a default configuration file located in the `conf.d` directory named `default.conf`.
+
+We can open the file using the following command:
+
+```sh:Open default.conf File
+sudo nano /etc/nginx/conf.d/default.conf
+```
+
+The content of the file should look similar to:
+
+```sh:default.conf File
+server {
+    listen       80;
+    server_name  localhost;
+
+    #access_log  /var/log/nginx/host.access.log  main;
+
+    location / {
+        root   /usr/share/nginx/html;
+        index  index.html index.htm;
+    }
+
+    #error_page  404              /404.html;
+
+    # redirect server error pages to the static page /50x.html
+    #
+    error_page   500 502 503 504  /50x.html;
+    location = /50x.html {
+        root   /usr/share/nginx/html;
+    }
+
+    # proxy the PHP scripts to Apache listening on 127.0.0.1:80
+    #
+    #location ~ \.php$ {
+    #    proxy_pass   http://127.0.0.1;
+    #}
+
+    # pass the PHP scripts to FastCGI server listening on 127.0.0.1:9000
+    #
+    #location ~ \.php$ {
+    #    root           html;
+    #    fastcgi_pass   127.0.0.1:9000;
+    #    fastcgi_index  index.php;
+    #    fastcgi_param  SCRIPT_FILENAME  /scripts$fastcgi_script_name;
+    #    include        fastcgi_params;
+    #}
+
+    # deny access to .htaccess files, if Apache's document root
+    # concurs with nginx's one
+    #
+    #location ~ /\.ht {
+    #    deny  all;
+    #}
+}
+```
+
+Here the `default.conf` file is using a `server` block which is used to define a **virtual server**.
+
+#### Virtual Servers
+
+Virtual servers are used to control the processing of requests, and the directives included within a `server` block vary depending on the traffic type.
+
+The `server` block being used in the `default.conf` file is being used in the `http` context, so each directive in the `server` block controls the processing of requests for resources at specified domains or IP addresses. To specify how to process requests at specific **Uniform Resource Identifiers (URIs)**, the `location` block is used, e.g., the configuration for processing URIs starting with `/` is specified by `location /`.
+
+For mail and TCP/UDP traffic, i.e., the `mail` and `stream` contexts the `server` directives control the processing of traffic arriving at a particular TCP port or UNIX socket.
+
+### Configuration Backup
+
+Before configuring NGINX as a reverse proxy with SSL/TLS enabled, we're going to first backup the default `nginx.conf` file. By backing up the configuration file we'll have a reference to the original file. Having a reference to the original file can be useful, e.g., if an error occurs it can help us determine if a changed we made is responsible for the error.
+
+To backup the `nginx.conf` file we can run the following command:
+
+```sh:Backup nginx.conf File
+sudo mv /etc/nginx/nginx.conf /etc/nginx/nginx.conf.bak
+```
+
+The command above renames the `nginx.conf` file to `nginx.conf.bak` and places it in the same directory, i.e., `/etc/nginx`.
+
+### NGINX as a Reverse Proxy with SSL/TLS
+
+Now that we've gone over the basics of NGINX and created a backup of the configuration file, we're ready to configure NGINX as a reverse proxy with SSL/TLS enabled using the SSL/TLS self-signed certificate and the corresponding private key we created.
 
 🚧 Under Construction!!! 🚧
 
