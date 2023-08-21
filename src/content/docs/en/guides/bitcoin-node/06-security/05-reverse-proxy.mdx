@@ -476,8 +476,8 @@ sudo systemctl stop nginx
 
 We can also load configuration updates without performing a complete reboot of NGINX by running the following command:
 
-```sh:Reboot NGINX
-sudo systemctl reboot nginx
+```sh:Reload NGINX
+sudo systemctl reload nginx
 ```
 
 ### Restart NGINX
@@ -490,7 +490,7 @@ sudo systemctl restart nginx
 
 ### Configuration Files
 
-By default NGINX is configured to handle HTTP traffic. Since we're going to use NGINX as a reverse proxy configured to use SSL/TLS, we're going to update the configuration to handle TCP and UDP traffic instead.
+By default NGINX is configured to handle HTTP traffic. Since we're not using HTTP we're going to update the configuration to handle TCP and UDP traffic directly with SSL/TLS enabled.
 
 To update the configuration we need to update the `nginx.conf` file which can be found in the `/etc/nginx` directory.
 
@@ -719,9 +719,9 @@ sudo nano /etc/nginx/conf.d/stream/self-signed.conf
 
 We're now going to set the `ssl_certificate` directive to the path of the SSL/TLS self-signed certificate we created, and we're going to set the `ssl_certificate_key` directive to the path of the corresponding private key by adding the following lines to the `self-signed.conf` file:
 
-```sh:Set self-signed.conf Directives
-ssl_certificate /etc/ssl/certs/nginx-self-signed.crt
-ssl_certificate_key /etc/ssl/private/nginx-self-signed.key
+```sh:self-signed.conf
+ssl_certificate /etc/ssl/certs/nginx-self-signed.crt;
+ssl_certificate_key /etc/ssl/private/nginx-self-signed.key;
 ```
 
 We can now save the file and exit.
@@ -752,11 +752,9 @@ To create and open the file we can run the following command:
 sudo nano /etc/nginx/conf.d/stream/ssl-params.conf
 ```
 
-We're now going to set the `ssl_certificate` directive to the path of the SSL/TLS self-signed certificate we created, and we're going to set the `ssl_certificate_key` directive to the path of the corresponding private key by adding the following lines to the `self-signed.conf` file:
-
 We're now ready to set the directives for strong encryption and advanced features. These directives are adapted from the [Mozilla SSL Configuration Generator](https://ssl-config.mozilla.org/#server=nginx&version=1.17.7&config=intermediate&openssl=1.1.1k&guideline=5.7) which is a useful resource that provides recommendations for how to securely configure popular server software for modern, intermediate, and old clients.
 
-```sh:Set ssl-params.conf Directives
+```sh:ssl-params.conf
 ssl_session_timeout 5m;
 ssl_session_cache shared:SSL:1m;
 ssl_session_tickets off;
@@ -793,7 +791,76 @@ Here's a description of what each directive does:
   The recommended settings from the Mozilla SSL Configuration Generator provide strong security at the cost of wider client compatibility. If you're experiencing issues, e.g., you need to support an older client, then you can use the older configuration. However, it's recommended to use the newer configurations.
 </Callout>
 
-🚧 Under Construction!!! 🚧
+#### Create nginx.conf File
 
-### Test
+We're now going to create the `nginx.conf` file in the `/etc/nginx` directory. We'll use this file to configure settings that affect the entire NGINX application as well as to import the SSL/TLS settings we just configured.
+
+The directives we place here outside of curly braces, i.e., `{}` will be in the main context which means these settings will affect the entire NGINX application. Many of the directives set in the main context cannot be overridden in lower contexts since they're used to set global NGINX settings.
+
+Some common settings that are configured in the main context include the system user and group used to run the worker processes, the number of worker processes, the file used to save the main NGINX PID, the default error file for logging, etc.
+
+To create and open the file we can run the following command:
+
+```sh:Create and Open nginx.conf File
+sudo nano /etc/nginx/nginx.conf
+```
+
+Here's what the `nginx.conf` file looks like after setting the configuration:
+
+```sh:nginx.conf
+user nginx;
+worker_processes auto;
+
+error_log /var/log/nginx/error.log notice;
+pid /var/run/nginx.pid;
+
+events {
+  worker_connections 1024;
+}
+
+stream {
+  include /etc/nginx/conf.d/stream/*.conf;
+}
+```
+
+We can now save the file and exit.
+
+Here's a description of what each directive does:
+
+- `user`: Defines a user and group used by the worker processes. If you don't use a group, then a group whose name equals that of user is used. Here we're using the value of `nginx` which is the default user used with the worker processes.
+
+- `worker_processes`: Responsible for setting the number of worker processes to spawn. The optimal value depends on numerous factors including the number of CPU cores, the number of HDDs/SSDs used to store data, the load pattern, etc. A good rule of thumb is to set it to the number of available CPU cores. The default value is `1`, and here we're using `auto` which attempts to autodetect the number of available CPU cores.
+
+- `error_log`: Sets a file to store error logs in as well as the level of logging which can be set to one of the following: `debug`, `info`, `notice`, `warn`, `error`, `crit`, `alert`, or `emerg`. The log levels here are listed in order of increasing severity. Setting a log level will cause all messages of the specified log level and more severe log levels to be logged, e.g., a log level of `crit` will cause `crit`, `alert`, and `emerg` messages to be logged. The default value is `/logs/error.log error`, and here we're using `/var/log/nginx/error.log notice`.
+
+- `pid`: Sets a file to store the PID for the master NGINX process. The default value is `/logs/nginx.pid`, and here we're setting the value to `/var/run/nginx.pid`.
+
+- `events`: Specifies the events context which is used to handle general connection processing.
+
+- `worker_connections`: Sets the maximum number of simultaneous connections that can be opened by a worker process. The connections include connections with proxied servers, clients, etc. Also, the actual number of simultaneous connections cannot exceed the limit on the maximum number of open files set by the system. The default value is `512`, and here we're setting it to the value of `1024`.
+
+- `stream`: Specifies the stream context which creates a stream proxy server that can handle TCP and UDP traffic using the SSL/TLS settings we just configured.
+
+- `include /etc/nginx/conf.d/stream/*.conf`: Used to import the SSL/TLS settings we previously set as well as any future configuration files we create.
+
+To apply the configuration updates we made, we can reload NGINX without performing a complete reboot by running the following command:
+
+```sh:Reload NGINX
+sudo systemctl reload nginx
+```
+
+### Test Configuration
+
+To test the configuration updates are working, we can run the following command:
+
+```sh:Test NGINX
+sudo nginx -t
+```
+
+If the configuration is working, then the output of the command should look similar to:
+
+```sh:NGINX Success Output
+nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+nginx: configuration file /etc/nginx/nginx.conf test is successful
+```
 
