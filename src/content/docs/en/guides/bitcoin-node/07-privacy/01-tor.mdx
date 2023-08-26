@@ -1,0 +1,359 @@
+---
+label: Tor
+slug: en/guides/bitcoin-node/privacy/tor
+order: 10
+---
+
+import Callout from "@components/mdx/Callout.tsx";
+
+# Tor
+
+Runnning our own node at a location we control allows us to be a sovereign peer on the Bitcoin network, but if our node isn't configured with privacy in mind, then we're broadcasting to the whole world that someone at that location is using a Bitcoin node which can become problematic.
+
+The main PII we're leaking is the IP address related to the node which can be used to determine your location quite accurately by using a publicly available and free service like [iplocation.net](https://www.iplocation.net/).
+
+To stop leaking the IP address to everyone, we're going to configure our node to use the FOSS communication protocol [Tor](https://www.torproject.org/) which allows us to run the node in a more anonymous way. We can also use Tor to connect to our node from outside of the LAN, i.e., we'll be able to connect to our node from any location using a client that is running Tor and is able to access the Tor network.
+
+## What is Tor
+
+Tor stands for **The Onion Router** and is a communication protocol that uses a network of relays comprised of thousands of volunteer servers known as **Tor relays** to prevent others from being able to easily track, surveil, and censor the websites you visit. The anonymity of the network increases when more independent volunteers run relays and when more users join the network since there will be fewer points of failure and more traffic to analyze.
+
+The term "onion" is used to describe the three layers of encryption that get applied to your traffic when using the network. The network of Tor relays and the layered encryption allows you to communicate online with more anonymity by obfuscating your IP address, location, and online activities.
+
+Tor can also be used to access the so-called **dark web** which is used to describe computer networks that communicate in a more anonymous way by using, e.g., **onion routing** as well as **onion services** formerly known as **hidden services**. The dark web is a subset of the **deep web** which refers to anything on the internet that isn't indexed and, therefore, accessible via a search engine, e.g., medical records, anything behind a paywall, confidential corporate web pages, etc.
+
+By using Tor we'll be able to achieve more anonymity of the traffic associated with our node, e.g., the validation, broadcasting, querying, etc. of transactions.
+
+## What Tor Isn't
+
+Tor isn't a completely decentralized **peer-to-peer (P2P)** communication protocol. It depends on a set of trusted **directory nodes** each controlled by a different organization. These directory nodes manage and keep the state of the network at any given time. Since there are a relatively small number of directory nodes controlled by centralized organizations, it's possible that some or even all of them can become compromised. However, having these multiple organizations does provide a certain amount of redundancy and distribution of trust. These tradeoffs are necssary because if the protocol was completely P2P, then it wouldn't be very usable.
+
+Tor also doesn't hide the IP address and location of the client sending data over the network. It obfuscates and compartmentalizes the IP address and location of the client which means no single entity can easily obtain this information about the client.
+
+Tor provides more anonymity when using the internet; however, it doesn't give you the ability to achieve perfect anonymity. There are weaknesses in the protocol that can be exploited using various attacks. We'll discuss some of these vulnerabilities below.
+
+## Onion Routing
+
+To achieve more anonymous communication Tor uses a technique called onion routing. In an **onion network** data is wrapped in layers of encryption, analogous to the layers of an onion. The encrypted data is transmitted through a series of Tor relays also known as **onion routers**. The number of layers and relays is typically restricted to three because as the number of layers and relays increases the communication speed decreases.
+
+Each relay is responsible for decrypting or "peeling" one layer of encryption which reveals the data's next destination. When the data reaches the final relay in the path it removes the final layer of encryption and sends the decrypted data to the desired destination server.
+
+During the transmission of the data the sender is able to remain anonymous because each intermediate relay only knows the IP address of the immediately preceding and following relays, i.e., no relay knows both the origin and the final destination of the data. Only the entry relay knows the IP address of the originator, i.e., the sender of the data, and only the exit relay knows the IP address of the destination server and has access to the decrypted data.
+
+To gain a better understanding of this process, let's break it down into several steps:
+
+1. The user that wants to send the data runs a Tor client on their device.
+
+2. The client obtains a list of active relays from a directory node.
+
+3. The chosen relays are arranged into a path also known as a **chain** or **circuit** through which the data is transmitted. To preserve the anonymity of the sender, no relay in the circuit is able to tell whether the relay before it is the originator, i.e., the client sending the data or an intermediary. The entry relay does know the IP address of the originator even though it doesn't know it is the originator in the circuit. Also, no relay in the circuit is able to tell how many other relays are in the circuit. Only the exit relay is able to determine its own location in the circuit as well as the decrypted data.
+
+4. The data is encrypted or "wrapped" three times by the Tor client.
+
+5. The data is sent to the first relay, i.e., the entry relay.
+
+6. The first layer of encryption is "peeled" by the entry relay. By "peeling" the first layer of encryption the entry relay determines where to send the data to next and it also knows the IP address of the preceding relay.
+
+7. The entry relay sends the data to the middle relay.
+
+8. The second layer of encryption is "peeled" by the middle relay. By "peeling" the second layer of encryption the middle relay determines where to send the data to next and it also knows the IP address of the preceding relay.
+
+9. The middle relay sends the data to the exit relay.
+
+10. The final layer of encryption is "peeled" by the exit relay. The data is now decrypted, and the exit relay determines where to send the decrypted data and it also knows the IP address of the preceding relay. The exit relay knows the IP address of the middle relay, but it doesn't know the IP address of the entry relay or the originator.
+
+11. The exit relay sends the decrypted data to the intended destination server which doesn't need to be running Tor to successfully receive the data.
+
+12. To receive a response from the destination server the data is sent back to exit relay which adds its layer of encryption to the data.
+
+13. The exit relay sends the encrypted data to the middle relay.
+
+14. The middle relay adds its layer of encryption, so the data is "wrapped" in two layers of encryption.
+
+15. The middle relay sends the data to the entry node.
+
+16. The entry node adds its layer of encryption, so the data is "wrapped" in three layers of encryption.
+
+17. The entry node sends the data to the client.
+
+18. The client is able to decrypt all of the layers of encryption to view the decrypted response from the destination server.
+
+As you can see there are quite a number of steps when sending and receiving data through Tor which slows down the connection. The main concern of Tor is to provide users with greater anonymity when using the internet which is why all of these extra steps take place at the cost slowing down the connection.
+
+## Circuit Updates
+
+Tor reuses the same circuit for new TCP streams for 10 minutes assuming the circuit is functioning properly. If the circuit fails for some reason, then Tor will switch to a new circuit immediately. However, a single TCP stream, e.g., a long Internet Relay Chat (IRC) connection will use the same circuit indefinitely. These individual streams aren't rotated from one circuit to the next since it gives an adversary with a partial view of the network more chances over time to link you to your destination as opposed to just one chance.
+
+When these circuits are updated the entry relay also known as a **guard node** isn't necessarily updated. A guard node is a privileged node since it sees the actual IP address of your client. Guard nodes must be fast and stable which means they must have a high uptime as well as good bandwidth. These requirements can make it more difficult for a regular user to run one, and there is no way for Tor to prevent large companies, governments, etc. from registering a large number of guard nodes.
+
+When a Tor client starts up for the first time it will choose a small and random set of guard nodes, and they will be updated every 2-3 months. This technique provides more protection against a known anonymity-breaking attack. It minimizes the probability of an attacker that controls a certain fraction of the network from being able to easily observe a fraction of every user's traffic. If the guard nodes aren't compromised, then the user's circuits will also not be compromised. If the guard node is compromised, then the attacker will know the IP address of your client. However, the attacker doesn't necessarily have control of the other relays in circuit which are updated on a more frequent basis.
+
+<Callout client:load type="info">
+  If you're interested in learning more about the rationale behind how guard nodes are selected, then you can take a look at the [proposal](https://github.com/torproject/torspec/blob/main/proposals/271-another-guard-selection.txt).
+</Callout>
+
+## Onion Services
+
+Onion services are services provided by servers that can only be accessed over Tor. Running an onion service provides all of the secuirty benefits of HTTPS along with the added security and privacy benefits of using the Tor network.
+
+The IP address of an onion service is protected since onion services are an overlay network on top of TCP/IP, so IP addresses aren't even used in the protocol.
+
+Onion services provide **end-to-end (E2E) authentication** as well because when a user accesses a particular onion service they know the content they're seeing can only come from the specified onion service and not from some impersonator. This is in contrast to when a user normally accesses a site since a **man-in-the-middle (MITM)** attack is possible which can reroute the user to some other site.
+
+Onion services also encrypt the traffic sent between the client and the onion service.
+
+Finally, onion services can **punch-through** firewalls or routers that are using **Network Address Translation (NAT)**. This means if you're connected to a network that is filtered and are unable to open ports on the firewall you can use an onion service to bypass it.
+
+To be able to connect to the onion service without using an IP address we need to use the onion address of an onion service which will look similar to this:
+
+```sh:Onion Address
+vww6ybal4bd7szmgncyruucpgfkqahzddi37ktceo3ah7ngmcopnpyyd.onion
+```
+
+The onion address is the identity public key of a specific onion service, and it allows us to achieve the security and privacy benefits we mentioned above.
+
+To establish the connection the client introduces itself to the onion service over the Tor network using the onion address of the onion service. A **rendezvous point** is then set up between the client and the onion service over the Tor network.
+
+The onion address for an onion service can be found on a public website, from a friend, and if you're using your own onion service it will be generated by you.
+
+We'll be setting up an onion service on our node which will allow us to SSH into the node from outside of our LAN over the Tor network by using the onion address we generate with a client that is running Tor and connected to the Tor network.
+
+<Callout client:load type="info">
+  If you're interested in a detailed breakdown of how the onion service protocol works, then take a look at [How Do Onion Services Work?](https://community.torproject.org/onion-services/overview/).
+</Callout>
+
+## Tor, Tor Browser, and Tor Browser Launcher
+
+We're now going to discuss the differences between Tor, Tor Browser, and Tor Browser Launcher.
+
+Tor also as known as [little-t-tor](https://support.torproject.org/little-t-tor/) is the core of the Tor Project's software and acts as a **Socket Secure (SOCKS)** proxy which allows a user to achieve more anonymity online using techniques like the ones we described above, i.e. onion routing and onion services. Little-t-tor gets installed as a system-wide daemon, and to configure it you need to edit the `torrc` which should be located in the `/etc/tor` directory if you're using Debian.
+
+[Tor Browser](https://support.torproject.org/tbb/) is a modified version of [Firefox](https://www.mozilla.org/en-US/firefox/new/) specifically designed for use with Tor that includes enhanced security and privacy features. It's not recommended to install any additional add-ons or plugins with the Tor Browser since they may bypass Tor and compromise security and privacy.
+
+Tor Browser comes with **HTTPS-Only Mode** which forces all connections to websites to use a secure encrypted connection, i.e., HTTPS, **NoScript** which is a browser extension that allows JavaScript and other potentially harmful content to be executed only by trusted websites of your choice, and other patches to enhance security and privacy.
+
+Tor Browser will also block the usage of browser plugins like Flash, RealPlayer, QuickTime, etc. since they can be manipulated into revealing your IP address. You also shouldn't **torrent** over Tor since torrent file-sharing applications can reveal the actual IP address of your client by ignoring proxy settings and making direct connections even when they're told to use Tor and by sending your actual IP address within requests used by the torrent application. Take a look at the [Most Frequently Asked Questions](https://support.torproject.org/faq/) to learn more about the Tor Browser and best practices.
+
+[Tor Browser Launcher](https://github.com/micahflee/torbrowser-launcher) is supposed to make Tor Browser easier to install for GNU/Linux users. The package is `torbrowser-launcher` and can be installed using your Linux distribution's package manager.
+
+Tor Browser Launcher will download and install the most recent version of Tor Browser for your computer's architecture or launch Tor Browser if it's already installed. The launcher will check if a new version of Tor Browser is available and will automatically download and update the browser if there is a new version. The launcher verifies the Tor Browser signature which ensures the downloaded version was signed by the Tor developers and not tampered with. It also adds Tor Browser and Tor Browser Launcher as desktop entries to your desktop environment.
+
+## Installation
+
+We're going to install Tor on the node using the [prebuilt Debian package from the Tor repository](https://deb.torproject.org/) which is maintained by the Tor Project which should always provide the latest stable version of Tor. There is also a prebuilt Debian package from the OS repository that provides the **Long-term support (LTS)** version of Tor, but it might not always provide the latest stable version of Tor. Therefore, it's recommended to install Tor from the Tor repository.
+
+### Determine Architecture
+
+Before installing Tor, we need to first determine the node's architecture which we can do by running the following command:
+
+```sh:Determine Architecture
+dpkg --print-architecture
+```
+
+The Tor repository offers `amd64` and `arm64` binaries. If the command outputs a different architecture, then your node is using an architecture that isn't supported by the Tor repository.
+
+<Callout client:load type="tip">
+  If your node is using an unsupported architecture, then you can try installing Tor using a prebuilt Debian package from the OS repository or by [installing Tor from source](https://community.torproject.org/onion-services/setup/install/#installing-tor-from-source).
+</Callout>
+
+### Prerequisites
+
+To enable all package managers using the package managmenent runtime library `libapt-pkg` to access metadata and packages available in sources accessible over HTTPS we need to install the following package:
+
+```sh:Install apt-transport-https
+sudo apt install -y apt-transport-https
+```
+
+### Configure apt to Use Tor Repository
+
+We're now going to create a file named `tor.list` in the `/etc/apt/sources.list.d` directory and configure `apt` to use the latest stable version of Tor.
+
+To create and open the file we can run the following command:
+
+```sh:Create tor.list File
+sudo nano /etc/apt/sources.list.d/tor.list
+```
+
+We're now going to configure `apt` to use the latest stable version of Tor from the Tor repository by adding the following lines to the `tor.list` file:
+
+```sh:Configure apt to Use Tor Repository
+deb     [signed-by=/usr/share/keyrings/tor-archive-keyring.gpg] https://deb.torproject.org/torproject.org <distribution> main
+deb-src [signed-by=/usr/share/keyrings/tor-archive-keyring.gpg] https://deb.torproject.org/torproject.org <distribution> main
+```
+
+Be sure to replace `<distribution>` with the Debian codename which can be found by running the following command:
+
+```sh:Determine Codename
+lsb_release -c
+```
+
+The output should look similar to:
+
+```sh:Codename Output
+No LSB modules are available.
+Codename:	bookworm
+```
+
+Here we replace `<distribution>` with the codename `bookworm`.
+
+### Import Tor Project Signing Key
+
+Before we can import the Tor Project signing key, we need to first temporarily enable the `root` user by running the following command:
+
+```sh:Temporarily Enable the root User
+sudo -i
+```
+
+If we don't temporarily enable the `root` user, then we'll get a `Permission denied` error when attempting to import the Tor project signing key.
+
+To import the signing key we can run the following command:
+
+```sh:Import Tor Project Signing Key
+sudo wget -qO- https://deb.torproject.org/torproject.org/A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89.asc | gpg --dearmor | tee /usr/share/keyrings/tor-archive-keyring.gpg >/dev/null
+```
+
+After importing the signing key, we can disable the `root` user again by logging out of the session by running the command:
+
+```sh:Exit Session
+exit
+```
+
+### Update apt
+
+We're now going to fetch the information about the latest versions of the packages available for our system by running the following command:
+
+```sh:Update apt
+sudo apt update
+```
+
+### Install Tor
+
+After running the above command, we're now able to install the latest stable version of Tor from the Tor repository along with the `deb.torproject.org-keyring` package which is used to keep the Tor Project signing key current by running the following command:
+
+```sh:Install tor and deb.torproject.org-keyring
+sudo apt install -y tor deb.torproject.org-keyring
+```
+
+## Check Version
+
+After installing Tor, we can check the version by running the following command:
+
+```sh:Check Version
+tor --version
+```
+
+The output should look similar to:
+
+```sh:Version Output
+Aug 25 22:57:52.822 [warn] Tor was compiled with zstd 1.5.2, but is running with zstd 1.5.4. For safety, we'll avoid using advanced zstd functionality.
+Tor version 0.4.7.13.
+Tor is running on Linux with Libevent 2.1.12-stable, OpenSSL 3.0.9, Zlib 1.2.13, Liblzma 5.4.1, Libzstd 1.5.4 and Glibc 2.36 as libc.
+Tor compiled with GCC version 12.2.0
+```
+
+If we take a look at the line starting with `Tor version`, then we see the Tor version is `0.4.7.13`.
+
+## Check Tor Status
+
+To check the `status` of Tor run the following command:
+
+```sh:Check Tor Status
+sudo systemctl status tor
+```
+
+The output should look similar to:
+
+```sh:Tor Status Output
+● tor.service - Anonymizing overlay network for TCP (multi-instance-master)
+     Loaded: loaded (/lib/systemd/system/tor.service; enabled; preset: enabled)
+     Active: active (exited) since Fri 2023-08-25 22:49:42 CST; 43min ago
+   Main PID: 2171 (code=exited, status=0/SUCCESS)
+        CPU: 1ms
+```
+
+From the output of the command we’re able to determine the following about Tor:
+
+- If it's running
+
+- If it's set to automatically start on boot
+
+### Check if Tor is Running
+
+If we look at the following line:
+
+```sh:Check if Tor is Running
+Active: active (exited)
+```
+
+Then we see that Tor is currently running since the status shows `active (exited)`.
+
+If you see `inactive (dead)`, then Tor isn't running.
+
+### Check if Tor is Enabled
+
+If we look at the following line:
+
+```sh:Check if Tor is Enabled
+Loaded: loaded (/lib/systemd/system/tor.service; enabled; preset: enabled)
+```
+
+Then we see that Tor is set to automatically start on boot since the service is `enabled`.
+
+If you see `disabled`, then Tor isn't set to automatically start on boot.
+
+## Enable Tor
+
+If Tor isn't enabled to automatically start on boot, then run the following command:
+
+```sh:Enable Tor
+sudo systemctl enable tor
+```
+
+## Disable Tor
+
+If you want to disable Tor from automatically starting on boot, then run the following command:
+
+```sh:Disable Tor
+sudo systemctl disable tor
+```
+
+## Start Tor
+
+If Tor isn’t running, then run the following command to start the service:
+
+```sh:Start Tor
+sudo systemctl start tor
+```
+
+## Stop Tor
+
+If you want to stop Tor, then run the following command:
+
+```sh:Stop Tor
+sudo systemctl stop tor
+```
+
+## Reload Tor
+
+We can also load configuration updates without performing a complete reboot of Tor by running the following command:
+
+```sh:Reload Tor
+sudo systemctl reload tor
+```
+
+## Restart Tor
+
+If you want to restart Tor which completely stops then starts the service, then you can run the following command:
+
+```sh:Restart Tor
+sudo systemctl restart tor
+```
+
+## Configuration
+
+🚧Under Construction!!!🚧
+
+## SSH Remote Access over Tor
+
+## Vulnerabilities
+
