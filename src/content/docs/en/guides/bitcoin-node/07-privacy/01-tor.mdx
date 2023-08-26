@@ -36,7 +36,7 @@ Tor provides more anonymity when using the internet; however, it doesn't give yo
 
 To achieve more anonymous communication Tor uses a technique called onion routing. In an **onion network** data is wrapped in layers of encryption, analogous to the layers of an onion. The encrypted data is transmitted through a series of Tor relays also known as **onion routers**. The number of layers and relays is typically restricted to three because as the number of layers and relays increases the communication speed decreases.
 
-Each relay is responsible for decrypting or "peeling" one layer of encryption which reveals the data's next destination. When the data reaches the final relay in the path it removes the final layer of encryption and sends the decrypted data to the desired destination server.
+Each relay is responsible for decrypting or "peeling" one layer of encryption which reveals the data's next destination. When the data reaches the final relay in the path it removes the final layer of encryption and sends the decrypted data to the desired destination server. Since the data is decrypted when it reaches the final relay, it's important that the destination server supports a secure communication protocol like HTTPS to avoid an attacker from being able to view the data in transit.
 
 During the transmission of the data the sender is able to remain anonymous because each intermediate relay only knows the IP address of the immediately preceding and following relays, i.e., no relay knows both the origin and the final destination of the data. Only the entry relay knows the IP address of the originator, i.e., the sender of the data, and only the exit relay knows the IP address of the destination server and has access to the decrypted data.
 
@@ -46,7 +46,7 @@ To gain a better understanding of this process, let's break it down into several
 
 2. The client obtains a list of active relays from a directory node.
 
-3. The chosen relays are arranged into a path also known as a **chain** or **circuit** through which the data is transmitted. To preserve the anonymity of the sender, no relay in the circuit is able to tell whether the relay before it is the originator, i.e., the client sending the data or an intermediary. The entry relay does know the IP address of the originator even though it doesn't know it is the originator in the circuit. Also, no relay in the circuit is able to tell how many other relays are in the circuit. Only the exit relay is able to determine its own location in the circuit as well as the decrypted data.
+3. The chosen relays are arranged into a path also known as a **chain** or **circuit** through which the data is transmitted. To preserve the anonymity of the sender no relay in a circuit is able to tell how many other relays are in the circuit. Also, any client is allowed to use any relay for any hop in the circuit except with some restrictions on the exit relay. In practice however, most users should and will use the entry relays recommended by the directory nodes. Even with those mitigations in place it's still possible for both the entry and exit relays to determine their position in a circuit which can cause the traffic to be analyzed in a way that can reduce anonymity. The ability for entry and exit relays to determine their positions in a circuit is described in more detail below.
 
 4. The data is encrypted or "wrapped" three times by the Tor client.
 
@@ -62,9 +62,9 @@ To gain a better understanding of this process, let's break it down into several
 
 10. The final layer of encryption is "peeled" by the exit relay. The data is now decrypted, and the exit relay determines where to send the decrypted data and it also knows the IP address of the preceding relay. The exit relay knows the IP address of the middle relay, but it doesn't know the IP address of the entry relay or the originator.
 
-11. The exit relay sends the decrypted data to the intended destination server which doesn't need to be running Tor to successfully receive the data.
+11. The exit relay sends the decrypted data to the destination server which doesn't need to be running Tor to receive the data ideally over a secure communication protocol like HTTPS.
 
-12. To receive a response from the destination server the data is sent back to exit relay which adds its layer of encryption to the data.
+12. To receive a response from the destination server the data is sent back to the exit relay ideally over a secure communication protocol like HTTPS. After receiving the response the exit relay, adds its layer of encryption to the data.
 
 13. The exit relay sends the encrypted data to the middle relay.
 
@@ -79,6 +79,10 @@ To gain a better understanding of this process, let's break it down into several
 18. The client is able to decrypt all of the layers of encryption to view the decrypted response from the destination server.
 
 As you can see there are quite a number of steps when sending and receiving data through Tor which slows down the connection. The main concern of Tor is to provide users with greater anonymity when using the internet which is why all of these extra steps take place at the cost slowing down the connection.
+
+### How Relay Positions can be Determined
+
+Even though no relay can know for sure how many other relays are in the circuit and relays have the possibility of being used as either an entry, middle, or exit relay in any given circuit, the entry and exit relays can still determine their position in a circuit. An entry relay can determine its position in a circuit by, e.g., analyzing the incoming IP address and determining that it's not the IP address of a relay being used in the network which means it's most likely a client's IP address. Also, client's don't have long-term identities like relays do which also means it's more likely the IP address belongs to a client. The exit relay can perfom a similar analysis on the IP address of the destination server. The exit relay can also just look at the data and see that it's decrypted which means it's the final relay in a circuit.
 
 ## Circuit Updates
 
