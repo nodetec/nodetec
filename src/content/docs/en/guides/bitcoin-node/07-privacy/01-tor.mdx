@@ -355,9 +355,96 @@ sudo systemctl restart tor
 
 ## Configuration
 
-🚧Under Construction!!!🚧
+We're now going to configure Tor to accept instructions with proper authentication through its control port. By enabling Tor to accept these instructions we'll be able to set up Bitcoin Core to directly communicate with the Tor daemon which will allow us to route all of the Bitcoin Core traffic through the Tor network.
+
+To configure Tor to accept instructions with proper authentication through its control port we need to first open the Tor configuration file, i.e., `torrc` which is located in the `/etc/tor` directory by running the following command:
+
+```sh:Open torrc
+sudo nano /etc/tor/torrc
+```
+
+After opening the file, you should see a section that looks similar to:
+
+```sh:Disabled Conrtol Port for Local Connections
+## The port on which Tor will listen for local connections from Tor
+## controller applications, as documented in control-spec.txt.
+#ControlPort 9051
+## If you enable the controlport, be sure to enable one of these
+## authentication methods, to prevent attackers from accessing it.
+#HashedControlPassword 16:872860B76453A77D60CA2BB8C1A7042072093276A3D701AD684053EC4C
+#CookieAuthentication 1
+```
+
+From the section above we can see that if we uncomment the line `#ControlPort 9051`, then we'll enable the control port used by Tor when listening for local connections from Tor controller applications like Bitcoin Core.
+
+By enabling the control port we're giving low-level access to the Tor daemon which allows applications to change and monitor Tor, modify the Tor configuration while Tor is running, and to get details about the Tor network status and circuits.
+
+If we take a look at the next line, then we can see that it's recommended to enable at least one of the authentication methods below to prevent attackers from being able to access the control port we're enabling. If we don't set an authentication method, then Tor trusts any local user that connects to the control port. We have the option of restricting access to the control port using **cookie authentication**, a **control password**, or both.
+
+We're going to enable the cookie authentication method by uncommenting the line `#CookieAuthentication 1` and by adding the following lines to the file:
+
+```sh:Enabled Conrtol Port for Local Connections
+## The port on which Tor will listen for local connections from Tor
+## controller applications, as documented in control-spec.txt.
+ControlPort 9051
+## If you enable the controlport, be sure to enable one of these
+## authentication methods, to prevent attackers from accessing it.
+#HashedControlPassword 16:872860B76453A77D60CA2BB8C1A7042072093276A3D701AD684053EC4C
+CookieAuthentication 1
+CookieAuthFileGroupReadable 1
+DataDirectoryGroupReadable 1
+```
+
+We can now save and exit the file.
+
+Here's a description of what each update does:
+
+- `CookieAuthentication`: If this option is set to `0` which is the default value, then cookie authentication is disabled. If the option is set to `1`, then cookie authentication is enabled which means Tor will write a cookie file named `control_auth_cookie` into the default Tor data directory, i.e., `/var/lib/tor` unless we specify a different directory and file name using the `CookieAuthFile` option. By enabling cookie authentication access to the control port is restricted by file permissions that are set on the cookie file and on the Tor data directory. The controller must demonstrate that it has the proper file permissions to access the cookie file which is used to authenticate the user.
+
+- `CookieAuthFileGroupReadable`: If this option is set to `0` which is the default value, then the file system group, i.e., `debian-tor` isn't allowed to read the authentication cookie file. If the option is set to `1`, then the cookie file is readable by the default **group identifier (GID)** which is a numeric value used to represent a specific group, i.e., `debian-tor`.
+
+- `DataDirectoryGroupReadable`: If this option is set to `0` which is the default value, then the file system group associated with the Tor data directory, i.e., `debian-tor` isn't allowed to read the Tor data directory. If the option is set to `1`, then the Tor data directory is readable by the default GID. The Tor data directory is specified by the `DataDirectory` option, and the default value for Debian is `/var/lib/tor`.
+
+<Callout client:load type="tip">
+  By setting the `DataDirectoryGroupReadable` to `1` we're also setting the `CacheDirectoryGroupReadable` to `1` since it uses the value of `DataDirectoryGroupReadable` when the `CacheDirectory` and `DataDirectory` options are the same value which they are by default.
+</Callout>
+
+To apply the configuration updates we made, we can reload Tor by running the following command:
+
+```sh:Reload Tor
+sudo systemctl reload tor
+```
+
+<Callout client:load type="info">
+  If you're interested in learning about more command line options, configuration file formatting, configuration options, etc., then you can view the Tor man page by running the following command `man tor`.
+</Callout>
+
+To ensure Tor is working properly and listening at the default SOCKS proxy port, i.e., `9050` and at the control port we enabled, i.e., `9051` we can run the following command:
+
+```sh:Check Tor Listening Ports
+sudo ss -tulpn | grep tor | grep LISTEN
+```
+
+If Tor is working properly, then you should see output that looks similar to:
+
+```sh:Tor Listening Ports Success Output
+tcp   LISTEN 0      4096       127.0.0.1:9050      0.0.0.0:*    users:(("tor",pid=610,fd=6))
+tcp   LISTEN 0      4096       127.0.0.1:9051      0.0.0.0:*    users:(("tor",pid=610,fd=7))
+```
+
+To view real time updates and output logs for Tor we can use the `journalctl` utility which allows us to access and manipulate the data collected and managed by the **systemd** logging system **journal** by running the following command:
+
+```sh:View Tor Journal Logs
+sudo journalctl -f -u tor@default
+```
+
+<Callout client:load type="warning">
+  Not all of the network traffic is currently configured to use the Tor network; however, we have the basic configuration set up which will allow us to configure sensitive applications like Bitcoin Core to use it. To route all of the Bitcoin Core traffic over the Tor newtork we're going to create a sepatate user with the name `bitcoin` for security reasons and add the user to the `debian-tor` group which will allow Bitcoin Core to access the Tor daemon.
+</Callout>
 
 ## SSH Remote Access over Tor
+
+🚧Under Construction!!!🚧
 
 ## Vulnerabilities
 
