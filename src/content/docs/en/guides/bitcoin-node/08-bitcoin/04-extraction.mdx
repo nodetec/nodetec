@@ -1,0 +1,106 @@
+---
+label: Extraction
+slug: en/guides/bitcoin-node/bitcoin/extraction
+order: 40
+---
+
+import Callout from "@components/mdx/Callout.tsx";
+
+# Extraction
+
+Now that we have successfully verified the checksum file, the Bitcoin Core file, and validated the timestamp proof, we're ready to extract, install, and configure Bitcoin Core on our node.
+
+## Required Packages
+
+To extract the Bitcoin Core files you'll need to have `tar` installed on the node which should already be installed, but if not here's how to install it.
+
+### tar
+
+Run the following command to install `tar` on the node:
+
+```sh:Install tar
+sudo apt install -y tar
+```
+
+## Extract Bitcoin Core Files
+
+To extract the Bitcoin Core files from the `.tar.gz` file we downloaded we can run the following command:
+
+```sh:Extract Bitcoin Core Files
+tar -xvzf bitcoin-$VERSION-x86_64-linux-gnu.tar.gz
+```
+
+Here's an explanation of the options we passed to the `tar` command:
+
+- `-x`: This option specifies that we want to extract the contents of the archive, i.e., the `.tar.gz` file.
+
+- `-v`: This option specifies that we would like to see the verbose output which means we'll be displayed a list of all of the files being extracted.
+
+- `-z`: This option specifies that we would like to decompress the arcive using GZIP.
+
+- `-f`: This option specifies the archive file that we would like to extract.
+
+The output should look similar to the following:
+
+```sh:Bitcoin Core Extraction Output
+bitcoin-25.0/
+bitcoin-25.0/README.md
+bitcoin-25.0/bin/
+bitcoin-25.0/bin/bitcoin-cli
+bitcoin-25.0/bin/bitcoin-qt
+bitcoin-25.0/bin/bitcoin-tx
+bitcoin-25.0/bin/bitcoin-util
+bitcoin-25.0/bin/bitcoin-wallet
+bitcoin-25.0/bin/bitcoind
+bitcoin-25.0/bin/test_bitcoin
+bitcoin-25.0/bitcoin.conf
+bitcoin-25.0/include/
+bitcoin-25.0/include/bitcoinconsensus.h
+bitcoin-25.0/lib/
+bitcoin-25.0/lib/libbitcoinconsensus.so
+bitcoin-25.0/lib/libbitcoinconsensus.so.0
+bitcoin-25.0/lib/libbitcoinconsensus.so.0.0.0
+bitcoin-25.0/share/
+bitcoin-25.0/share/man/
+bitcoin-25.0/share/man/man1/
+bitcoin-25.0/share/man/man1/bitcoin-cli.1
+bitcoin-25.0/share/man/man1/bitcoin-qt.1
+bitcoin-25.0/share/man/man1/bitcoin-tx.1
+bitcoin-25.0/share/man/man1/bitcoin-util.1
+bitcoin-25.0/share/man/man1/bitcoin-wallet.1
+bitcoin-25.0/share/man/man1/bitcoind.1
+bitcoin-25.0/share/rpcauth/
+bitcoin-25.0/share/rpcauth/README.md
+bitcoin-25.0/share/rpcauth/rpcauth.py
+```
+
+The extraction output displays a list of all of the files and directories contained in the `bitcoin-$VERSION-x86_64-linux-gnu.tar.gz` file we downloaded.
+
+## Bitcoin Core Files
+
+After the extraction is completed a `bitcoin-<version>` directory will be created in whatever directory you extracted the files to where `<version>` should be replaced with whatever version of Bitcoin Core you downloaded.
+
+We can navigate to the `bitcoin-<version>` directory by running the following command:
+
+```sh:Navigate to bitcoin-<version> Directory
+cd bitcoin-<version>
+```
+
+E.g., to navigate to the `bitcoin-25.0` on my node I would run the following command:
+
+```sh:Navigate to bitcoin-25.0 Directory on My Node
+cd bitcoin-25.0
+```
+
+To see all of the files and directories in the `bitcoin-$VERSION` directory we can run the following command:
+
+```sh:List Directory Content
+ls
+```
+
+The output of the command should look something like this:
+
+```sh:bitcoin-$VERSION Directory Content
+bin  bitcoin.conf  include  lib  README.md  share
+```
+
