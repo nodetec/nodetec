@@ -1,0 +1,129 @@
+---
+label: Installation
+slug: en/guides/bitcoin-node/bitcoin/installation
+order: 50
+---
+
+import Callout from "@components/mdx/Callout.tsx";
+
+# Installation
+
+After extracting the Bitcoin Core files, we're now going to "install" Bitcoin Core by using the `install` command.
+
+We're actually not installing Bitcoin Core though since the `install` command isn't used to install software packages despite its name.
+
+The `install` command is way to copy files to a target location similar to the copy command, i.e., `cp`, but it gives us more control by allowing us to use advanced featues when copying the files.
+
+Some of these advanced features include the abilities to adjust permission modes like when using the `chmod` command, adjust ownership permissions like when using the `chown` command, to make backups of the files, and to preserve the metadata of the files, e.g., the access and modifications times of the files.
+
+<Callout client:load type="info">
+  If you want to learn more about the `install` command, then check out [The install Command in Linux](https://www.baeldung.com/linux/install-command).
+</Callout>
+
+## Install Bitcoin Core
+
+To "install" Bitcoin Core we can run the following command:
+
+```sh:"Install" Bitcoin Core
+sudo install -v -m 755 -o root -g root -t /usr/local/bin bitcoin-$VERSION/bin/*
+```
+
+Here's an explanation of the options we passed to the `install` command:
+
+- `-v`: This option specifies that we would like to see the verbose output which means we'll be displayed with the details of the process.
+
+- `-m`: This option specifies the file permissions in **octal notation** for the files we're copying.
+
+- `-o`: This option allows us to set the owner for the files we're copying.
+
+- `-g`: This option allows us to set the group for the files we're copying.
+
+- `-t`: This option specifies the target directory that we want to copy the specified files into.
+
+The verbose output should look similar to the following:
+
+```sh:Bitcoin Core "Installation" Output
+'bitcoin-25.0/bin/bitcoin-cli' -> '/usr/local/bin/bitcoin-cli'
+'bitcoin-25.0/bin/bitcoind' -> '/usr/local/bin/bitcoind'
+'bitcoin-25.0/bin/bitcoin-qt' -> '/usr/local/bin/bitcoin-qt'
+'bitcoin-25.0/bin/bitcoin-tx' -> '/usr/local/bin/bitcoin-tx'
+'bitcoin-25.0/bin/bitcoin-util' -> '/usr/local/bin/bitcoin-util'
+'bitcoin-25.0/bin/bitcoin-wallet' -> '/usr/local/bin/bitcoin-wallet'
+'bitcoin-25.0/bin/test_bitcoin' -> '/usr/local/bin/test_bitcoin'
+```
+
+From the verbose output we can see that all of the Bitcoin core binaries, i.e., the files located in the `bitcoin-$VERSION/bin` directory were successfully copied to the `/usr/local/bin` directory.
+
+<Callout client:load type="info">
+  Binaries are files that contain the compiled source code, and they're also known as executables since they can be executed by the computer.
+</Callout>
+
+The `/usr/local/bin` was the target directory we specified using the `-t` option in the command.
+
+The files to copy we're specified at the end of the command, i.e., `bitcoin-$VERSION/bin/*`. The `*` is a wildcard used to specify that we want ot copy all of the files in the `bitcoin-$VERSION/bin` directory.
+
+We set the group of the files we're copying to be `root` using the `-g` option.
+
+We set the owner of the files we're copying to also be `root` using the `-o` option.
+
+Finally, we set the permissions for each of the files using octal notation with the `-m` option to be `755`.
+
+In octal notation each number represents the read, write, and execute permissions. The first number specifies the permissions for the file's owner, the second number specifies the permissions for the users belonging to the file's group, and the last number specifies the permissions for all other users.
+
+The read, write, and execute permissions have the following number values:
+
+- `r` (read) = 4
+
+- `w` (write) = 2
+
+- `x` (execute) = 1
+
+- no permissions = 0
+
+The permissions for a file's owner, the users belonging to a file's group, and all other users is represented as the sum of the read, write, and execute values.
+
+Here, we've given the owner of the files, i.e., `root` read, write, and execute permissions since the first number has a value of `7`.
+
+Here's how we got the value of `7` to use with the owner of the files:
+
+- Owner: `rwx` = `4` + `2` + `1` = `7`
+
+We've given the users belonging to the file's group, i.e., `root` read and execute permissions since the second number has a value of `5`.
+
+Here's how we got the value of `5` to use with the users belonging to the file's group:
+
+- Group: `r-x` = `4` + `0` + `1` = `5`
+
+We've also given all other users read and execute permissions since the last number has a value of `5`.
+
+Here's how we got the value of `5` to use with all of the other users:
+
+- Others: `r-x` = `4` + `0` + `1` = `5`
+
+## Check File Permissions
+
+To check the file permissions for the Bitcoin Core binaries we copied to the `/usr/local/bin` directory we can run the following command:
+
+```sh:List File Permissions for Bitcoin Core Binaries
+ls -l /usr/local/bin
+```
+
+The output should look similar to the following:
+
+```sh:File Permissions for Bitcoin Core Binaries Output
+total 97408
+-rwxr-xr-x 1 root root  2281672 Oct  5 13:35 bitcoin-cli
+-rwxr-xr-x 1 root root 15296688 Oct  5 13:35 bitcoind
+-rwxr-xr-x 1 root root 41284248 Oct  5 13:35 bitcoin-qt
+-rwxr-xr-x 1 root root  4059384 Oct  5 13:35 bitcoin-tx
+-rwxr-xr-x 1 root root  2084576 Oct  5 13:35 bitcoin-util
+-rwxr-xr-x 1 root root  9450112 Oct  5 13:35 bitcoin-wallet
+-rwxr-xr-x 1 root root 25267824 Oct  5 13:35 test_bitcoin
+```
+
+From the output we can see that each of the Bitcoin Core binaries we copied have the following permissions `rwxr-xr-x` where the first three letters specify the owner's permissions, i.e., `rwx`, the second three letters specify the permissions of the users belonging to group, i.e., `r-x`, and the last three letters specify the permissions for the all other users, i.e., `r-x`.
+
+<Callout client:load type="info">
+  If you want to learn more about Linux file permissions, then check out [Understanding Linux File Permissions](https://linuxize.com/post/understanding-linux-file-permissions/).
+</Callout>
+
