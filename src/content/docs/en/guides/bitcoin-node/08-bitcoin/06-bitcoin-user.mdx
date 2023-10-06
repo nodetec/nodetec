@@ -1,0 +1,280 @@
+---
+label: Bitcoin User
+slug: en/guides/bitcoin-node/bitcoin/bitcoin-user
+order: 60
+---
+
+import Callout from "@components/mdx/Callout.tsx";
+
+# Bitcoin User
+
+For security reasons we're now going to create a separate user to use with Bitcoin Core which will run as a daemon, i.e., it will run as a background process.
+
+## Create bitcoin User
+
+We're going to use the username `bitcoin` for the new user, and this user will not have `sudo` privileges and will be unable to change the system configuration.
+
+To create the `bitcoin` user we can run the following command:
+
+```sh:Create bitcoin User
+sudo adduser --gecos "" --disabled-password bitcoin
+```
+
+The output should look similar to the following:
+
+```sh:Create bitcoin User Output
+Adding user `bitcoin' ...
+Adding new group `bitcoin' (1001) ...
+Adding new user `bitcoin' (1001) with group `bitcoin (1001)' ...
+Creating home directory `/home/bitcoin' ...
+Copying files from `/etc/skel' ...
+Adding new user `bitcoin' to supplemental / extra groups `users' ...
+Adding user `bitcoin' to group `users' ...
+```
+
+From the output of the command we can see the `adduser` command automatically:
+
+- Creates a group with the same name as the provided `username`, i.e., `bitcoin` and the first available **Group Identifier (GID)**, i.e., `1001` which is a unique numerical value assigned to each group.
+
+- Creates the user with the provided `username`, i.e., `bitcoin` and the first available **User Identifier (UID)**, i.e., `1001` which is a unique numerical value assigned to each user account.
+
+- Adds the user to the group.
+
+- Creates a home directory for the user, i.e., `/home/bitcoin`
+
+- Copies the files from the `/etc/skel` directory which is a **skeleton directory** containing files and directories that will be copied to a new user's `home` directory.
+
+- Adds the user to the default Debian group `users`.
+
+- The `--gecos` option is set to `""` which means we're leaving the **GECOS** field, i.e., the full name, room number, work phone, home phone, and other contact information associated with a user empty.
+
+- The `--disabled-password` option is used to override the default password settings in the `/etc/adduser.conf` file by disabling the password login for the user since we're not going to use this user to login to the node.
+
+To check the username, group names, UID, and GIDs of the `bitcoin` user we can run the following command:
+
+```sh:Check bitcon User Details
+id bitcoin
+```
+
+The output should look similar to the following:
+
+```sh:bitcoin User Details Output
+uid=1001(bitcoin) gid=1001(bitcoin) groups=1001(bitcoin),100(users)
+```
+
+<Callout client:load type="info">
+  The files copied from the `/etc/skel` directory include the `.`, `..`, `.bash_logout`, `.bashrc`, `.profile` directories which can be determined by listing the content of the `/etc/skel` directory by running `ls -a /etc/skel`.
+</Callout>
+
+<Callout client:load type="tip">
+  If you're concerned about having a user with a username that is obviously related to Bitcoin, then you can always set the username to be a value that isn't related to Bitcoin.
+</Callout>
+
+## Add User to bitcoin Group
+
+We're also going to add the user we set during the installation of the OS to be a part of the `bitcoin` group by running the following command:
+
+```sh:Add <username> to bitcoin Group
+sudo adduser <username> bitcoin
+```
+
+Where `<username>` should be replaced with the user you set during the installation.
+
+E.g., I would run the following command to add the user `satoshi` to the `bitcoin` group:
+
+```sh:Add satoshi to bitcoin Group
+sudo adduser satoshi bitcoin
+```
+
+The output should look similar to the following:
+
+```sh:Add satoshi to bitcoin Group
+Adding user `satoshi' to group `bitcoin' ...
+Done.
+```
+
+To check all of the users a part of the `bitcoin` group we can run the following command:
+
+```sh:Check bitcoin Group Users
+grep -i --color bitcoin /etc/group
+```
+
+The output should look similar to the following:
+
+```sh:bitcoin Group Users Output
+users:x:100:satoshi,bitcoin
+bitcoin:x:1001:satoshi
+```
+
+From the second line of the output we can see `satoshi` has been successfully added to the `bitcoin` group.
+
+## Add User to debian-tor Group
+
+To be able to access the Tor control port we enabled that is listening on port `9051` we need to add the `bitcoin` user to the `debian-tor` group.
+
+This allows Bitcoin Core to be able to change and monitor Tor, modify the Tor configuration while Tor is running, and to get details about the Tor network status and circuits.
+
+To add the `bitcoin` user to the `debian-tor` group we can run the following command:
+
+```sh:Add bitcoin User to debian-tor Group
+sudo adduser bitcoin debian-tor
+```
+
+The output should look similar to the following:
+
+```sh:Add bitcoin User to debian-tor Group Output
+Adding user `bitcoin' to group `debian-tor' ...
+Done.
+```
+
+## Data Directory
+
+By default Bitcoin Core uses the `/home/<username>/.bitcoin` directory where `<username>` refers to the username you're using with Bitcoin Core.
+
+Instead of using the default `/home/<username>/.bitcoin` directory, we're going to use a general data directory, i.e., `/data/bitcoin`, and then create a **symbolic link** to it which is type of file or directory that points to another file or directory.
+
+To create the `/data` directory we can run the following command:
+
+```sh:Create /data Directory
+sudo mkdir /data
+```
+
+To create the `/data/bitcoin` directory we can run the following command:
+
+```sh:Create /data/bitcoin Directory
+sudo mkdir /data/bitcoin
+```
+
+We're now going to set the owner and the group for the `/data/bitcoin` directory by running the following command:
+
+```sh:Set Owner and Group for /data/bitcoin Directory
+sudo chown bitcoin:bitcoin /data/bitcoin
+```
+
+To check the owner, group, and file permissions for the `/data/bitcoin` directory we can run the following command:
+
+```sh:List File Permissions for /data Directory
+ls -l /data
+```
+
+The output should look similar to the following:
+
+```sh:File Permissions for /data Output
+drwxr-xr-x 2 bitcoin bitcoin 4096 Oct  6 10:44 bitcoin
+```
+
+From the output we can see the `/data/bitcoin` directory has the following permissions rwxr-xr-x where the first three letters specify the `bitcoin` owner’s permissions, i.e., rwx, the second three letters specify the permissions of the users belonging to the `bitcoin` group, i.e., r-x, and the last three letters specify the permissions for all other users, i.e., r-x.
+
+Before creating the symbolic link we're going to first switch to the `bitcoin` user by running the following command:
+
+```sh:Switch to bitcoin User
+sudo su - bitcoin
+```
+
+To switch to the `bitcoin` user we used the `su` command which is short for substitute or switch user with the `-` option, i.e., the `-l` or `--login` option, This option specifies we want to start the shell as a login shell with an environment that is similar to an actual login shell.
+
+After switching to the `bitcoin` user, the Bash prompt should now be updated and show `bitcoin@<hostname>:~$` where `<hostname>` is the hostname you set during the installation of the OS. E.g., the prompt on my node displays `bitcoin@btc-node:~$`.
+
+We can also check the current user by running the following command:
+
+```sh:Check Current User
+echo $USER
+```
+
+The output should look similar to the following:
+
+```sh:Check Current User Output
+bitcoin
+```
+
+We can now create a symbolic link from the `/data/bitcoin` directory to the `/home/<username>/.bitcoin` directory where `<username>` refers to the username you're using with Bitcoin Core, e.g., `bitcoin` by running the following command:
+
+```sh:Create Symbolic Link
+ln -s /data/bitcoin /home/bitcoin/.bitcoin
+```
+
+To verify the symbolic link was successfully created we can run the following command:
+
+```sh:Check Symbolic Link
+ls -l /home/bitcoin/.bitcoin
+```
+
+The output should look similar to the following:
+
+```sh:Check Symbolic Link Output
+lrwxrwxrwx 1 bitcoin bitcoin 13 Oct  6 11:35 /home/bitcoin/.bitcoin -> /data/bitcoin
+```
+
+The `l` character is a file type flag that represents a symbolic link, and the `->` shows the file the symbolic link points to.
+
+## Generate Access Credentials
+
+We're now going to generate access credentials to allow other applications to query Bitcoin Core to retreive the data they need to operate.
+
+Since we don't want to store the password in **plaintext**, i.e., readable data in a form that can be seen or used without the need of decryption, we're going to store the password as a hash.
+
+To accomplish this Bitcoin Core accepts a password we set, hashes it, and compares it with the stored hash which prevents us from having to store the password in plaintext.
+
+Bitcoin Core also provides the ability to generate access credentials by using a `.cookie` file in the Bitcoin data directory, i.e., `/data/bitcoin`.
+
+This cookie file is automatically created and can be read by all users that belong to the `bitcoin` group.
+
+To generate the configuration line to use in the config file for the access credentials Bitcoin Core provides a Python script which can be downloaded using the `wget` command.
+
+We're going to first navigate to the `$HOME/.bitcoin` by running the following command:
+
+```sh:Navigate to $HOME/.bitcoin Directory
+cd $HOME/.bitcoin
+```
+
+We can now download the **Remote Procedure Call (RPC)** authentication Python script, i.e., `rpcauth.py` by running the following command:
+
+```sh:Download rpcauth.py
+wget https://raw.githubusercontent.com/bitcoin/bitcoin/master/share/rpcauth/rpcauth.py
+```
+
+<Callout client:load type="tip">
+  If the download is taking a while, then you can force Wget to only look for IPv4 addresses using the `--inet4-only` flag, i.e., `wget --inet4-only https://raw.githubusercontent.com/bitcoin/bitcoin/master/share/rpcauth/rpcauth.py`. This prevents Wget from trying to download the file using IPv6 addresses which may time out.
+</Callout>
+
+We can now run the downloaded `rpcauth.py` script using Python3 by providing a username and a password as arguments to the script.
+
+<Callout client:load type="tip">
+  As mentioned in a previous section, you can use a FOSS password mananger like [KeePass](https://keepass.info/) or [Bitwarden](https://bitwarden.com/) to generate and store your usernames and passwords/passphrases.
+</Callout>
+
+<Callout client:load type="warning">
+  Before providing a username and password to the `rpcauth.py` script, it's important to note that all commands you enter into the terminal get stored in a `.bash_history` file located in the `$HOME` directory. To avoid storing the password as plaintext in the `.bash_history` file be sure to run all of the following commands in order.
+</Callout>
+
+To temporarily turn off the history for the current shell session we can run the following command:
+
+```sh:Turn Off Bash History
+set +o history
+```
+
+We can now generate the access credentials using the `rpcauth.py` script by running the following command:
+
+```sh:Generate Access Credentials
+python3 rpcauth.py <rpc-username> <rpc-password>
+```
+
+Be sure to replace `<rpc-username>` with your RPC username and `<rpc-password>` with your RPC password.
+
+The output should look similar to the following:
+
+```sh:Generate Access Credentials
+String to be appended to bitcoin.conf:
+rpcauth=btc-node:8c1ea24e01708671265877da5b360f75$d7269745e8cf31a9bb9b153ce09c8acbf1c7e24499b57426dfab857e745b20b0
+Your password:
+<rpc-password>
+```
+
+Be sure to copy the line starting with `rpcauth` which contains the hash of your RPC password. We'll be pasting this line in the Bitcoin config file in the section.
+
+We can now turn on the history for the current shell session by running the following command:
+
+```sh:Turn On Bash History
+set -o history
+```
+
