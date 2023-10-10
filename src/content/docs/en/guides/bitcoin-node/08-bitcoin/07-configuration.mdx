@@ -1,0 +1,173 @@
+---
+label: Configuration
+slug: en/guides/bitcoin-node/bitcoin/configuration
+order: 70
+---
+
+import Callout from "@components/mdx/Callout.tsx";
+
+# Configuration
+
+We're now going to create and edit the Bitcoin config file which is used by the following Bticoin Core excutables `bitcoind`, `bitcoin-qt`, and `bitcoin-cli`.
+
+## Bitcoin Core Executables
+
+Here's a brief description of each of those executables:
+
+- `bitcoind`: Is a headless daemon, i.e., a program that runs as a background process without a GUI implementation of the Bitcoin protocol that provides a **JSON-RPC** interface, i.e., an RPC protocol encoded in **JavaScript Object Notation (JSON)** which allows it to be controlled by local or remote devices. We'll be using `bitcoind` to sync and validate the Bitcoin blockchain and to run the Bitcoin protocol.
+
+- `bitcoin-qt`: Is an implementation of the Bitcoin protocol that provides a GUI which offers a visual representation of the node and wallet functionality provided by Bitcoin Core. The suffix `qt` is derived from the FOSS GUI toolkit [Qt](https://www.qt.io/) which is used to build `bitcoin-qt`. Since our node isn't using a GUI, we won't be using `bitcoin-qt`.
+
+- `bitcoin-cli`: Is a CLI for Bitcoin Core that connects to a running instance of `bitcoind`. This program can be used to interact with `bitcoind` to control the node and wallet functionality provided by Bitcoin Core. We'll be using `bitcoin-cli` throughout this guide to interact with the node.
+
+## Create Bitcoin Config File
+
+The Bitcoin config file is not automatically created when installing Bitcoin Core, so we can create the file manually.
+
+Before creating the file be sure you're using the user you set up to use with Bitcoin Core, e.g., the `bitcoin` user we created in the previous section.
+
+If you're not currently using the Bitcoin user, then you can switch to it by running the following command:
+
+```sh:Switch to Bitcoin User
+sudo su - <username>
+```
+
+Here `<username>` refers to the username you're using with Bitcoin Core.
+
+E.g., to switch to my node's Bitcoin Core user I would run the following command:
+
+```sh:Switch to bitcoin User
+sudo su - bitcoin
+```
+
+Now we're ready to create and open the config file which we can do by running the following command:
+
+```sh:Create and Open bitcoin.conf
+nano $HOME/.bitcoin/bitcoin.conf
+```
+
+The default name used for the config file is `bitcoin.conf`, and the default location is the default Bitcoin data directory.
+
+<Callout client:load type="tip">
+  Both the default config file path and the default Bitcoin data directory can be changed by using the `bitcoin-cli` options `-conf` and `-datadir`, respectively. The `-conf` option is only useable from the CLI and cannot be used in the config file. The `-conf` option will also use a relative path prefixed by the value of the `-datadir` option unless an absolute path is provided.
+</Callout>
+
+## Edit Bitcoin Config File
+
+We're now going to add the following lines to the `bitcoin.conf` file:
+
+```sh:Bitcoin Config File Updates
+server=1
+txindex=1
+
+proxy=127.0.0.1:9050
+bind=127.0.0.1
+listen=1
+```
+
+Here's an explanation of the updates we made to the `bitcoin.conf` file:
+
+- `server=1`: Allows `bitcoind` to accept command line and JSON-RPC commands.
+
+- `txindex=1`: Maintains a full transaction index, and is used by the `getrawtransaction` RPC. The default value for this option is `0`, so it's disabled by default. You cannot have this option enabled if you're planning on running a pruned node, i.e., a node that doesn't download the entire blockchain.
+
+- `proxy=127.0.0.1:9050`: Specifies the IP address and the port number to use with a SOCKS5 proxy in the format `<ip:port>`. Here we set the value to be `127.0.0.1:9050` which is the default SOCKS5 proxy Tor is listening on. The proxy server will be used to reach `.onion` addresses as well. This option is disabled by default.
+
+- `bind=127.0.0.1`: Bind to the provided IP address and always listen on it. Here we set the value to be `127.0.0.1` which is the IP address being used by Tor. The default value is `0.0.0.0`
+
+- `listen=1`: Determines if connections from outside of the node are allowed. The default value is `1`, so normally we wouldn't need to explicity set it. However, since we're using the `proxy` option, listening gets disabled. Therefore, we need to explicitly set it.
+
+## Network Explanation
+
+When using Bitcoin Core with Tor it will usually only be able to make outgoing connections. To enable incoming connections over Tor which helps improve the security and privacy of the Bitcoin network, we can run a Tor hidden service on the node.
+
+We previously enabled Tor to listen for connections on the control port, i.e., `9051` which is used to set up an automatic Tor hidden service that is initiated by Bitcoin Core.
+
+Bitcoin Core will automatically attempt to use Tor's control socket API to create and destroy ephemeral, i.e., short-lived onion services programmatically.
+
+Therefore, if Tor is running with authentication properly configured, then Bitcoin Core will automatically create an onion service to listen for incoming connections over Tor assuming Bitcoin Core is configured to listen to and accept connections from outside of the node, i.e., the `listen` option is set to a value `1`.
+
+The ability to automically detect and use Tor's control socket API to create a Bitcoin Core onion service is enabled by default by the `listenonion` option which has a default value of `1`.
+
+### Authentication
+
+Bitcoin Core offers two methods of authentication to be able to connect to Tor's control socket API:
+
+- **Cookie Authentication**: To enable this method the user running `bitcoind`, e.g., `bitcoin` must have read access to the `CookieAuthFile` specified in the `/etc/tor/torrc` config file or in the default location in the `/run/tor/control.authcookie` file. We previously enabled read access to the `CookieAuthFile` for the user running `bitcoind` when we addded the `bitcoin` user to the `debian-tor` group.
+
+- **Password Authentication**: To enable this method you would use the plaintext of the control password that was used when generating the hashed password for the `HashedControlPassword` option in the `/etc/tor/torrc` file. The plaintext of the control password would be provided to the `torpassword` option in the Bitcoin config file. Since we didn't generate a Tor control password, we're not using this option.
+
+The Tor control port that Bitcoin Core connects to is specified by the `torcontrol` option which is specified in the format `<ip>:<port>`. This option has a default value of `127.0.0.1:9051` which is the control port we previously enabled in the `/etc/tor/torrc` config file.
+
+### Onion Service
+
+After enabling the Tor control port to listen on `127.0.0.1:9051` using the Cookie Authentication method with the `bitcoin` user given read access to the `CookieAuthFile`, `bitcoind` will generate a file called `onion_private_key` in the Bitcoin data directory when there is no file with that name present in the directory.
+
+The `onion_private_key` file contains the private key needed to generate the hostname of the onion service used by Bitcoin Core, i.e., the onion address.
+
+<Callout client:load type="warning">
+  The public and private keys associated with the Bitcoin Core onion service need to be kept private. If the keys are leaked, then othen other people can impersonate the onion service which means it's now compromised, useless, and dangerous to use.
+</Callout>
+
+If we delete the keys associated with the Bitcoin Core onion service, then the next time `bitcoind` loads it will generate new keys and derive a new onion address.
+
+<Callout client:load type="warning">
+  An attacker cannot necessarily associate the onion address used by the onion service with a specific person or group; however, as long as the onion address remains the same an attacker can assume it's being run by the same person or group. This is why it's important to keep onion addresses private as well when we're using them for our own internal needs. However, to allow incoming Tor connections we need to share the onion address with the rest of the Bitcoin network.
+</Callout>
+
+<Callout client:load type="tip">
+  To achieve a higher level of security and privacy its recommended to delete the keys associated with the Bitcoin Core onion address on each reboot or on some frequent interval.
+</Callout>
+
+After performing the configuration above the node will now be able to accept incoming and outgoing connections over the Tor network.
+
+### Tor Proxy
+
+By default Bitcoin Core will usually connect over clearnet as well as allow connections to and from the Tor hidden service we've configured.
+
+After configuring the Bitcoin Core onion service, we're now helping other users who want to submit transactions to the Bitcoin newtork securely and privately. However, the transactions we submit can potentially be traced back to our node's IP address since our node still currently allows transactions we submit to be over clearnet.
+
+To ensure Bitcoin Core always uses Tor when connecting to other nodes we added the following options to the `bitcoin.conf` file:
+
+- `proxy`
+
+- `bind`
+
+- `listen`
+
+As mentioned above the `proxy` option allows us to specify the IP address and the port number to use with a SOCKS5 proxy in the format `<ip:port>`. Again we set the value to be `127.0.0.1:9050` which is the default SOCKS5 proxy Tor is listening on. The proxy server will be used to reach `.onion` addresses as well.
+
+Again, the `bind` option is used to bind the provided IP address and to always listen on it. Here we set the value to be `127.0.0.1` which is the IP address being used by the Tor proxy. This mitigates the possibility of our node establsihing a clearnet connection with another node without using Tor as a proxy.
+
+Since we set the `proxy` option, Bitcoin Core will once again not listen for and accept connections from outside of the node which is why we're explicitly setting the `listen` option to a value of `1`.
+
+### Onion Only Network
+
+If you additionally want Bitcoin Core automatic outbound connections to only connect to Tor hidden services, then you can also add this line to the `bitcoin.conf` file:
+
+```sh:Set Onion Only Network
+onlynet=onion
+```
+
+By setting the `onlynet` option to have a value of `onion` this makes your node more secure and private since it will never establish an outbound connection without using the Tor hidden service. However, your node will be unable to connect to any of the clearnet nodes.
+
+If everyone used this configuration, then nobody on the onion Bitcoin network would be able to communicate with the clearnet Bitcoin network. Therefore, it's essential that some nodes access both Tor and clearnet.
+
+enable incoming connections over Tor
+
+If you just want to enable incoming connections to your node over Tor to provide more security and privacy for other Tor users, then you shouldn't set this value. On the other hand, if you need to submit Bitcon transactions with a higher level of obscurity, then you should use `onlynet=onion`.
+
+<Callout client:load type="warning">
+  Inbound and manual connections are not affected by the `onlynet` option, so if you don't want to enable clearnet connections, then be sure to remove any manual clearnet connections you may have added in your `bitcoin.conf` file.
+</Callout>
+
+### Privacy Recommendations
+
+The onion service being used by Bitcoin Core should not be reused by any other service being run on the node, e.g., a web service.
+
+You should create a new onion service for any other service that you want to use on your node.
+
+If you use the same onion service for Bitcoin Core and some other service running on your node, then the traffic between the services can be linked.
+
+Also, note that automatic onion services created by Bitcoin Core always have only one port open.
+
