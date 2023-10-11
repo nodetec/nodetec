@@ -20,6 +20,16 @@ Here's a brief description of each of those executables:
 
 - `bitcoin-cli`: Is a CLI for Bitcoin Core that connects to a running instance of `bitcoind`. This program can be used to interact with `bitcoind` to control the node and wallet functionality provided by Bitcoin Core. We'll be using `bitcoin-cli` throughout this guide to interact with the node.
 
+The configuration used by `bitcoind` and `bitcoin-qt` are compatible. They both use the same command line arguments, the same config file, and use the same data files when reading and writing.
+
+<Callout client:load type="tip">
+Even though `bicoind` and `bitcoin-qt` are compatible in their configuration, only one can be run at a time. If you're running one of them, then you'll need to stop it before being able to run the other.
+</Callout>
+
+<Callout client:load type="warning">
+  While it's possible to quickly start `bitcoind` or `bitcoin-qt` using the default configuration by running `./bitcoind` or `./bitcoin-qt`, respectively, it's recommended to check the configuration and set any options that will increase your security and privacy.
+</Callout>
+
 ## Create Bitcoin Config File
 
 The Bitcoin config file is not automatically created when installing Bitcoin Core, so we can create the file manually.
@@ -46,15 +56,48 @@ Now we're ready to create and open the config file which we can do by running th
 nano $HOME/.bitcoin/bitcoin.conf
 ```
 
-The default name used for the config file is `bitcoin.conf`, and the default location is the default Bitcoin data directory.
+The default name used for the config file is `bitcoin.conf`, and the default location is the Bitcoin data directory.
 
 <Callout client:load type="tip">
-  Both the default config file path and the default Bitcoin data directory can be changed by using the `bitcoin-cli` options `-conf` and `-datadir`, respectively. The `-conf` option is only useable from the CLI and cannot be used in the config file. The `-conf` option will also use a relative path prefixed by the value of the `-datadir` option unless an absolute path is provided.
+  Both the config file path and the Bitcoin data directory can be changed by using the command line options `-conf` and `-datadir`, respectively. The `-conf` option is only useable from the command line, i.e., it cannot be used in the config file. The `-conf` option will also use a relative path prefixed by the value of the `-datadir` option unless an absolute path is provided.
 </Callout>
+
+## Bitcoin Config File Format
+
+The Bitcoin config file is a plain text file that consists of entries in the following format:
+
+- `option=value`
+
+Here `option` represents the Bitcoin option we're configuring and `value` represents the value we're assigning to that option.
+
+Each entry or option is placed on its own line, and all of the leading and trailing whitespaces are removed by the Bitcoin config file parser.
+
+As opposed to setting config options using the command line, options set in the Bitcoin config file must following these rules:
+
+- Each option must be specified withought a leading `-`.
+- Each option is required to have value.
+
+E.g., the `noconnect` option must be specified using the following format in the Bitcoin config file `noconnect=1`; whereas on the command line it can be specified as `-noconnect`.
+
+### Blank Lines
+
+Blank lines are also allowed and are ignored by the Bitcoin config file parser.
+
+### Comments
+
+Comments start with a `#` and extend to the end of a line.
+
+All comments are ignored by the Bitcoin config file parser.
+
+Comments may appear in two ways:
+
+- On their own line (preferable)
+
+- After an `option=value` entry
 
 ## Edit Bitcoin Config File
 
-We're now going to add the following lines to the `bitcoin.conf` file:
+We're now going to add the following lines to the Bitcoin config file:
 
 ```sh:Bitcoin Config File Updates
 server=1
@@ -63,9 +106,11 @@ txindex=1
 proxy=127.0.0.1:9050
 bind=127.0.0.1
 listen=1
+
+rpcauth=<userpw>
 ```
 
-Here's an explanation of the updates we made to the `bitcoin.conf` file:
+Here's an explanation of the updates we made to the Bitcoin config file:
 
 - `server=1`: Allows `bitcoind` to accept command line and JSON-RPC commands.
 
@@ -76,6 +121,38 @@ Here's an explanation of the updates we made to the `bitcoin.conf` file:
 - `bind=127.0.0.1`: Bind to the provided IP address and always listen on it. Here we set the value to be `127.0.0.1` which is the IP address being used by Tor. The default value is `0.0.0.0`
 
 - `listen=1`: Determines if connections from outside of the node are allowed. The default value is `1`, so normally we wouldn't need to explicity set it. However, since we're using the `proxy` option, listening gets disabled. Therefore, we need to explicitly set it.
+
+- `rpcauth=<userpw>`: Specifies the username and HMAC-SHA-256 hashed password for JSON-RPC connections. The value of `<userpw>` is provided in the format `<username>:<salt>$<hash>`. Here `<userpw>` should be replaced with your RPC username and the generated salt and hash of the your RCP password which we generated in the previous section using the `rpcauth.py` script. After setting this value, Bitcoin Core then connects normally using the `rpcuser=<username>` option, i.e., the username for JSON-RPC connections, and the `rpcpassword=<password>` option, i.e., the password for JSON-RPC connections.
+
+If `bitcoind` or `bitcoin-qt` are currently running, then changes made to the config file will only take effect after retarting them.
+
+Also, any options set using the command line will override the corresponding values set in the Bitcoin config file.
+
+<Callout client:load type="tip">
+  All command line options except for `-?`, `-help`, `-version`, and `-conf` can be specified in the config file, and all config file options except for `includeconf` can be specified on the command line.
+</Callout>
+
+<Callout client:load type="tip">
+  It's possible to get a list of all of the Bitcoin config file options including explanations about the options by running the following command `bitcoind -?`. You can also view a default `bitcoin.conf` file located in whatever directory you extracted the Bitcoin Core files to in the `bitcoin-<version>` directory where `<version>` should be replaced by whatever version of Bitcoin Core you downloaded. This default `bitcoin.conf` file is generated by the `gen-bitcoin-conf.sh` script which can be found at [contrib/devtools/gen-bitcoin-bitcoin-conf.sh](https://github.com/bitcoin/bitcoin/blob/master/contrib/devtools/gen-bitcoin-conf.sh) in the bitcoin repository.
+</Callout>
+
+<Callout client:load type="warning">
+  Be sure to only make config file changes that you understand, and to check all of the recommended config file changes proposed here against other sources.
+</Callout>
+
+## Transaction Index Explanation
+
+By default Bitcoin Core builds a transaction index consisting of only the transactions related to the user's wallets including **watch-only wallets**, i.e., a wallet that allows users to keep track of their Bitcoin in cold storage while disabling the ability to spend funds. Bitcoin Core will also maintain transaction data related to the node's **memory pool (mempool)**, i.e., a list of pending transactions waiting for validation from the network before being committed to a block in the blockchain.
+
+To be able to access any transaction with a command like `getrawtransaction` we need to configure Bitcoin Core to build and maintain a full transaction index which we did above by setting the `txindex` option to a value of `1`.
+
+You may not need to build and maintain a full transaction index if you're planning on using the node for only your own personal wallet.
+
+However, if you're planning on using your node for development, blockchian analysis, and/or any application that requires a full transaction index to run properly, e.g., some wallets and blockchain explorers, then you'll need to set `txindex=1` to be able to get transaction data for any transaction in the blockchain.
+
+The tradeoff of setting `txindex=1` is it makes the node slightly slower as well as increases the storage requirements for the node.
+
+You also cannot set `txindex=1` if you're planning on running a pruned node, i.e., a node that doesn't download the entire blockchain.
 
 ## Network Explanation
 
@@ -127,7 +204,7 @@ By default Bitcoin Core will usually connect over clearnet as well as allow conn
 
 After configuring the Bitcoin Core onion service, we're now helping other users who want to submit transactions to the Bitcoin newtork securely and privately. However, the transactions we submit can potentially be traced back to our node's IP address since our node still currently allows transactions we submit to be over clearnet.
 
-To ensure Bitcoin Core always uses Tor when connecting to other nodes we added the following options to the `bitcoin.conf` file:
+To ensure Bitcoin Core always uses Tor when connecting to other nodes we added the following options to the Bitcoin config file:
 
 - `proxy`
 
@@ -143,7 +220,7 @@ Since we set the `proxy` option, Bitcoin Core will once again not listen for and
 
 ### Onion Only Network
 
-If you additionally want Bitcoin Core automatic outbound connections to only connect to Tor hidden services, then you can also add this line to the `bitcoin.conf` file:
+If you additionally want Bitcoin Core automatic outbound connections to only connect to Tor hidden services, then you can also add this line to the Bitcoin config file:
 
 ```sh:Set Onion Only Network
 onlynet=onion
@@ -158,7 +235,7 @@ enable incoming connections over Tor
 If you just want to enable incoming connections to your node over Tor to provide more security and privacy for other Tor users, then you shouldn't set this value. On the other hand, if you need to submit Bitcon transactions with a higher level of obscurity, then you should use `onlynet=onion`.
 
 <Callout client:load type="warning">
-  Inbound and manual connections are not affected by the `onlynet` option, so if you don't want to enable clearnet connections, then be sure to remove any manual clearnet connections you may have added in your `bitcoin.conf` file.
+  Inbound and manual connections are not affected by the `onlynet` option, so if you don't want to enable clearnet connections, then be sure to remove any manual clearnet connections you may have added in your Bitcoin config file.
 </Callout>
 
 ### Privacy Recommendations
