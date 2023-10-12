@@ -108,6 +108,12 @@ bind=127.0.0.1
 listen=1
 
 rpcauth=<userpw>
+
+maxconnections=<n>
+maxuploadtarget=<n>
+
+dbcache=<n>
+blocksonly=1
 ```
 
 Here's an explanation of the updates we made to the Bitcoin config file:
@@ -123,6 +129,14 @@ Here's an explanation of the updates we made to the Bitcoin config file:
 - `listen=1`: Determines if connections from outside of the node are allowed. The default value is `1`, so normally we wouldn't need to explicity set it. However, since we're using the `proxy` option, listening gets disabled. Therefore, we need to explicitly set it.
 
 - `rpcauth=<userpw>`: Specifies the username and HMAC-SHA-256 hashed password for JSON-RPC connections. The value of `<userpw>` is provided in the format `<username>:<salt>$<hash>`. Here `<userpw>` should be replaced with your RPC username and the generated salt and hash of the your RCP password which we generated in the previous section using the `rpcauth.py` script. After setting this value, Bitcoin Core then connects normally using the `rpcuser=<username>` option, i.e., the username for JSON-RPC connections, and the `rpcpassword=<password>` option, i.e., the password for JSON-RPC connections.
+
+- `maxconnections=<n>`: Specifies the maximum number of incoming connections to establish with peers simultaneously. The default value is `125`. If your node has limited resources and you're having issues, then you can try decreasing this number to conserve resources. If your node has enough resources to handle the default number of  `maxconnections`, then it's recommended to leave the value as the default. This limit doesn't apply to manually addded connections, i.e., connections added using the `addnode` option or the `addnode` RPC which has a default limit of `8`.
+
+- `maxuploadtarget=<n>`: Specifies the preferred target over a 24 hour span to keep the outbound traffic under. The default value is `0M` which specifies no limit. If your node has limited resources and you're having issues, then you can try decreasing this number to conserve resources. Otherwise, it's recommended to keep this value at the default value. The limit doesn't apply to peers that have been granted a `download` permission by whitelisting their IP address or blocks created in the past week. Optional suffix units include `k, K, m, M, g, G, t, and T` where lowercase represents the 1000 base and uppercase represents 1024 base, e.g., 1k = 1000 bytes and 1K = 1024 bytes.
+
+- `dbcache=<n>`: Specifies the maximum database cache size in `MiB`. The value can be between `4` and `16384`, and the default value is `450`. In addition to the value set here any unused mempool memory is shared with this cache. The default `maxmempool` option has a default value of `300MB`, so if the mempool memory is currently using less memory than the `300MB` the remaining memory gets used by the database cache. To increase the initial download speed of the blockchain you can increase this value to be anywhere from a quarter to up to at least half of your node's RAM. E.g., if your node has `4GB` of RAM you can initially set this value to be `2000`. After syncing the entire blockchain, you can reduce the value to the default size to free up some of the node's RAM which will allow other applications to be able to run in parallel on the node. However, if your node has sufficient RAM, then you can increase this value as much as your hardware allows to reduce the number of disk operations done by your node and to incerase your node's speed when accessing the database.
+
+- `blocksonly=1`: Specifies whether to reject transactions from network peers by disabling transaction relaying. The default value for this option is `0`. This option reduces the incoming bandwidth to a node since it no longer participates in transaction relaying. Automatic broadcast and rebroadcast of any transactions from inbound peers is disabled, unless the peer has been granted the `relay` permission by whitelisting their IP address. The node will disconnect from any peers that attempt to relay a transaction without being granted the proper permissions. RPC transactions are not affected. This setting will increase the initial download speed of the blockchain since the node's bandwidth is no longer concerned with transaction relaying. After syncing the entire blockchain, we're going to set `blocksonly` back to `0` since we'll want to be able to relay the transactions of network peers.
 
 If `bitcoind` or `bitcoin-qt` are currently running, then changes made to the config file will only take effect after retarting them.
 
@@ -153,6 +167,20 @@ However, if you're planning on using your node for development, blockchian analy
 The tradeoff of setting `txindex=1` is it makes the node slightly slower as well as increases the storage requirements for the node.
 
 You also cannot set `txindex=1` if you're planning on running a pruned node, i.e., a node that doesn't download the entire blockchain.
+
+## Maximum Connections Explanation
+
+The `maxconnections` option specifies the maximum number of incoming connections to establish with peers simultaneously. The default value is `125`.
+
+If your node has enough resources to handle the default number of  `maxconnections`, then it's recommended to leave the value as the default.
+
+It's recommended to not try to max out your node's number of incoming connections since other nodes that are looking for the minimum number of peers to connect to will be unable to connect to your node. Connectable peers on the network can be a scarce resource and are essential to the decentralization of the network.
+
+Having more connections doesn't result in stronger verification or faster relaying. It actually slows down the relaying since your node will have to distribute new blocks and transactions to your increased number of peers.
+
+If your node has limited resources and you're having issues, then you can try decreasing this number to conserve resources.
+
+Also, note this limit doesn't apply to manually addded connections, i.e., connections added using the `addnode` option or the `addnode` RPC which has a default limit of `8`.
 
 ## Network Explanation
 
