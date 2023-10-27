@@ -406,3 +406,55 @@ If your node has limited resources and you're having issues, then you can try de
 
 Also, note this limit doesn't apply to manually addded connections, i.e., connections added using the `addnode` option or the `addnode` RPC which has a default limit of `8`.
 
+## Bitcoin Config File Permissions
+
+We're now going to set file permissions for the Bitcoin config file to allow only the owner of the file, i.e., the `bitcoin` user to be able to read the file and to write to the file and to allow members of the `bitcoin` group to be able to read the file. All other users will have no permissions.
+
+To set the file permissions for the config file we can run the following command:
+
+```sh:Set Bitcoin Config File Permissions
+chmod 640 $HOME/.bitcoin/bitcoin.conf
+```
+
+Here we're setting file permissions for the `bitcoin.conf` file located in the `$HOME/.bitcoin` directory by using the `chmod` command with a value of `640`.
+
+The first number represents the file permissions for the owner of the file, i.e., the `bitcoin` user.
+
+Here, we've given the owner of the file read and write permissions since the first number has a value of `6`.
+
+Here's how we got the value of `6` to use with the owner of the file:
+
+- Owner: `rw-` = `4` + `2` + `0` = `6`
+
+We've given the users belonging to the file's group, i.e., `bitcoin` and `satoshi` read permissions since the second number has a value of `4`.
+
+Here's how we got the value of `4` to use with the users belonging to the file's group:
+
+- Group: `r--` = `4` + `0` + `0` = `4`
+
+We've also given all other users no permissions since the last number has a value of `0`.
+
+Here's how we got the value of `0` to use with all of the other users:
+
+- Others: `---` = `0` + `0` + `0` = `0`
+
+<Callout client:load type="info">
+  Here `satoshi` should be replaced with the user you set during the installation of the OS, and `bitcoin` should be replaced with the user you set to use with Bitcoin Core.
+</Callout>
+
+### Check File Permissions
+
+To check the file permissions for the config file we can run the following command:
+
+```sh:List File Permissions for Bitcoin Config File
+ls -l $HOME/.bitcoin/bitcoin.conf
+```
+
+The output should look similar to the following:
+
+```sh:File Permissions for Bitcoin Config File
+-rw-r----- 1 bitcoin bitcoin 351 Oct 27 12:24 /home/bitcoin/.bitcoin/bitcoin.conf
+```
+
+From the output we can see that the config file have the following permissions `rw-r-----` where the first three letters specify the owner’s permissions, i.e., `rw-`, the second three letters specify the permissions of the users belonging to group, i.e., `r--`, and the last three letters specify the permissions for all other users, i.e., `---`.
+
