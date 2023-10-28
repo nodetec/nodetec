@@ -1,0 +1,155 @@
+---
+label: Running bitcoind
+slug: en/guides/bitcoin-node/bitcoin/running-bitcoind
+order: 80
+---
+
+import Callout from "@components/mdx/Callout.tsx";
+
+# Running bitcoind
+
+We're now ready to run `bitcoind` which we'll do manually at first. After manually running `bitcoind`, then we'll go over how to automatically start `bitcoind` when our node starts even if there is no user logged into the node.
+
+Before going over how to run `bitcoind`, we need to first make sure we're using the user we set up to use with Bitcoin Core, e.g., the `bitcoin` user.
+
+If you’re not currently using the Bitcoin user, then you can switch to it by running the following command:
+
+```sh:Switch to Bitcoin User
+sudo su - <username>
+```
+
+Here `<username>` refers to the username you're using with Bitcoin Core.
+
+E.g., to switch to my node's Bitcoin Core user I would run the following command:
+
+```sh:Switch to bitcoin User
+sudo su - bitcoin
+```
+
+## Manually Running bitcoind
+
+We're now going to manually run `bitcoind` by running the following command:
+
+```sh:Manually Running bitcoind
+bitcoind
+```
+
+After manually running `bitcoind`, we should be presented with output related to the startup and running of the Bitcoin Core daemon. Let `bitcoind` run for a few minutes to make sure everything is running correctly.
+
+If the output stops at `dnsseed thread exit`, then the node should still be functioning correctly and you can proceed to the next steps.
+
+If `bitcoind` is running correctly, then we can stop it by pressing `Ctrl+C`.
+
+## Debug Log File
+
+Bitcoin Core provides a debug log file by default which has a default name of `debug.log` and has a default location specified by the Bitcoin data directory which by default is `$HOME/.bitcoin`.
+
+After running `bitcoind`, we should have a `debug.log` file located in the following directory `/home/<username>/.bitcoin`.
+
+Here `<username>` refers to the username you're using with Bitcoin Core, e.g, `bitcoin`.
+
+### Edit Location
+
+To change the default location of the debug log file, you can add the following to your Bitcoin config file:
+
+```sh:Edit Location
+debuglogfile=<file>
+```
+
+Here `<file>` should be replaced with the preferred location for the debug log file. If a relative path is provided, then it will be prefixed by the `datadir` location, i.e., the Bitcoin Core data directory.
+
+### Disable
+
+To disable the debug log file you can set the following in your Bitcoin config file:
+
+```sh:Disable Debug Log File
+debuglogfile=/dev/null
+```
+
+### Logging
+
+By default debug logging is disabled. The severity level for logging in the debug log file contains info, warning, and error levels by default.
+
+To enable debug and trace logging you can add the following to your Bitcoin config file:
+
+```sh:Enable Debug and Trace Logging
+debug=<category>
+```
+To see a list of the `<category>` options you can run `bitcoind -?` and navigate to the `debug` option.
+
+The `debug=<category>` option can be specified multiple times to output debug and trace logging for multiple categories.
+
+If `<category>` is left empty or if `debug=1` is set, then all debug and trace logging will be output to the debug log file.
+
+### File Permissions
+
+We’re now going to set file permissions for the debug log file to allow only the owner of the file, i.e., the `bitcoin` user to be able to read the file and to write to the file and to allow members of the `bitcoin` group to be able to read the file. All other users will have no permissions.
+
+To set the file permissions for the debug log file we can run the following command:
+
+```sh:Set Debug Log File Permissions
+chmod g+r $HOME/.bitcoin/debug.log
+```
+
+Here we're setting file permissions for the `debug.log` file located in the `$HOME/.bitcoin` directory by using the `chmod` command with a value of `g+r`.
+
+Here we're using the `chmod` command's **symbolic mode** when setting the file permissions for the debug log file.
+
+The `g` is the user flag, and it's used to indicate that we want to edit the file permissions for the users belonging to the file's group.
+
+The `+` is the operation flag, and it's used to indicate that we want to add permissions to the user's specified by the user flag.
+
+The `r` specifies the permissions we want to set for the specified users which in this case is the read permission.
+
+<Callout client:load type="info">
+  If you want to learn more about Linux file permissions and the `chmod` command, then check out [Chmod Command in Linux (File Permissions)](https://linuxize.com/post/chmod-command-in-linux/).
+</Callout>
+
+### Check File Permissions
+
+To check the file permissions for the debug log file we can run the following command:
+
+```sh:List File Permissions for Debug Log File
+ls -l $HOME/.bitcoin/debug.log
+```
+
+The output should look similar to the following:
+
+```sh:File Permissions for Debug Log File
+-rw-r----- 1 bitcoin bitcoin 9602 Oct 28 10:46 /home/bitcoin/.bitcoin/debug.log
+```
+
+From the output we can see that the debug log file has the following permissions `rw-r-----` where the first three letters specify the owner’s permissions, i.e., `rw-`, the second three letters specify the permissions of the users belonging to group, i.e., `r--`, and the last three letters specify the permissions for all other users, i.e., `---`.
+
+After setting the file permissions for the debug log file, we can now exit the `bitcoin` user session by running the following command:
+
+```sh:Exit Bitcoin User Session
+exit
+```
+
+After exiting the `bitcoin` user session, the Bash prompt should now be updated and show `<username>@<hostname>:~$` where `<username>` is the username you set during the installation of the OS, e.g., `satoshi`, and `<hostname>` is the hostname you set during the installation of the OS. E.g., the prompt on my node displays `satoshi@btc-node:~$`.
+
+## Create Symbolic Link
+
+We're now going to create a symbolic link from the `/data/bitcoin` directory to the `/home/<username>/.bitcoin` directory where `<username>` refers to the username you set during the installation of the OS, e.g., `satoshi` by running the following command:
+
+```sh:Create Symbolic Link
+ln -s /data/bitcoin /home/<username>/.bitcoin
+```
+
+By creating this symbolic link, we're allowing the user we set during the installation of the OS to interact with `bitcoind` directly. This allows us to, e.g., use the Bitcoin Core CLI, i.e., `bitcoin-cli` from the user we set during the installation of the OS as well.
+
+To verify the symbolic link was successfully created we can run the following command:
+
+```sh:Check Symbolic Link
+ls -l /home/<username>/.bitcoin
+```
+
+The output should look similar to the following:
+
+```sh:Check Symbolic Link Output
+lrwxrwxrwx 1 satoshi satoshi 13 Oct 28 11:32 /home/satoshi/.bitcoin -> /data/bitcoin
+```
+
+The `l` character is a file type flag that represents a symbolic link, and the `->` shows the file the symbolic link points to.
+
