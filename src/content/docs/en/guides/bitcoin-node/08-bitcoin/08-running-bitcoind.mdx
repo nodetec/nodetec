@@ -56,7 +56,7 @@ To change the default location of the debug log file, you can add the following 
 debuglogfile=<file>
 ```
 
-Here `<file>` should be replaced with the preferred location for the debug log file. If a relative path is provided, then it will be prefixed by the `datadir` location, i.e., the Bitcoin Core data directory.
+Here `<file>` should be replaced with the preferred location for the debug log file. If a relative path is provided, then it will be prefixed by the `datadir` location, i.e., the Bitcoin data directory.
 
 ### Disable
 
@@ -152,4 +152,444 @@ lrwxrwxrwx 1 satoshi satoshi 13 Oct 28 11:32 /home/satoshi/.bitcoin -> /data/bit
 ```
 
 The `l` character is a file type flag that represents a symbolic link, and the `->` shows the file the symbolic link points to.
+
+## Autostart on Boot
+
+To be able to automatically run `bitcoind` on the node in the background on boot and when no one is logged in we can use [systemd](https://systemd.io/).
+
+### systemd
+
+systemd is a software suite that provides an array of system components for Linux. It's primarily a **system and service manager** that runs as `PID 1`, i.e., the `init` process which is the first Linux user-mode process created and starts the rest of the system.
+
+Along with handling the startup process of the system, systemd gives us the ability to create and manage our own services by using configuration files also known as **unit files**.
+
+#### Unit Files
+
+A unit file is a plain text file containing configuration details about a service, a socket, a device, a mount point, an automount point, a swap file or partition, a startup target, a watched file system path, a timer controlled and supervised by systemd, a resource management slice, or a group of externally created processes.
+
+To see the current unit files in the system we can the following command:
+
+```sh:List systemd Unit Files
+ls /etc/systemd/system
+```
+
+The output should look similar to the following:
+
+```sh:systemd Unit Files
+dbus-fi.w1.wpa_supplicant1.service          multi-user.target.wants
+dbus-org.freedesktop.ModemManager1.service  network-online.target.wants
+dbus-org.freedesktop.nm-dispatcher.service  sshd.service
+dbus-org.freedesktop.timesync1.service      sysinit.target.wants
+getty.target.wants                          timers.target.wants
+```
+
+<Callout client:load type="warning">
+ The name you use for the unit file should not be the same as any existing unit file since it will take precedence over the already present unit file.
+</Callout>
+
+Unit files use `INI` file syntax, i.e., the files consist of section headers started with square brackets, e.g., `[Section Name]` that contain variable declarations that use the following format `option=value`.
+
+### Create bitcoind Unit File
+
+To create and open the `bitcoind` unit file we can run the followng command as the user you set during the installation of the OS, e.g., `satoshi`:
+
+```sh:Create bitcoind Unit File
+sudo nano /etc/systemd/system/bitcoind.service
+```
+
+### Edit bitcoind Unit File
+
+We're now going to add the following lines to the `bitcoind` unit file:
+
+```sh:bitcoind Unit File Updates
+# systemd unit for bitcoind
+# /etc/systemd/system/bitcoind.service
+
+# Note that almost all daemon options could be specified in
+# /etc/bitcoin/bitcoin.conf, but keep in mind those explicitly
+# specified as arguments in ExecStart= will override those in the
+# config file.
+
+[Unit]
+Description=Bitcoin Core Daemon
+Documentation=https://github.com/bitcoin/bitcoin/blob/master/doc/init.md
+
+# https://www.freedesktop.org/wiki/Software/systemd/NetworkTarget/
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+
+# Service execution
+###################
+
+ExecStart=/usr/local/bin/bitcoind -pid=/run/bitcoind/bitcoind.pid \
+                                  -conf=/home/bitcoin/.bitcoin/bitcoin.conf \
+                                  -datadir=/home/bitcoin/.bitcoin \
+                                  -startupnotify='chmod g+r /home/bitcoin/.bitcoin/.cookie && systemd-notify --ready' \
+                                  -shutdownnotify='systemd-notify --stopping'
+
+# Process management
+####################
+
+Type=notify
+NotifyAccess=all
+PIDFile=/run/bitcoind/bitcoind.pid
+
+Restart=on-failure
+TimeoutStartSec=infinity
+TimeoutStopSec=600
+RestartSec=30
+
+# Directory creation and permissions
+####################################
+
+# Run as bitcoin:bitcoin
+User=bitcoin
+Group=bitcoin
+UMask=0027
+
+# /run/bitcoind
+RuntimeDirectory=bitcoind
+RuntimeDirectoryMode=0710
+
+# Hardening measures
+####################
+
+# Provide a private /tmp and /var/tmp.
+PrivateTmp=true
+
+# Mount /usr, /boot/ and /etc read-only for the process.
+ProtectSystem=full
+
+# Disallow the process and all of its children to gain
+# new privileges through execve().
+NoNewPrivileges=true
+
+# Use a new /dev namespace only populated with API pseudo devices
+# such as /dev/null, /dev/zero and /dev/random.
+PrivateDevices=true
+
+# Deny the creation of writable and executable memory mappings.
+MemoryDenyWriteExecute=true
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Here's an explanation of the updates we made to the `bitcoind` unit file:
+
+- `[Unit]`: Specifies the `Unit` section which contains generic information about the unit, i.e., information that isn't dependent on the specific unit.
+
+- `Description=Bitcoin Core Daemon`: A short human readable title of the unit. This option may be used by systemd and other UIs as a user-visible label for the unit, so the value should identify the unit instead of describing it, despite the option's name. It's recommended that the value shouldn't repeat the unit name, e.g., *bitcoind* or be too generic, e.g., *daemon*. systemd may use the string as a noun in status messages, e.g., *Starting description...*, *Started description.*, *Failed to start description.*, etc., so it should ideally be capatilized and shouldn't be a full sentence or phrase with a continuous verb, e.g., *starting the daemon*.
+
+- `Documentation=`: This option is used for referencing documentation for the unit and its configuration. The option expects a list of Uniform Resource Identifiers (URIs) separated by a space. Only URIs of types `http://`, `https://`, `file:`, `info:`, and `man:` are accepted. The provided URIs should ideally be listed in order of relevance, i.e., starting with the most relevant. Ideally, the first URI references documentation that explains the unit's purpose, followed by how the unit is configured, and finally any other related documentation. Here we set the value to the [Sample init scripts and service configuration for bitcoind](https://github.com/bitcoin/bitcoin/blob/master/doc/init.md) documentation which is a reference provided by Bitcoin Core.
+
+- `After=`: This option is used to specify a list of units that should be fully started up before the unit we're configuring is started. When a unit is considered to be fully started up depends on the value of `Type` specified in the unit file. When units have an ordering dependency between them the opposite of the startup order is applied when the units are shutdown. If a unit is ordered to shutdown, then the shutdown takes precedence over any startup order given to any of the units that have an ordering dependency with the unit that was ordered to shutdown. The option expects a list of unit names separated by a space, and this option can also be listed more than once in a unit file. See the [Network Target](/en/guides/bitcoin-node/bitcoin/running-bitcoind#network-target) section below for an explanation of the value we set.
+
+- `Wants=`: This option is used to configure weak requirement dependencies on other units. The option expects a list of unit names separated by a space, and it can also be listed more than once in a unit file. A weak dependency will be created for each unit name in the provided list. If the unit we're configuring is started, then the units in the provided list will also start. However, if any of the listed units fail to start or cannot be added to the service, then the configuring unit will still be started. The order of the weak dependencies doesn't influence the order in which the units are started or stopped. The ordering of the starting or stopping of units is handled by the `After=` and `Before=` options. If no ordering is specified, then when the unit we're configuring is activated it will start simultaneously with all of the units in the provided list. See the [Network Target](/en/guides/bitcoin-node/bitcoin/running-bitcoind#network-target) section below for an explanation of the value we set.
+
+- `[Service]`: Specifies the `Service` section which contains information about the service and process it supervises. This section must be included in service unit files.
+
+- `ExecStart=`: Specifies commands that are executed when the service is started. Exactly one command can be given unless the `Type` for the unit file is set to `oneshot`. The process started with this option is considered the main process of the daemon unless `Type=forking` is set. See the [ExecStart](/en/guides/bitcoin-node/bitcoin/running-bitcoind#execstart) section below for an explanation of the value we set.
+
+- `Type=notify`: This option configures the mechanism via which the service notifies the manager that the service startup has finished. By setting the value to `notify`, the service manager will consider the unit started immediately after the main service binary has executed and after the service sends an expected `READY=1` notification message or an equivalent call when it has finished starting up. The service manager will delay the starting of any follow-up units until after the main service binary has executed and the notification message has been sent. By using this value, we're able to precisely schedule when to consider the service as started up successfully and when to proceed with the follow-up units. It's recommended to use this value instead of the traditional value of `forking`. When using this value, `NotifyAccess=` should be configured to open access to the notification socket provided by systemd. If `NotifyAccess=` isn't provided or set to `none`, then it'll be forcibly set to `main`.
+
+- `NotifyAccess=all`: This option controls access to the service status notification socket. The option expects one of the following values `none`, `main`, `exec`, or `all`. If `none` is set, then no daemon status updates sent from the main process of service are accepted. If `main` is set, then only service updates sent from the main process of the service are accepted. If `exec` is set, then only service updates sent from any of the main or control processes originating from the `Exec*=` commands are accepted. If `all` is set, then all service updates from all members of the service's control are accepted. Here we set the value to `all` to allow all service updates.
+
+- `PIDFile=/run/bitcoind/bitcoind.pid`: This option expects a path to the PID file of the service. Typically, the provided path is contained in the `/run/` directory. If a relative path is provided it will be prefixed by `/run/`. After the startup of the service, the service manager will read the PID of the main process of the service from the file specified here. The service manager will not write to file configured here, but it will remove the file after the service shuts down if it still exists. The PID file doesn't need to be owned by a privileged user, but if it's owned by an unprivileged user, then the file may not be a symlink to a file owned by a different user, and the PID file must refer to a process already belonging to the service. Here we set the value to `/run/bitcoind/bitcoind.pid`. See the [ExecStart](/en/guides/bitcoin-node/bitcoin/running-bitcoind#execstart) section for an explanation of value we set.
+
+- `Restart=on-failure`: This option configures whether the service shall be restarted when the service process exits, is killed, or a timeout is reached. The service process can be the main service process, but it can also be one of the processes specified with `ExecStartPre=`, `ExecStartPost=`, `ExecStop=`, `ExecStopPost=`, or `ExecReload`. Here the main service process is used, and it's the command given to the `ExecStart=` option since `Type=forking` isn't set. When the death of the process is caused by a systemd operation, e.g., a service stop or restart, then the service isn't restarted. The option expects one of the following values `no`, `on-success`, `on-failure`, `on-abnormal`, `on-watchdog`, `on-abort`, or `always`. Here we set the value to `on-failure` which means the serivce will be restarted when the process exits with a non-zero exit code, is terminated by a signal including on core dump but excluding the signals `SIGHUP`, `SIGINT`, `SIGTERM`, and `SIGPIPE`, when an operation, e.g., a service reload times out, and when the configured watchdog timeout is triggered. The `on-failure` value is the recommended value for long-running services since it increases reliability by attempting to automatically recover from errors.
+
+- `TimeoutStartSec=infinty`: - This option configures the time to wait for startup. If a daemon service doesn't signal startup completion within the provided time, then the service will be considered failed and will be shut down again. The exact action depends on the `TimeoutStartFailureMode=` option which has a default value of `terminate` that attempts to gracefully terminate the service. The option expects a unitless value in seconds or a time span value, e.g., `5min` or `20s`. To disable the timeout logic a value of `infinity` can be provided which is the value we set. The default value is determined by the `DefaultTimeoutStartSec=` set in the manager unless `Type=oneshot` is used which disables the timeout by default.
+
+- `TimeoutStopSec=600`: This option configures the time to wait for each `ExecStop` command to finish. If any of the `ExecStop` commands timeout, then the subsequent `ExecStop` commands are skipped and the service will be terminated using the `SIGTERM` signal. If no `ExecStop` commands are specified, then the service gets the `SIGTERM` signal immediately. This option also configures the time to wait for the service itself to stop. If the service doesn't terminate in the specified time, it will be forcibly terminated using the `SIGKILL` signal. The exact action depends on the `TimeoutStopFailureMode=` option which has a default value of `terminate` that attempts to gracefully terminate the service. The option expects a unitless value in seconds or a time span value, e.g., `5min` or `20s`. To disable the timeout logic a value of `infinity` can be provided. The default value is determined by `DefaultTimeoutStopSec` set in the manager configuration file. Here we set the value to `600` without using any `ExecStop` commands, so this means the system manager will wait for `600` seconds, i.e, `60` minutes for the service to gracefully terminate before forcibly terminating the service.
+
+- `RestartSec=30`: This option configures the time to sleep before restarting a service. The restart action depends on the `Restart=` option which we set to `on-failure`. The option expects a unitless value in seconds or a time span value, e.g., `5min` or `20s`. The default value is `100ms`.
+
+- `User=bitcoin`: This option sets the user that the processes are executed as. The option expects a single username or the numeric ID of a user. For system services, i.e., services run by the system service manager which are managed by PID 1 and for user services of the `root` user, i.e., services managed by the `root` user's instance of systemd, the default value is `root`. To specify a different user to run the `bitcoind` service as, we set the value to `bitcoin`. If you're using a different user with Bitcoin Core, then replace `bitcoin` with your preferred username. If the `Group=` option isn't set, then the default group of the user is used, i.e., `bitcoin`.
+
+- `Group=bitcoin`: This option sets the group that the processes are executed as. The option expects a single group name or the numeric ID of the group. For system services, i.e., services run by the system service manager which are managed by PID 1 and for user services of the `root` user, i.e., services managed by the `root` user's instance of systemd, the default value is `root`. If the `Group=` option isn't set, then the default group of the user that is being used to execute the processes is used, i.e., `bitcoin`. Here, we explicitly set the group name for the `bitcoind` service to `bitcoin`. If you're using a different group with Bitcoin Core, then replace `bitcoin` with your preferred group name unless you want to omit it and implicitly set it by using the default group of the user set by the `User=` option.
+
+- `UMask=0027`: This option controls the file mode creation mask for the service. The default file mode creation mask on Linux systems is `0022`. The file mode creation mask determines the permission bits for newly created files and directories. The default file creation permissions on Linux systems are `666` for files and `777` for directories. The default value for files gives read and write permissions to the owner of a file, to the users belonging to a file's group, and to all of the other users. The default value for directories gives read, write, and execute permissions to the owner of a directory, to the users belonging to a directory's group, and to all of the other users. These default creation permissions can be modified using the `umask` command. The `umask` value contains the permission bits that should not be set on newly created files and directories. E.g., here we set the file mode creation mask to `0027`. The first digit, i.e., `0` represents the `suid`, `sgid`, and sticky bit and are ignored by the `umask` command. The second digit, i.e., `0` represents the owner permission bits not set on a newly created file and directory, i.e., no permissions which corresponds to allowing read, write, and execute permissions for the owner, i.e., `7`. The third digit, i.e., `2` represents the group permission bits not set on a newly created file and directory, i.e., the write permission which corresponds to allowing read and execute permissions for the group. The fourth digit, i.e., `7` represents all other user permission bits not set on a newly created file and directory, i.e., the read, write, and execute permissions which corresponds to allowing no permissions for all other users, i.e., `0`. Therefore, by setting the `UMask=` option to `0027`, we're setting the permission bits for newly created files and directories for the `bitcoind` service to be `0750`. If you're interested in learning more about the `umask` command, then take a look at [umask](https://wiki.archlinux.org/title/umask).
+
+- `RuntimeDirectory=bitcoind`: This option is used to manage one or more runtime directories for the unit which are used to store temporary data that is deleted when the daemon stops. This functionality is useful for underpriviledged daemons that cannot create runtime directories in `/run/` due to lack of privileges, and to ensure the runtime directory is cleaned up automatically after each use. The option expects a list of directory names separated by a space. The provided directory names must be relative and cannot include `..`. When the unit is started the provided directories including any specified parent directories are created below the `/run/` directory. The innermost subdirectories of the provided directories are removed when the unit is stopped. The innermost subdirectories will also be owned by the user and group specified by the `User=` and `Group=` options, and they will have their access mode adjusted to the value specified by the `RuntimeDirectoryMode=` option. A corresponding environment variable, i.e., `$RUNTIME_DIRECTORY` is also set and contains the full paths of the provided directories. The environment variable paths are concatenated with colons, i.e., `:` if multiple directories are provided. Here we set the value to `bitcoind` which means a runtime directory will be created in the following location `/run/bitcoind` which is owned by the user and group we previously specified, i.e., the `bitcoin` user and the `bitcoin` group.
+
+- `RuntimeDirectoryMode=0710`: This option specifies the permission bits for the directories specified by the `RuntimeDirectory=` option which in our case is the `/run/bitcoind` directory. The option takes an octal number for the permission bits and defaults to `0755`. Here we set the permission bits for the runtime directory to be `0710`. The first digit, i.e., `0` represents the `suid`, `sgid`, and sticky bit permissions where a value of `0` means none of those permissions are set. The second digit, i.e., `7` sets read, write, and execute permissions for the owner of the directory. The third digit, i.e., `1` sets the execute permission for users belonging to the directory's group. The fourth digit, i.e., `0` sets no permissions for all other users.
+
+- `PrivateTmp=true`: This option takes a boolean argument, i.e., `false` or `true`. The default value for this option is `false`. If set to `true`, then a new file system namespace for the executed processes is set up and private `/tmp` and `/var/tmp` directories are set up inside of it. These directories aren't shared by processes outside of the namespace. This option is useful for securing access to temporary files related to the process. However, sharing between processes via the `/tmp` and `/var/tmp` directories is impossible. When this option is set to `true`, then all temporary files created by a service in the `/tmp` and `/var/tmp` directories are removed when the service is stopped. The implementation of this option might not be possible, e.g., if mount namespaces aren't available, so the unit shouldn't soley rely on this option for security.
+
+- `ProtectSystem=full`: This option takes a boolean argument or the special values `full` or `strict`. If set to `true`, then the `/usr` directory and the boot loader directories, i.e., `/boot` and `/efi` are mounted as read-only for processes invoked by the unit. If set to `full`, then the `/etc` directory is mounted as read-only too. If set to `strict`, then the entire file system hierarchy is mounted read-only, except for the API file system subtrees, i.e., `/dev`, `/proc`, and `/sys`. This setting ensures that any modification of the OS and optionally its configuration and local mounts is prohibited for the service. It's recommended to enable this setting for all long-running services unless they're involved with system updates or needed to modify the OS in some way. The option `ReadWritePaths=` can be used to exclude specific directories from being made read-only. This option cannot ensure protection in all cases, and the default is `false`. Here, we set the value to `full`.
+
+- `NoNewPrivileges=true`: This option takes a boolean argument, i.e., `false` or `true`. If set to `true`, then the service process and all its children can never gain new privileges through `execve()`, e.g., from `setuid` or `setgid` bits or filesystem capabilities. Setting this option to `true` is a simple and effective way to ensure that a process and its children can never elevate privileges again. This option only has an effect on the unit's processes or any process directly or indirectly forked off them and not on processes potentially invoked on request of them. The default value is `false`. Also, the following options `DynamicUser=`, `LockPersonality=`, `MemoryDenyWriteExecute=`, `PrivateDevices=`, `ProtectClock=`, `ProtectHostname=`, `ProtectKernelLogs=`, `ProtectKernelModules=`, `ProtectKernelTunables=`, `RestrictAddressFamilies=`, `RestrictNamespaces=`, `RestrictRealtime=`, `RestrictSUIDSGID=`, `SystemCallArchitectures=`, `SystemCallFilter=`, or `SystemCallLog=` can override and ignore the value set for this option.
+
+- `PrivateDevices=true`: This option takes a boolean argument, i.e., `false` or `true`. The default value for this option is `false`. If set to `true`, then a new `/dev` mount for the executed processes is set up and only API pseudo devices, e.g., `/dev/null`, `/dev/zero`, and/or `/dev/random` are added to the newly mounted `/dev` namespace. The new `/dev` mount is read-only and `noexec`. No physical devices, e.g., `/dev/sda`, system memory `/dev/mem`, system ports `/dev/port`, etc. are set up for the executed processes. By setting this option to `true`, we're turning off physical device access for the executed processes. The implementation of this option might not be possible, e.g., if mount namespaces aren't available, so the unit shouldn't soley rely on this option for security.
+
+- `MemoryDenyWriteExecute=true`: This option takes a boolean argument, i.e., `false` or `true`. If set to `true`, then this option prohibits attempts to create memory mappings that are writable and executable at the same time, to change existing memory mappings to become executable, and the mapping of shared memory segments as executable. This option is used to improve service security since it makes it harder for software exploits to change running code dynamically. However, it's possible to circumvent this protection if the service can write to a filesystem which isn't mounted with `noexec`. To prevent this we set `PrivateDevices=true` which as described above only allows API pseudo devices to the `/dev` mount that is read-only and has `noexec` set.
+
+- `[Install]`: Specifies the `Install` section which contains installation information for the unit. This option isn't interpreted by systemd during runtime instead it's used by the `enable` and `disable` commands of the `systemctl` tool during the installation of a unit.
+
+- `WantedBy=multi-user.target`: This option expects a list of unit names separated by a space, and it can also be listed more than once in a unit file. The option is used to create symbolic links to `.wants/` directories for each of the provided units when the unit is installed using `systemctl enable`. This has the effect of a `Wants=` dependency for the current unit being added to each of the listed units. Here we set the value to `multi-user.target` which is a special target unit provided by systemd used to set up a multi-user system, i.e., it's the state where the system can accept multiple non-graphical user sessions. It's commonly used as the default target for a Linux system which starts everything that is needed for full system functionality. The `multi-user.target` unit is also pulled in by the special target unit `graphical.target`. Units that are needed for a multi-user system must add a `Wants=` dependency for their unit to the `multi-user.target` unit during installation which is what we accomplished for the `bitcoind.service` unit by adding `WantedBy=multi-user.target` to the `[Install]` section.
+
+<Callout client:load type="info">
+  If you want to learn more about systemd including the options we set above, then check out [Unit directives](https://www.freedesktop.org/software/systemd/man/latest/systemd.directives.html), [Unit configuration](https://www.freedesktop.org/software/systemd/man/latest/systemd.unit.html), [Service unit configuration](https://www.freedesktop.org/software/systemd/man/latest/systemd.service.html), [Execution environment configuration](https://www.freedesktop.org/software/systemd/man/latest/systemd.exec.html#), [Special systemd units](https://www.freedesktop.org/software/systemd/man/latest/systemd.special.html), and [systemd-notify](https://www.freedesktop.org/software/systemd/man/latest/systemd-notify.html).
+</Callout>
+
+#### Network Target
+
+Here's the `After=` option we set related to the network target in the `bitcoind` unit file above:
+
+```sh:Network Target After Option from bitcoind Unit File
+After=network-online.target
+```
+
+Here we set the `After=` option to be `network-online.target` which is a special target unit provided by systemd related to network configuration. This target unit is an active unit, i.e., it is pulled in by the consumer, i.e., the `bitcond` service in our case rather than the provider of the functionality. This target unit is used to pull in a service that delays further execution until the network is sufficiently configured. What is meant by sufficiently configured ultimately depends on the implementation of the network managing service.
+
+By setting `After=` to `network-online.target` we're checking that the network has been properly configured before completing the execution of the `bitcoind` service. This setting is also useful during shutdown since the `bitcoind` service can be sure that it's stopped before the network is shut down which allows `bitcoind` to cleanly terminate connections before shutting down.
+
+Here's the `Wants=` option we set related to the network target in the `bitcoind` unit file above:
+
+```sh:Network Target Wants Option from bitcoind Unit File
+Wants=network-online.target
+```
+
+Here we set the `Wants=` option to also be `network-online.target` which we explained above.
+
+Since `bitcoind` requires a configured network connection to function as expected, we set the `Wants=` option to `network-online.target`. This pulls in a weak dependency on the `network-online.target` unit. When the `bitcoind` service is started, then the `network-online.target` unit would also start which is why we also set the `After=` option described above.
+
+By setting these two options we're ensuring that the configured network devices are up and have an IP address assigned to them before the `bitcoind` service is started.
+
+<Callout client:load type="info">
+  If you want to learn more about the `Wants=` option, the `After=` option, and the reasoning behind the configuration used here, then check out [Wants=](https://www.freedesktop.org/software/systemd/man/latest/systemd.unit.html#Wants=), [Before=, After=](https://www.freedesktop.org/software/systemd/man/latest/systemd.unit.html#Before=), and [Running Services After the Network is up](https://www.freedesktop.org/wiki/Software/systemd/NetworkTarget/), respectively.
+</Callout>
+
+#### ExecStart
+
+Here's the `ExecStart=` option we set in the `bitcoind` unit file above:
+
+```sh:ExecStart Option from bitcoind Unit File
+ExecStart=/usr/local/bin/bitcoind -pid=/run/bitcoind/bitcoind.pid \
+                                  -conf=/home/bitcoin/.bitcoin/bitcoin.conf \
+                                  -datadir=/home/bitcoin/.bitcoin \
+                                  -startupnotify='chmod g+r /home/bitcoin/.bitcoin/.cookie && systemd-notify --ready' \
+                                  -shutdownnotify='systemd-notify --stopping'
+
+# Make sure the RPC cookie file is readable by the bitcoin group
+```
+
+Here we set the `ExecStart=` option to be the following value:
+
+```sh:ExecStart Option Value
+/usr/local/bin/bitcoind -pid=/run/bitcoind/bitcoind.pid \
+                                  -conf=/home/bitcoin/.bitcoin/bitcoin.conf \
+                                  -datadir=/home/bitcoin/.bitcoin \
+                                  -startupnotify='chmod g+r /home/bitcoin/.bitcoin/.cookie && systemd-notify --ready' \
+                                  -shutdownnotify='systemd-notify --stopping'
+```
+
+We're now going to explain each part of the given value:
+
+- `/usr/local/bin/bitcoind`: Specifies that we want to use the Bitcoin Core executable `bitcoind` that's located in the following directory `/usr/local/bin`.
+
+- `-pid=/run/bitcoind/bitcoind.pid`: Specifies the file path to the `bitcoind.pid` file, i.e., the PID file used by `bitcoind`. This file stores the PID associated with `bitcoind` to allow for easy access to the PID. If a relative path is provided, then it will be prefixed by a net-specific `datadir` location, i.e., the file path set for the Bitcoin data directory. The default value is `bitcoin.pid`. Here we set the value to `/run/bitcoind/bitcoin.pid`. The `/run` directory is used to store temporary data used at runtime. The `/run/bitcoind` directory is specified to store the `bitcoind.pid` file in which helps to organize and avoid any possible clashes with other processes contained in the `/run` directory.
+
+- `-conf=/home/bitcoin/.bitcoin/bitcoin.conf`: Specifies the file path to the Bitcoin config file. This option uses a relative path prefixed by the value of the `datadir` option, i.e., the Bitcoin data directory unless an absolute path is provided. The default value is `bitcoin.conf`, and the default location is the Bitcoin data directory. Here we set the location of the Bitcoin config file to be an absolute path, i.e., `/home/bitcoin/.bitcoin` using the `bitcoin` user. If you're using a different user with Bitcoin Core, then be sure to replace `bitcoin` with your preferred username. We also used the default name for the Bitcoin config file, i.e., `bitcoin.conf`.
+
+- `-datadir=/home/bitcoin/.bitcoin`: Specifies the file path to the Bitcoin data directory. The default value is `/home/<username>/.bitcoin` where `<username>` refers to the user being used with Bitcoin Core. Here we set the location of the Bitcoin data directory to be `/home/bitcoin/.bitcoin` which specifies we want to use the `bitcoin` user. If you're using a different user with Bitcoin Core, then be sure to replace `bitcoin` with your preferred username.
+
+- `startupnotify='chmod g+r /home/bitcoin/.bitcoin/.cookie && systemd-notify --ready'`: Here we're specifying commands that we want to execute on the `bitcoind` startup by using the `startupnotify` option provided by `bitcoind`. Here we're specifying two commands on startup, i.e., `chmod g+r /home/bitcoin/.bitcoin/.cookie` and `systemd-notify --ready`. The commands are executed together using the **logical AND** operator, i.e., `&&` which executes the commands in sequence, i.e., the second command is executed only if the first command runs successfully. The first command we want to execute is `chmod g+r /home/bitcoin/.bitcoin/.cookie`. By using the `chmod` command we're setting the file permissions for the Bitcoin Core RPC auth cookie file. The Bitcoin Core RPC auth cookie file is created by `bitcoind` on startup and removed when `bitcoind` is shutdown, and by default is located in the Bitcoin data directory and is named `.cookie`. To change the location of the RPC auth cookie file the `rpcauthcookiefile` option can be set in the Bitcoin config file which expects a relative or absoulte path to the RPC auth cookie file. By specifying `chmod g+r` we're allowing only the owner of the file, i.e., the `bitcoin` user to be able to read the file and to write to the file and to allow members of the `bitcoin` group to be able to read the file. All other users will have no permissions. If you're using a different user with Bitcoin Core, then be sure to replace `bitcoin` with your preferred username. The second command, i.e., `systemd-notify --ready` uses the `systemd-notify` directive which is used to notify the service manager about startup completion and other daemon status changes. Here we're using the `--ready` option which informs the invoking service manager about service startup or configuration reload completion.
+
+- `-shutdownnotify='systemd-notify --stopping'`: Here we're specifying a command that we want to execute immediately before `bitcoind` enters shutdown by using the `shutdownnotify` option provided by `bitcoind`. Here we're using the following command `systemd-notify --stopping` which uses the `systemd-notify` directive which is used to notify the service manager about startup completion and other daemon status changes. Here we're using the `--stopping` option which informs the invoking service manager about the beginning of the shutdown of the service.
+
+### Enable bitcoind Service
+
+After creating the `bitcoind` unit file and editing the file, we're now ready to enable the `bitcoind` service which can be done by running the following command:
+
+```sh:Enable bitcoind Service
+sudo systemctl enable bitcoind.service
+```
+
+For the changes to take effect, we can reboot the node by running the following command:
+
+```sh:Reboot Node
+sudo reboot
+```
+
+### Verify bitcoind Service
+
+After rebooting the node, the `bitcoind` service we set up should start and begin to download and validate the Bitcoin blockchain.
+
+After waiting for the node to finish rebooting, we can SSH into the node using, e.g., the IP address of the node:
+
+```sh:SSH into Node using an IP Address and Custom Port
+ssh -p <port-number> <username>@<ip-address>
+```
+
+Here `<username>` should be replaced with the `username` you set during the installation, e.g., `satoshi`, `<ip-address>` should be replaced with the IP address of your node, e.g., `192.168.0.100`, and `<port-number>` should be replaced with the port number you set in the `sshd_config` file on the node.
+
+If you installed Tor and torsocks on your client, then you can SSH into the node over the Tor network by running the following commad:
+
+```sh:SSH into Node using Torsocks
+torsocks ssh -p <port-number> <username>@<onion-address>
+```
+
+Here `<port-number>` should be replaced with the port number you set in the `sshd_config` file on the node, `<username>` should be replaced with the `username` you set during installation, e.g., `satoshi`, and `<onion-address>` should be replaced with the onion address you generated when configuring the onion service on the node, e.g., `rtc5bqxmswgjng5yutevxiykautzo2dc4qltme5kkitjhw7kbfimrlad.onion`.
+
+After logging back into the node, we can check the status of the `bitcoind` service that should have automatically been started by systemd by running the following command:
+
+```sh:Check bitcoind Service Status
+sudo systemctl status bitcoind.service
+```
+
+The output should look similar to:
+
+```sh:bitcoind Service Status Output
+● bitcoind.service - Bitcoin Core Daemon
+     Loaded: loaded (/etc/systemd/system/bitcoind.service; enabled; preset: enabled)
+     Active: active (running) since Wed 2023-11-15 13:38:05 CST; 1min 36s ago
+       Docs: https://github.com/bitcoin/bitcoin/blob/master/doc/init.md
+   Main PID: 1439 (bitcoind)
+      Tasks: 15 (limit: 2315)
+     Memory: 50.0M
+        CPU: 657ms
+     CGroup: /system.slice/bitcoind.service
+             └─1439 /usr/local/bin/bitcoind -pid=/run/bitcoind/bitcoind.pid -conf=/home/bitcoin/.bitcoin/bitcoin.conf -datadir=/home/bitcoin/.bitcoin "-startupnotify=chmod g+r /home/bitcoin/.bitcoin/.cookie && systemd-notify --ready" "-shutdownnotify=systemd-notify --stopping"
+```
+From the output of the command we’re able to determine the following about the `bitcoind` service:
+
+- If it's running
+
+- If it's set to automatically start on boot
+
+To exit the status of the `bitcoind` service we can press `Ctrl+C` or `q`.
+
+#### Check if bitcoind Service is Running
+
+If we look at the following line:
+
+```sh:Check if bitcoind Service is Running
+Active: active (running) since Wed 2023-11-15 13:38:05 CST; 1min 36s ago
+```
+
+Then we see that the `bitcoind` service is currently running since the status shows `active (running)`.
+
+If you see `inactive (dead)`, then the `bitcoind` service isn't running.
+
+#### Check if bitcoind Service is Enabled
+
+If we look at the following line:
+
+```sh:Check if bitcoind Service is Enabled
+Loaded: loaded (/etc/systemd/system/bitcoind.service; enabled; preset: enabled)
+```
+
+Then we see that the `bitcoind` service is set to automatically start on boot since the service is `enabled`.
+
+If you see `disabled`, then the `bitcoind` service isn't set to automatically start on boot.
+
+#### Check RPC Auth Cookie File Permissions
+
+To check if the RPC auth cookie file can be accessed by the `bitcoin` group we can run the following command:
+
+```sh:Check RPC Auth Cookie File Permissions
+ls -la $HOME/.bitcoin/.cookie
+```
+
+The output should look similar to:
+
+```sh:RPC Auth Cookie File Permissions
+-rw-r----- 1 bitcoin bitcoin 75 Nov 15 13:58 /home/<username>/.bitcoin/.cookie
+```
+
+Here `<username>` is the username of the current user you're logged in as, e.g., `satoshi` or `bitcoin`.
+
+From the output we see that the RPC auth cookie file has the following file permissions `rw-r-----` which means the owner of the file, e.g., the `bitcoin` user is able to read the file and to write to the file, members of the `bitcoin` group are able to read the file, and all other users have no permissions.
+
+These permissions allow other users on the system as well as applications being run by different users on the system to be able to access Bitcoin Core as long as the users are members of the `bitcoin` group.
+
+#### Monitor bitcoind Debug Log File
+
+To see the `bitcoind` service in action we can monitor the output of the debug log file we previously configured by running the following command:
+
+```sh:Monitor bitcoind Debug Log File
+tail -f $HOME/.bitcoin/debug.log
+```
+
+To exit the monitoring of the `bitcoind` service we can press `Ctrl+C`.
+
+#### Get Blockchain Info
+
+To get information about the current blockchain we can run the following command:
+
+```sh:Get Blockchain Info
+bitcoin-cli getblockchaininfo
+```
+
+The output should look similar to the following:
+
+```sh:Get Blockchain Info Output
+{
+  "chain": "main",
+  "blocks": 0,
+  "headers": 0,
+  "bestblockhash": "000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f",
+  "difficulty": 1,
+  "time": 1231006505,
+  "mediantime": 1231006505,
+  "verificationprogress": 1.120861323489728e-09,
+  "initialblockdownload": true,
+  "chainwork": "0000000000000000000000000000000000000000000000000000000100010001",
+  "size_on_disk": 293,
+  "pruned": false,
+  "warnings": ""
+}
+```
+
+### Disable bitcoind Service
+
+If you want to disable the `bitcoind` service from automatically starting on boot, then run the following command:
+
+```sh:Disable bitcoind service
+sudo systemctl disable bitcoind.service
+```
+
+### Start bitcoind Service
+
+If the `bitcoind` service isn’t running, then run the following command to start the service:
+
+```sh:Start bitcoind Service
+sudo systemctl start bitcoind.service
+```
+
+### Stop bitcoind Service
+
+If you want to stop the `bitcoind` service, then run the following command:
+
+```sh:Stop bitcoind Service
+sudo systemctl stop bitcoind.service
+```
+
+### Reload bitcoind Service
+
+We can also load configuration updates without performing a complete reboot of the `bitcoind.service` by running the following command:
+
+```sh:Reload bitcoind Service
+sudo systemctl reload bitcoind.service
+```
+
+### Restart bitcoind Service
+
+If you want to restart the `bitcoind` service which completely stops then starts the service, then you can run the following command:
+
+```sh:Restart bitcoind Service
+sudo systemctl restart bitcoind.service
+```
+
+### Bitcoin Core Syncing
+
+Now that we've started the `bitcoind` service, the entire Bitcoin blockchain is being downloaded and all of the transactions are being validated.
+
+This process can take anywhere between about a day to about a week depending on the type of drive your node is using, e.g., HDD, SATA SSD, or NVMe SSD, the type of internet connection your node is using, e.g., WiFi or Ethernet, your internet speed, etc.
+
+Ideally, you should let the node finish the downloading and validation of the entire blockchain before proceeding to the next step.
 
