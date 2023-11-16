@@ -651,3 +651,95 @@ While you're waiting for the blockchain to finish downloading and for the valida
 
 - [Bitcoin Resources ₿](https://codemonkeys.tech/resources/bitcoin/#bitcoin-%E2%82%BF-%F0%9F%90%92): List of resources related to Bitcoin including blockchain explorers, books, collaborative custody, dashboards, education, entertainment, hardware wallets, jobs, media, meetups, nodes, payment processors, P2P exchanges, podcasts, products, seed storage, software wallets, statistics, and ways to support developers.
 
+### After Syncing
+
+Once the Bitcoin blockchain has been fully synchronized, we can make some potential updates to the Bitcoin config file as well as verify timestamps by using our local copy of the blockchain.
+
+#### Reduce Database Cache
+
+If you increased the database cache to increase the initial download speed of the blockchain by increasing the value provided to the `dbcache` option in the Bitcoin config file, then you can now reduce the value to the default size to free up some of the node’s RAM which will allow other applications to be able to run in parallel on the node.
+
+To reduce the `dbcache` option in the Bitcoin config file you can open the Bitcoin config file by running the following command:
+
+```sh:Open bitcoin.conf
+nano $HOME/.bitcoin/bitcoin.conf
+```
+
+To set the `dbcache` option to the default size you can comment out the line for the `dbcache` option or remove it from the file.
+
+The Bitcoin config file should now look something like this:
+
+```sh:Reduce Database Cache
+server=1
+txindex=1
+
+proxy=127.0.0.1:9050
+bind=127.0.0.1
+listen=1
+
+rpcauth=<userpw>
+
+zmqpubrawblock=tcp://127.0.0.1:28332
+zmqpubrawtx=tcp://127.0.0.1:28333
+whitelist=download@127.0.0.1
+
+maxconnections=<n>
+maxuploadtarget=<n>
+
+# dbcache=<n>
+blocksonly=1
+```
+
+If your node has sufficient resources, then instead of using the default value for the `dbcache` option you have the option to increase it as long as your node still has enough RAM to be able to run all of the applications in parallel.
+
+<Callout client:load type="info">
+ The `<n>` values are placeholders for whatever values you set for your node during the configuration of Bitcoin Core. If you want to set them to the default values, then you can comment out the lines or remove them like we did for `dbcache`. Also `<userpw>` for the `rpcauth` option should be replaced with the your RPC username and the generated salt and hash of your generated RPC password.
+</Callout>
+
+#### Disable Blocks Only
+
+If you enabled the `blocksonly` option to `1` in the Bitcoin config file to increase the initial download speed of the blockchain by reducing the incoming bandwidth to your node by not participating in transaction relaying, then you can disable the `blocksonly` option.
+
+To disable the `blocksonly` option you can comment out the line for the `blocksonly` option or remove it from the file.
+
+The Bitcoin config file should now look something like this:
+
+```sh:Disable Blocks Only
+server=1
+txindex=1
+
+proxy=127.0.0.1:9050
+bind=127.0.0.1
+listen=1
+
+rpcauth=<userpw>
+
+zmqpubrawblock=tcp://127.0.0.1:28332
+zmqpubrawtx=tcp://127.0.0.1:28333
+whitelist=download@127.0.0.1
+
+maxconnections=<n>
+maxuploadtarget=<n>
+
+# dbcache=<n>
+# blocksonly=1
+```
+
+After disabling the `blocksonly` option, the node will now be able to relay the transactions of network peers.
+
+#### Restart bitcoind Service
+
+For these updates to take effect, we can restart the `bitcoind` service by running the following command:
+
+```sh:Restart bitcoind Service
+sudo systemctl restart bitcoind.service
+```
+
+#### Verify Timestamps Locally
+
+Our node is now able to verify timestamps without relying on other nodes in the network by using our local copy of the blockchain assuming you installed the OpenTimestamps client on your node.
+
+Check out the previous [Verification with Bitcoin Node](/en/guides/bitcoin-node/bitcoin/verification#verification-with-bitcoin-node) section for details on how to verify a timestamp using your own node.
+
+If you didn't install the OpenTimestamps client, then check out the previous [Verify Timestamp](/en/guides/bitcoin-node/bitcoin/verification#verify-timestamp) section for installation and usage instructions.
+
