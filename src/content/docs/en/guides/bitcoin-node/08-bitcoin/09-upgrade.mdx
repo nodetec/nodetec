@@ -1,0 +1,121 @@
+---
+label: Upgrade
+slug: en/guides/bitcoin-node/bitcoin/upgrade
+order: 90
+---
+
+import Callout from "@components/mdx/Callout.tsx";
+
+# Upgrade
+
+We're now going to go over how to upgrade Bitcoin Core.
+
+The upgrade process is essentially the same as the initial installation process we previously went over and can be broken down into the following steps:
+
+1. Download Bitcoin Core
+
+2. Verify the authenticity of Bitcoin Core
+
+3. Extract Bitcoin Core
+
+4. "Install" Bitcoin Core
+
+5. Restart the `bitcoind` service
+
+6. Check the status of the `bitcoind` service
+
+<Callout client:load type="warning">
+  Before upgrading be sure to check the [release notes](https://github.com/bitcoin/bitcoin/tree/master/doc/release-notes) of the version you're installing for any breaking changes, changes in data structures, and/or other updates that require special attention.
+</Callout>
+
+<Callout client:load type="warning">
+  If you don’t agree with the updates in a new version of Bitcoin Core, then be sure to not upgrade your version. Updates you may not agree with could be, e.g., related to consensus changes you're not familiar with or don't agree with. It's also not a bad idea to keep running a previous version of Bitcoin Core until the newest version has been released for a while in case there are any critical issues with the new release assuming of course your current version doesn't have any critical issues itself.
+</Callout>
+
+## Download
+
+To download the version of Bitcoin Core you want to upgrade to you can follow along with the previous [Download](/en/guides/bitcoin-node/bitcoin/download) section.
+
+<Callout client:load type="tip">
+  You should only have to update the value provided to the `VERSION` variable to the version you're upgrading to, e.g., `VERSION=25.1`.
+</Callout>
+
+<Callout client:load type="tip">
+  You should be able to perform the download, verification, extraction, and "installation" without having to stop the currently running version of the `bitcoind` service when upgrading. However, if your prefer you can shutdown the currently running version of the `bitcoind` service before upgrading by running the following command `sudo systemctl stop bitcoind.service`.
+</Callout>
+
+## Verification
+
+To verify the authenticity of the version of Bitcoin Core you want to upgrade to you can follow along with the previous [Verification](/en/guides/bitcoin-node/bitcoin/verification) section.
+
+<Callout client:load type="tip">
+  When importing the Bitcoin Core signing keys it's recommended to import all of the signing keys at once instead of importing them individually, so skip to the part that mentions cloning the `guix.sigs` repository.
+</Callout>
+
+<Callout client:load type="tip">
+  When verifying the timestamp you should be able to skip the Installation section and the Timestamp Information section and start at the [Verification with Bitcoin Node](/en/guides/bitcoin-node/bitcoin/verification#verification-with-bitcoin-node) section since your node should have already downloaded the blockchain. If you prefer to use a complete timestamp for the verification instead of an incomplete timestamp, then be sure to run the relevant commands from the [Upgrade Timestamp](/en/guides/bitcoin-node/bitcoin/verification#upgrade-timestamp) section before verifying the timestamp.
+</Callout>
+
+<Callout client:load type="tip">
+  If your node previously verified a `SHA256SUMS.ots` file and you haven't cleared the `ots` cache which is located in `/home/<username>/.cache/ots` where `<username>` is the username you set during the installation of the OS, then you can either clear the cache or run the relevant commands in the previously mentioned sections by adding the `--no-cache` option before the `verify` subcommand. E.g., if you're using a SOCKS proxy you can run the following command to verify the timestamp without using the cache `ots --socks5-proxy 127.0.0.1:9050 --no-cache verify SHA256SUMS.ots`.
+</Callout>
+
+After verifying the timestamp, you can check the outputted date is close to the release date of the version you're installing by e.g., checking the [releases page](https://github.com/bitcoin/bitcoin/releases).
+
+## Extraction
+
+To extract the version of Bitcoin Core you want to upgrade to you can follow along with the previous [Extraction](/en/guides/bitcoin-node/bitcoin/extraction) section.
+
+## Installation
+
+To "install" the version of Bitcoin Core you want to upgrade to you can follow along with the previous [Installation](/en/guides/bitcoin-node/bitcoin/installation) section.
+
+### Check Version
+
+To check the version of Bitcoin Core you just upgraded to you can run the following command:
+
+```sh:Check Bitcoin Core Version
+bitcoind --version
+```
+
+The output should look similar to the following:
+
+```sh:Bitcoin Core Version Output
+Bitcoin Core version v25.1.0
+Copyright (C) 2009-2023 The Bitcoin Core developers
+
+Please contribute if you find Bitcoin Core useful. Visit
+<https://bitcoincore.org/> for further information about the software.
+The source code is available from <https://github.com/bitcoin/bitcoin>.
+
+This is experimental software.
+Distributed under the MIT software license, see the accompanying file COPYING
+or <https://opensource.org/licenses/MIT>
+```
+
+Here `Bitcoin Core version v25.1.0` should be replaced with the version you upgraded to.
+
+## Restart bitcoind Service
+
+After successully downloading, verifying, extracting, "installing", and checking the Bitcoin Core version, you can now restart the `bitcoind` service to apply the upgrade by running the following command
+
+```sh:Restart bitcoind Service
+sudo systemctl restart bitcoind.service
+```
+
+## Check bitcoind Service Status
+
+To check the status of the `bitcoind` service you can run the following command:
+
+```sh:Check bitcoind Service Status
+sudo systemctl status bitcoind.service
+```
+
+### Get Blockchain Info
+
+To get information about the blockchain you can run the following command:
+
+```sh:Get Blockchain Info
+bitcoin-cli getblockchaininfo
+```
+
