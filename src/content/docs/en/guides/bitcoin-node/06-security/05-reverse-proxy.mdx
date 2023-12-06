@@ -52,7 +52,7 @@ A **self-signed SSL/TLS certificate** encrypts communication between the server 
 
 The verification process involves generating a **Certificate Signing Request (CSR)** which is an encrypted block of text that includes various information about your server including the country code, state/region/province, locality name, organization name, organizational unit name, common name, e.g., the FQDN of the server, the email address, etc. The CSR and public key are then sent to the CA which will verify the identity and whether or not you control the domain submitted in the application.
 
-Since we don't want to send Personal Identifiable Information (PII) about our node to a CA, and we're not planning on using a domain name with our node accessible on the **clearnet**, we're going to use a self-signed certificate. However, by using a self-signed certificate users cannot validate the identity of the server automatically.
+Since we don't want to send **Personally Identifiable Information (PII)** about our node to a CA, and we're not planning on using a domain name with our node accessible on the **clearnet**, we're going to use a self-signed certificate. However, by using a self-signed certificate users cannot validate the identity of the server automatically.
 
 ### Creating the Certificate
 

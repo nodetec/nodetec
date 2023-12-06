@@ -146,6 +146,10 @@ Tor Browser Launcher will download and install the most recent version of Tor Br
 
 We're going to install Tor on the node using the [prebuilt Debian package from the Tor repository](https://deb.torproject.org/) which is maintained by the Tor Project which should always provide the latest stable version of Tor. There is also a prebuilt Debian package from the OS repository that provides the **Long-term support (LTS)** version of Tor, but it might not always provide the latest stable version of Tor. Therefore, it's recommended to install Tor from the Tor repository.
 
+<Callout client:load type="tip">
+  If you followed along with the [Tor Installation](/en/guides/bitcoin-node/operating-system/updates#tor-installation) section of the guide, then Tor should already be installed on the node and you can skip this section. It's also recommended to follow the [Updates](/en/guides/bitcoin-node/operating-system/updates) section of the guide to learn about OS updates and to configure the OS updates to be done privately and securely.
+</Callout>
+
 ### Determine Architecture
 
 Before installing Tor, we need to first determine the node's architecture which we can do by running the following command:
@@ -159,14 +163,6 @@ The Tor repository offers `amd64` and `arm64` binaries. If the command outputs a
 <Callout client:load type="tip">
   If your node is using an unsupported architecture, then you can try installing Tor using a prebuilt Debian package from the OS repository or by [installing Tor from source](https://community.torproject.org/onion-services/setup/install/#installing-tor-from-source).
 </Callout>
-
-### Prerequisites
-
-To enable all package managers using the package managmenent runtime library `libapt-pkg` to access metadata and packages available in sources accessible over HTTPS we need to install the following package:
-
-```sh:Install apt-transport-https
-sudo apt install -y apt-transport-https
-```
 
 ### Configure apt to Use Tor Repository
 
@@ -199,6 +195,10 @@ Codename:	bookworm
 ```
 
 Here we replace `<distribution>` with the codename `bookworm`.
+
+<Callout client:load type="tip">
+  HTTPS support has been implemented in the `apt` package since version `1.5`. Therefore, unless you're using Debian 9 (Stretch) or an older release the `apt-transport-https` package no longer needs to be installed. If you're using an older release of Debian you can install the package using `sudo apt install -y apt-transport-https`. If you installed the package and no longer need it, then you can remove it by running the following command `sudo apt remove apt-transport-https --purge`.
+</Callout>
 
 ### Import Tor Project Signing Key
 
@@ -351,6 +351,86 @@ If you want to restart Tor which completely stops then starts the service, then 
 
 ```sh:Restart Tor
 sudo systemctl restart tor
+```
+
+## Use apt Tor Repository Over Tor
+
+When we installed Tor by configuring `apt` to use the latest stable version of Tor instead of using the prebuilt Debian package from the OS repository we used HTTPS connections in the `tor.list` file which we created in the `/etc/apt/sources.list.d` directory.
+
+To use APT with the Tor network with HTTP or HTTPS connections we need to install `apt-transport-tor`. After installing `apt-transport-tor`, we can then configure the `apt` Tor repository to use the Tor network as opposed to just using HTTPS connections.
+
+### Install apt-transport-tor
+
+After installing Tor and checking that it's enabled and running, we can install `apt-transport-tor`.
+
+<Callout client:load type="tip">
+  To install `apt-transport-tor` on the node you may be using unencrypted HTTP connections with the repositories in the `/etc/apt/sources.list` file. It's recommended to first configure APT to use HTTPS connections instead which will encrypt the communication between the node and the server you're connecting to. If you haven't already, check out the [Configure HTTPS](/en/guides/bitcoin-node/operating-system/updates#configure-https) section which goes over how to configure APT to use HTTPS connections.
+</Callout>
+
+We're now going to fetch the information about the latest versions of the packages available for our system by running the following command:
+
+```sh:Update apt
+sudo apt update
+```
+
+After running the above command, we're now able to install `apt-transport-tor` by running the following command:
+
+```sh:Install apt-transport-tor
+sudo apt install -y apt-transport-tor
+```
+
+<Callout client:load type="info">
+  Instead of using `apt-transport-tor` you can also force traffic over Tor by using transparent proxying using `iptables` or its successor `nftables` which are maintained by the [netfilter.org project](https://www.netfilter.org/). This method allows you to use onion addresses for APT repositories in the `sources.list` file as if they're standard HTTP addresses, and also has the added benefit of not relying on the installation of another package. Another method is to use an HTTP proxy, e.g., [Privoxy](https://www.privoxy.org/) and enable APT HTTP proxy support.
+</Callout>
+
+Now that we have installed `apt-transport-tor` we can also configure the Tor repository to use `tor+https` or `tor+http` with onion addresses.
+
+To open the `tor.list` file we can run the following command:
+
+```sh:Open tor.list File
+sudo nano /etc/apt/sources.list.d/tor.list
+```
+
+#### tor+https
+
+To configure APT to use HTTPS connections over the Tor network for the Tor repository we can edit the `tor.list` file as follows:
+
+```sh:tor.list File Using HTTPS Over Tor
+deb     [signed-by=/usr/share/keyrings/tor-archive-keyring.gpg] tor+https://deb.torproject.org/torproject.org <distribution> main
+deb-src [signed-by=/usr/share/keyrings/tor-archive-keyring.gpg] tor+https://deb.torproject.org/torproject.org <distribution> main
+```
+
+Here we edited the `tor.list` file to use the HTTPS connections over the Tor network to the `/torproject.org` archive repository provided by `deb.torproject.org`.
+
+Be sure to replace `<distribution>` with, e.g., the Debian codename.
+
+##### Update apt
+
+We're now going to fetch the information about the latest versions of the packages available for our system using the HTTPS over Tor connections we just configured by running the following command:
+
+```sh:Update apt
+sudo apt update
+```
+
+#### tor+http with Onion Addresses
+
+To configure APT to use HTTP connections over the Tor network using onion addresses which is the most private and secure method we can edit the `tor.list` file as follows:
+
+```sh:tor.list File Using HTTP Over Tor Using Onion Addresses
+deb     [signed-by=/usr/share/keyrings/tor-archive-keyring.gpg] tor+http://apow7mjfryruh65chtdydfmqfpj5btws7nbocgtaovhvezgccyjazpqd.onion/torproject.org <distribution> main
+deb-src [signed-by=/usr/share/keyrings/tor-archive-keyring.gpg] tor+http://apow7mjfryruh65chtdydfmqfpj5btws7nbocgtaovhvezgccyjazpqd.onion/torproject.org <distribution> main
+```
+
+Here we edited the `tor.list` file to use the HTTP connections over the Tor network using onion addresses to the `/torproject.org` archive repository provided by `apow7mjfryruh65chtdydfmqfpj5btws7nbocgtaovhvezgccyjazpqd.onion` which is the onion address for `deb.torproject.org`:
+
+Be sure to replace `<distribution>` with, e.g., the Debian codename.
+
+##### Update apt
+
+We're now going to fetch the information about the latest versions of the packages available for our system using the onion addresses we just configured by running the following command:
+
+```sh:Update apt
+sudo apt update
 ```
 
 ## Configuration

@@ -1,0 +1,848 @@
+---
+label: Updates
+slug: en/guides/bitcoin-node/operating-system/updates
+order: 60
+---
+
+import Callout from "@components/mdx/Callout.tsx";
+
+# Updates
+
+We're now going to discuss how to update and upgrade Debian as well as other applications we install. These updates include security patches as well as software updates. We'll be using the FOSS **package manager** **Advanced Package Tool (APT)** which handles the installation, upgrading, configuring, and removal of software on Debian and Debian-based Linux distributions, e.g., Ubuntu. Instead of evaluating each package individually, APT considers all of the packages as a whole and produces the best possible combination of packages depending on what packages are available and compatible with the current dependencies.
+
+<Callout client:load type="info">
+  More generally a package manager is a collection of software tools that automates the process of installing, upgrading, configuring, and removing programs from a system in a consistent and reliable manner.
+</Callout>
+
+We previously used the `apt` command in the OS [Verification](/en/guides/bitcoin-node/operating-system/verification) section when demonstating how to install `gnupg` on a system running Debian.
+
+We're now going to discuss APT in more detail and the `apt` command which will give us a better understanding of how to manage the packages installed on the node including how to privately manage packages to mitigate metadata leakage.
+
+## Configuring Sources List
+
+For APT to function properly it needs to be given a list of **package sources** which are also referred to as repositories.
+
+This list of package sources is located in the `/etc/apt/sources.list` file.
+
+<Callout client:load type="info">
+  A package source is a repository which could be a website, a File Transfer Protocol (FTP) server, a CD-ROM, a local directory, etc., while a source package refers to a package containing the source code of a program.
+</Callout>
+
+To open the `sources.list` file and view the current package sources being used by the node, we can run the following command:
+
+```sh:Open sources.list File
+sudo nano /etc/apt/sources.list
+```
+
+The content of the file should look similar to the following:
+
+```sh:sources.list File
+#deb cdrom:[Debian GNU/Linux 12.0.0 _Bookworm_ - Official amd64 NETINST with firmware 20230610-10:21]/ bookworm main non-free-firmware
+
+deb     http://deb.debian.org/debian/ bookworm main non-free-firmware
+deb-src http://deb.debian.org/debian/ bookworm main non-free-firmware
+
+deb     http://security.debian.org/debian-security bookworm-security main non-free-firmware
+deb-src http://security.debian.org/debian-security bookworm-security main non-free-firmware
+
+# bookworm-updates, to get updates before a point release is made;
+# see https://www.debian.org/doc/manuals/debian-reference/ch02.en.html#_updates_and_backports
+deb     http://deb.debian.org/debian/ bookworm-updates main non-free-firmware
+deb-src http://deb.debian.org/debian/ bookworm-updates main non-free-firmware
+
+# This system was installed using small removable media
+# (e.g. netinst, live or single CD). The matching "deb cdrom"
+# entries were disabled at the end of the installation process.
+# For information about how to configure apt package sources,
+# see the sources.list(5) manual.
+```
+
+From the `sources.list` file we can see the repositories the node connects to when using APT:
+
+- `deb http://deb.debian.org/debian/ bookworm main non-free-firmware`
+
+- `deb-src http://deb.debian.org/debian/ bookworm main non-free-firmware`
+
+- `deb http://security.debian.org/debian-security bookworm-security main non-free-firmware`
+
+- `deb-src http://security.debian.org/debian-security bookworm-security main non-free-firmware`
+
+- `deb http://deb.debian.org/debian/ bookworm-updates main non-free-firmware`
+
+- `deb-src http://deb.debian.org/debian/ bookworm-updates main non-free-firmware`
+
+These repositories are responsible for publishing Debian packages. APT will import the list of packages published by each of the repositories when, e.g., updating the system.
+
+The configuration used here should already work, but if you take a look at the **Uniform Resource Identifier (URI)** for each of the repositories you'll notice only **Hypertext Transfer Protocol (HTTP)** connections are being used, i.e., `http://` which are unencrypted connections. Since the connections are unencrypted, various metadata including potential **Personally Identifiable Information (PII)** can be leaked to any network observer. We'll discuss what metadata is being leaked and how to mitigate the leaking in the following sections.
+
+### Format
+
+We're now going to discuss the format used in the `sources.list` file.
+
+Each line in the file that isn't a comment, i.e., doesn't start with `#` represents a package source which consists of the following parts:
+
+- Archive Type
+
+- Repository URI
+
+- Distribution
+
+- Component(s)
+
+Here's a general example of the `sources.list` file format:
+
+```sh:sources.list Example
+deb uri distribution component1 component2 ... componentX
+deb-src uri distribution component1 component2 ... componentX
+```
+
+<Callout client:load type="info">
+  If you're interested in learning more about the `sources.list` file including the file format, then take a look at the [sources.list(5)](https://manpages.debian.org/unstable/apt/sources.list.5.en.html) documentation.
+</Callout>
+
+#### Archive Type
+
+The first part of each line, i.e., `deb` or `deb-src` represents the repository archive type.
+
+The archive type `deb` indicates the repository specified in the URI contains pre-compiled packages, i.e., binary packages.
+
+The archive type `deb-src` indicates the repository specified in the URI contains source packages.
+
+#### Repository URI
+
+The second part of each line, i.e., `uri` is the base URI of the repository APT uses to find the information it needs to download packages. The repository could be maintained by Debian or by some third party.
+
+Debian maintains [deb.debian.org](https://deb.debian.org/) which is a service that provides **mirrors** backed by the global **Content Delivery Network** [Fastly](https://www.fastly.com/) for the following Debian archive repositories:
+
+- `/debian/`
+
+- `/debian-debug/`
+
+- `/debian-ports/`
+
+- `/debian-security/`
+
+- `/debian-security-debug/`
+
+The server `deb.debian.org` doesn't actually contain the packages instead it uses **Service (SRV) records** which are custom **Domain Name System (DNS)** records used to establish a connection between a service and a hostname. The global CDN provided by Fastly is used to provide geographically distributed servers that work together to provide reliable and fast delivery for APT requests. If you're using **Debian 9 (Stretch)** or later, then `apt` will be able to locate the packages using the SRV records.
+
+From the `sources.list` file we can see the node is currently using the `/debian/` archive repository provided by `deb.debian.org`:
+
+- `deb http://deb.debian.org/debian/ bookworm main non-free-firmware`
+
+- `deb-src http://deb.debian.org/debian/ bookworm main non-free-firmware`
+
+- `deb http://deb.debian.org/debian/ bookworm-updates main non-free-firmware`
+
+- `deb-src http://deb.debian.org/debian/ bookworm-updates main non-free-firmware`
+
+When using APT to, e.g., update the system the specified `/debian/` archive repositories are used which use the SRV records to locate the packages that are backed by the Fastly CDN.
+
+<Callout client:load type="info">
+  If you're interested in learning more about the Debian mirrors backed by Fastly, then check out [deb.debian.org](https://deb.debian.org/) which also contains information on how to set up a specific instance of the Fastly CDN to prevent redirects if you're, e.g., using an HTTP proxy with APT.
+</Callout>
+
+The Debian security team maintains [security.debian.org](https://security.debian.org/debian-security/) which provides the latest security updates as quickly and easily as possible using the archive repository `/debian-security`.
+
+There are also unofficial mirrors of `security.debian.org`. However, the Debian security team doesn't encourage using these unofficial mirrors since they can add extra complexity that usually isn't needed and can cause issues if they aren't kept up to date.
+
+From the `sources.list` file we can see the node is currently using the `/debian-security` archive repository provided by `security.debian.org`:
+
+- `deb http://security.debian.org/debian-security bookworm-security main non-free-firmware`
+
+- `deb-src http://security.debian.org/debian-security bookworm-security main non-free-firmware`
+
+When using APT to, e.g., update the system the specified `/debian-security` archive repository is used which uses the security updates provided by the Debian security team.
+
+<Callout client:load type="info">
+  If you're interested in learning more about the security updates provided by the Debian security team, then check out the Debian [Security Information](https://www.debian.org/security/), the [Debian security FAQ](https://www.debian.org/security/faq), and [Securing Debian Manual](https://www.debian.org/doc/user-manuals#securing).
+</Callout>
+
+The term mirror mentioned above is basically a duplicate or copy of some data which is used for the same purpose as the original copy. A **mirror server** is used to duplicate or copy some or all of the data from a master or central server and gives users the ability to access the copied data. Mirror servers are used to provide redundancy, distribute the load on a master server, and increase the connection speed.
+
+Debian is distributed or mirrored on hundreds of servers across the world. This gives the user the ability to choose a mirror based on its location, latency, download speed, reliability, privacy policy, etc.
+
+Some of the Debian mirrors are given an `ftp.<country>.debian.org` alias which usually points to a mirror that syncs regularly and quickly and carries all of the architectures supported by Debian, e.g., AMD64 or ARM64. The `<country>` is used to specify the country the mirror server is located in which can be useful in picking a mirror that is close to your location.
+
+Certain mirrors may restrict what data they mirror due to, e.g., limited disk space. If a mirror isn't given an `ftp.<country>.debian.org` alias, then it doesn't necessarily mean that mirror is slower or not as up-to-date as a mirror with that given alias.
+
+In general a reliable mirror that syncs regularly and quickly with the Debian master servers that is geographically close to your location and supports the architecture used by your system should be used or you can simply use the `deb.debian.org` service.
+
+<Callout client:load type="warning">
+  Before selecting a mirror be sure to check the reputation of the repositories you decide to use with your node. Also, if the leaking of various metadata including potential PII is a concern, then you should use mirrors that support private and secure communication to minimize the amount of metadata being leaked. We'll discuss these mirrors in more detail below.
+</Callout>
+
+<Callout client:load type="tip">
+  The program [netselect-apt](https://packages.debian.org/stable/net/netselect-apt) can be used to download a mirrorlist and uses `netselect` to determine the fastest and closet mirror for your system. It's also possible to use [wget](https://packages.debian.org/stable/web/wget) or [rsync](https://packages.debian.org/stable/net/rsync) to determine the mirror with the best throughput.
+</Callout>
+
+<Callout client:load type="info">
+  Check out [Debian Mirrors (worldwide)](https://www.debian.org/mirror/list) for a list of Debian mirrors that were given an `ftp.<country>.debian.org` alias as well as other Debian mirrors.
+</Callout>
+
+The repository URI specified in the `sources.list` file can start with one of the following supported methods:
+
+- `http`: Indicates an HTTP server is being used. This is the most commonly used method, and is available for use by default. HTTP is unencrypted which means the entire communication between APT and a remote server or a proxy can be observed by an adversary. Even though the communication can be monitored, it cannot be modified. Therefore, the security of your system isn't at risk of downloading a modified package. APT's data security model is independent of the chosen transport method which is explained in more detail in [apt-secure(8)](https://manpages.debian.org/unstable/apt/apt-secure.8.en.html).
+
+- `https`: Indicates a **Hypertext Transfer Protocol Secure (HTTPS)** server is being used. This method has very similar options and is very similar in use to the HTTP method. The main difference between the methods is the communication between APT and a remote server or a proxy is encrypted. Even though the communication is encrypted, an adversary can still determine which server or proxy APT is communicating with and a deeper analysis has the potential of still revealing which data was downloaded. To prevent an adversary from being able to determine this information, APT provides a Tor based method.
+
+- `mirror, mirror+scheme`: This method is used to specify the location of a mirrorlist. By default HTTP is used for the mirrors, but any other scheme can be used via `mirror+scheme`. The mirrorlist can contain many different URIs for mirrors that APT can choose between when downloading packages. This gives APT the ability to distribute the load over the available mirrors, and it provides redundancy in case a configured mirror isn't available.
+
+- `file`: Allows an arbitrary directory in the local system's file system to be considered an archive. This method is useful for **Network File System (NFS)** mounts and local mirrors or archives.
+
+- `cdrom`: Indicates a local CD-ROM, DVD, BD, or USB drive is being used. This method isn't used as frequently as network-based installations, e.g., HTTP and HTTPS.
+
+- `ftp`: Indicates an FTP server is being used. The use of FTP is on the decline in favor of HTTP and HTTPS. FTP is unencrypted just like HTTP which means the entire communication between APT and a remote server or a proxy can be observed by an adversary. Even though the communication can be monitored, it cannot be modified. Therefore, the security of your system isn't at risk of downloading a modified package.
+
+- `ftps`: Indicates a **File Transfer Protocol Secure (FTPS)** server is being used. The use of FTPS is on the decline in favor of HTTP and HTTPS. Unlike FTP the communication between APT and a remote server or a proxy is encrypted when using FTPS. Even though the communication is encrypted, an adversary can still determine which server or proxy APT is communicating with and a deeper analysis has the potential of still revealing which data was downloaded. To prevent an adversary from being able to determine this information, APT provides a Tor based method.
+
+- `copy`: This method is identical to the `file` method except that packages are copied into the cache directly instead of being used directly from their location. This method is useful when using removable media to copy files to other devices with APT.
+
+- `ssh`: This method invokes SSH to connect to a remote host and access the files as a specified user. Prior configuration of SSH keys between the client and the remote host is recommended. The `find` and `dd` commands are used to perform the transferring of the files from the remote host to the client.
+
+- `tor+http(s)`: This method provides support in APT for downloading packages anonymously via the Tor network using HTTP or HTTPS. APT already provides mechanisms for verifying the authenticity of packages being downloaded, but an adversary can still determine which server or proxy APT is communicating with as well as what packages are being downloaded and their versions, the packages already installed on your system and their versions, your IP address, etc. Using this information makes it easier for an adversary to determine the best way to exploit your system as well as to create a unique fingerprint of your machine based on the packages you have installed which makes it easier to de-anonymize your internet traffic routed over Tor or some other anonymity tool. Ideally, HTTPS is used with Tor because when your request to download packages exits the Tor network the traffic will still be encrypted which means an adversary cannot view the content of the request. Only the exit node in Tor will know where the request is going to, i.e., the server being used to download the packages. This approach is only as secure as the Tor network itself, so if an adversary knows, e.g., the entry and exit node your machine is using, then your network traffic can be correlated. To use the Tor network with HTTP or HTTPS you need to install `apt-transport-tor` which we'll discuss in more detail below.
+
+<Callout client:load type="tip">
+  APT can be extended with more URI methods by installing optional packages that follow the naming scheme `apt-transport-<method>` where `method` would be replaced with the URI method you want to use. E.g., to use HTTP or HTTPS URIs routed via the Tor network we can install `apt-transport-tor` which we discussed above.
+</Callout>
+
+#### Distribution
+
+The third part of each line, i.e., `distribution` is usually a Debian codename, e.g., `Bookworm`, `Bullseye`, `Buster`, etc. which refers to a specific release of Debian or a release branch, e.g., `oldoldstable`, `oldstable`, `stable`, `testing`, or `unstable`.
+
+The `stable` branch is considered the primary release and what most people are referring to when discussing Debian. When the `stable` branch is replaced with a newer release, the current `stable` branch becomes the `oldstable` branch and the current `oldstable` branch becomes the `oldoldstable` branch. When the current `oldoldstable` branch is replaced it gets moved to an archived releases repository. The `unstable` branch also known as `Sid` is where active development is taking place. The `testing` branch contains packages that have been imported from the `unstable` branch.
+
+If you want to update packages for a specific release of Debian, e.g., `bookworm`, then you should specify a codename for the `distribution`. If you want to update packages for a specific release branch, then you should specify the preferred release branch for the `distribution`.
+
+Along with using a release codename or a specific release branch, Debian also provides the following `distributions`:
+
+- `<codename-or-release-branch>-backports-sloppy`: This distribution contains updates from newer major releases of Debian relative to the specified stable version. Unlike the backports distribution this distribution doesn't restrict the updates to only be from the next major release. This means the updates can contain even newer features, but it's more likely that package compatibility is broken with the specified stable version especially when upgrading to the next stable release. It's recommended to use this distribution with caution and to specify only single sloppy backported packages that fit your needs as opposed to using all of the available sloppy backports.
+
+- `<codename-or-release-branch>-backports`: This distribution contains updates from the next major release of Debian relative to the specified stable version which means the updates can contain new features, but it's possible that package compatibility is broken with the specified stable version. The packages are adjusted and recompiled for usage on the specified stable version and are run without new libraries whenever possible. It's recommended to specify single backported packages that fit your needs as opposed to using all of the available backports.
+
+- `<codename-or-release-branch>-proposed-updates`: This distribution contains proposed updates which are updates waiting to be moved into the recommended updates once more testing is done. The proposed updates may never reach the recommended updates or may be replaced by a newer update. Enabling this distribution isn't recommended for inexperienced users since it can break the system, and it should only be enabled if you have experience testing minor updates.
+
+- `<codename-or-release-branch>-updates`: This distribution contains recommended non-critical updates for fixing annoying problems and bugs as well as broken packages. These updates can fix features, but they aren't used to enable any new features. These updates also don't affect the security of the system. Enabling this distribution is recommended and if you look at the `sources-list` file from above you'll see the `bookworm-updates` distribution is being used with the `http://deb.debian.org/debian/` repository URI.
+
+Here `<codename-or-release-branch>` can be replaced with the preferred codename or release branch of Debian. The `unstable` release branch doesn't have `backports-sloppy`, `backports`, `proposed-updates`, or `updates` distributions, and the `testing` release branch doesn't have a `backports-sloppy` distribution.
+
+<Callout client:load type="info">
+  If you're interested in learning more about Debian codenames and release branches, then check out [Debian version history](https://en.wikipedia.org/wiki/Debian_version_history).
+</Callout>
+
+Along with being a codename or a release branch the `distribution` being used can also be a security distribution which is used to provide security updates.
+
+The security distributions have the following format:
+
+- `<codename-or-release-branch>-security`: The security updates distribution can provide security updates for a specific codename by specifying, e.g., `bookworm-security`. Security updates for the following release branches `oldstable`, `stable`, and `testing` are supported and can be specified using `oldstable-security`, `stable-security`, and `testing-security` respectively.
+
+The value that should be provided for the `distribution` ultimately depends on the structure of the repository being used. The specified repository URI will most commonly follow the structure of a standard Debian mirror which consists of multiple distributions in a `dists` directory located at the specified Debian archive repository, e.g., `http://deb.debian.org/debian/dists/`.
+
+Here `http://` can be replaced with the method being used by the mirror, `deb.` can be replaced with the **subdomain** of the mirror, `debian` can be replaced with the **second-level domain (SLD)** of the mirror, `.org` can be replaced with the **top-level domain (TLD)** of the mirror, and `/debian/` can be replaced with the archive repository being used by the mirror.
+
+If the specified repository URI follows the structure of a standard Debian mirror, then the `distribution` can be replaced with the  preferred codename or the preferred release branch. After specifying the `distribution`, the URI can, e.g., look like the following:
+
+- `http://deb.debian.org/debian/dists/bookworm/`
+
+- `http://deb.debian.org/debian/dists/stable/`
+
+- `http://security.debian.org/debian-security/dists/bookworm-security/`
+
+- `http://security.debian.org/debian-security/dists/stable-security/`
+
+In general the repository URI of a standard Debian mirror with a specified distribution will have the following form:
+
+- `method://subdomain.second-level-domain.top-level-domain/archive-repository/dists/distribution/`
+
+<Callout client:load type="tip">
+  To check the structure of a Debian mirror you can look up the mirror in your browser and navigate through the directories and files.
+</Callout>
+
+If you only want packages from a specific subdirectory of an archive repository denoted by the repository URI, then you can set the `distribution` to be an exact path to the preferred subdirectory which must end with a required trailing slash, i.e., `/`, and no components can be specified, i.e. `component1 component2 ... componentX` must be omitted. If the specified `distribution` isn't a full path, then at least one component must be specified.
+
+<Callout client:load type="tip">
+  If the mirror being used doesn't follow the structure of a standard Debian mirror, then instead of specifying a codename or release branch for the `distribution`, you can indicate the location of the packages using the preferred subdirectory of the mirror with a required trailing slash, i.e., `subdirectory/`. If the packages are directly at the specified repository URI, then you can specify `./` for the distribution which refers to the absence of a subdirectory.
+</Callout>
+
+#### Component(s)
+
+The fourth part of each line, i.e., `component1 component2 ... componentX` is used to differentiate between packages according to the software licenses chosen by the developers of each package. The following components are provided by a standard Debian mirror `main`, `contrib`, `non-free`, and since the `bookworm` release `non-free-firmware`.
+
+The `main` component includes packages that fully comply with the **Debian Free Software Guidelines (DFSG)** which is a reference document used to define which software is considered "free enough" to be included in the main section of Debian. The DSFG is outlined in the [Debian Social Contract (DSC)](https://www.debian.org/social_contract) which is a set of commitments that the developers of Debian agree to abide by.
+
+The `non-free` component includes packages that don't entirely conform to the DFSG, but can still be distributed without restrictions. This component isn't officially a part of Debian and acts as a service for users who rely on these packages. Debian recommends giving priority to free software. This component represents a problem for the [Free Software Foundation (FSF)](https://www.fsf.org/) which prevents Debian from being recommended by them.
+
+The `non-free-firmware` component includes all non-free firmware packages that were moved from the `non-free` component. This change has been implemented since the `bookworm` release.
+
+The `contrib` component which is short for contributions includes packages that are DFFG compliant, but cannot function without using some non-free software. The non-free software can consist of software from the `non-free` component or non-free files like game ROMs, BIOS of consoles, etc. The `contrib` component also includes free software that cannot be compiled without using proprietary software.
+
+If the specified repository URI follows the structure of a standard Debian mirror, then the components mentioned above should be available in the specified `distribution`, e.g., `http://deb.debian.org/debian/dists/bookworm/main/`.
+
+Here `http://` can be replaced with the method being used by the mirror, `deb.` can be replaced with the subdomain of the mirror, `debian` can be replaced with the second-level domain (SLD) of the mirror, `.org` can be replaced with the top-level domain (TLD) of the mirror, `/debian/` can be replaced with the archive repository being used by the mirror, `dists` is a distributions directory containing multiple distributions of Debian, `/bookworm/` can be replaced with the specific distribution of Debian being used, and `main/` can be replaced with the component containing the preferred software packages.
+
+If the specified repository URI follows the structure of a standard Debian mirror, then multiple components can be specified in the `sources.list` file. After specifying the `components`, the URI can, e.g., look like the following:
+
+- `http://deb.debian.org/debian/dists/bookworm/main/`
+
+- `http://deb.debian.org/debian/dists/bookworm/non-free-firmware/`
+
+In general the repository URI of a standard Debian mirror with a specified component will have the following form:
+
+- `method://subdomain.second-level-domain.top-level-domain/archive-repository/dists/distribution/component/`
+
+<Callout client:load type="tip">
+  The node should only need to use packages from the `main` component unless the hardware being used depends on proprietary firmware in which case packages from the `non-free-firmware` component need to be installed. If you need to use any of the packages contained in the other components, then you can add those components to the `sources.list` file.
+</Callout>
+
+## Hardening
+
+We're now going to discuss how to harden APT to mitigate metadata leakage.
+
+As previously mentioned this metadata includes:
+
+- The server or proxy APT is communicating with
+
+- The packages being downloaded and their versions
+
+- The packages already installed on your system and their versions
+
+- Your IP address
+
+As previously mentioned using this information makes it easier for an adversary to determine the best way to exploit your system as well as to create a unique fingerprint of your machine based on the packages you have installed which makes it easier to de-anonymize your internet traffic routed over Tor or some other anonymity tool.
+
+As previously mentioned to use the Tor network with HTTP or HTTPS with APT we need to install `apt-transport-tor`.
+
+<Callout client:load type="info">
+  We'll be discussing Tor in more detail in the [Tor](/en/guides/bitcoin-node/privacy/tor) section of the guide. For now we're going to discuss how to install Tor as well as how to configure APT to use Tor connections. If you're interested in learning more about Tor now, then check out the [Tor Project](https://www.torproject.org/). If you're already using the Tor Browser, then you can access the Tor Project website using the following onion address [2gzyxa5ihm7nsggfxnu52rck2vv4rvmdlkiu3zzui5du4xyclen53wid.onion](http://2gzyxa5ihm7nsggfxnu52rck2vv4rvmdlkiu3zzui5du4xyclen53wid.onion/).
+</Callout>
+
+### Configure HTTPS
+
+To install `apt-transport-tor` on the node we can use the currently configured repositories in the `sources.list` file which use unencrypted HTTP connections. However, we can first configure APT to use HTTPS connections instead which will encrypt the communication between the node and the server we're connecting to.
+
+<Callout client:load type="tip">
+  HTTPS support has been implemented in the `apt` package since version `1.5`. Therefore, unless you're using Debian 9 (Stretch) or an older release the `apt-transport-https` package no longer needs to be installed. If you're using an older release of Debian you can install the package using `sudo apt install -y apt-transport-https`. If you installed the package and no longer need it, then you can remove it by running the following command `sudo apt remove apt-transport-https --purge`.
+</Callout>
+
+<Callout client:load type="warning">
+  When we installed Debian on the node we used a network installer which exposed the node's IP address and other metadata to the APT repositories we configured as well as any other network observers. To mitigate this we can assign a new IP address to the node that isn't related at all to the previously exposed IP address. There's also the option of, e.g., using a machine and an IP address that is completely unrelated to the node to set up a USB that contains a Debian installation with all of the necessary packages including `tor` and `apt-transport-tor`. The configured Debian installation can then transfered to the node. We can also, e.g., configure SSH between the node and a client and install `tor` and `apt-transport-tor` over SSH from the client to the node which would expose metadata about the client to the APT repositories as well as any other network observers instead of the node. Depending on your threat model the prevention of exposing any metadata about the node to any servers before having Tor support configured may be necessary and the recommendations above can be used.
+</Callout>
+
+To configure APT to use HTTPS connections we can edit the `sources.list` file as follows:
+
+```sh:sources.list File Using HTTPS
+#deb cdrom:[Debian GNU/Linux 12.0.0 _Bookworm_ - Official amd64 NETINST with firmware 20230610-10:21]/ bookworm main non-free-firmware
+
+deb     https://deb.debian.org/debian/ bookworm main non-free-firmware
+deb-src https://deb.debian.org/debian/ bookworm main non-free-firmware
+
+deb     https://security.debian.org/debian-security bookworm-security main non-free-firmware
+deb-src https://security.debian.org/debian-security bookworm-security main non-free-firmware
+
+# bookworm-updates, to get updates before a point release is made;
+# see https://www.debian.org/doc/manuals/debian-reference/ch02.en.html#_updates_and_backports
+deb     https://deb.debian.org/debian/ bookworm-updates main non-free-firmware
+deb-src https://deb.debian.org/debian/ bookworm-updates main non-free-firmware
+
+# This system was installed using small removable media
+# (e.g. netinst, live or single CD). The matching "deb cdrom"
+# entries were disabled at the end of the installation process.
+# For information about how to configure apt package sources,
+# see the sources.list(5) manual.
+```
+
+Here we edited the `sources.list` file to use the HTTPS connections to the `/debian/` archive repository provided by `deb.debian.org` and the HTTPS connections to the `/debian-security` archive repository provided by `security.debian.org`:
+
+- `deb https://deb.debian.org/debian/ bookworm main non-free-firmware`
+
+- `deb-src https://deb.debian.org/debian/ bookworm main non-free-firmware`
+
+- `deb https://security.debian.org/debian-security bookworm-security main non-free-firmware`
+
+- `deb-src https://security.debian.org/debian-security bookworm-security main non-free-firmware`
+
+- `deb https://deb.debian.org/debian/ bookworm-updates main non-free-firmware`
+
+- `deb-src https://deb.debian.org/debian/ bookworm-updates main non-free-firmware`
+
+<Callout client:load type="warning">
+  As previously mentioned even though the communication is encrypted when using HTTPS, an adversary can still determine which server or proxy APT is communicating with and a deeper analysis has the potential of still revealing which data was downloaded.
+</Callout>
+
+#### Update apt
+
+We're now going to fetch the information about the latest versions of the packages available for our system using the HTTPS connections we just configured by running the following command:
+
+```sh:Update apt
+sudo apt update
+```
+
+### Tor Installation
+
+After configuring APT to use HTTPS connections we can install the `apt-transport-tor` package. However, this package also installs Tor using a prebuilt Debian package from the OS repository that provides the **Long-term support (LTS)** version of Tor which doesn't always provide the latest stable version of Tor. Therefore, it's recommended to first install Tor on the node using the prebuilt Debian package from the Tor repository which is maintained by the Tor Project and should always provide the latest stable version of Tor.
+
+#### Determine Architecture
+
+Before installing Tor, we need to first determine the node's architecture which we can do by running the following command:
+
+```sh:Determine Architecture
+dpkg --print-architecture
+```
+
+The Tor repository offers `amd64` and `arm64` binaries. If the command outputs a different architecture, then your node is using an architecture that isn't supported by the Tor repository.
+
+<Callout client:load type="tip">
+  If your node is using an unsupported architecture, then you can try installing Tor using a prebuilt Debian package from the OS repository or by [installing Tor from source](https://community.torproject.org/onion-services/setup/install/#installing-tor-from-source). If you're using the Tor Browser, then you can determine how to install Tor from source by using the following onion address [xmrhfasfg5suueegrnc4gsgyi2tyclcy5oz7f5drnrodmdtob6t2ioyd.onion](http://xmrhfasfg5suueegrnc4gsgyi2tyclcy5oz7f5drnrodmdtob6t2ioyd.onion/onion-services/setup/install/).
+</Callout>
+
+#### Configure apt to Use Tor Repository
+
+We're now going to create a file named `tor.list` in the `/etc/apt/sources.list.d` directory and configure `apt` to use the latest stable version of Tor.
+
+To create and open the file we can run the following command:
+
+```sh:Create tor.list File
+sudo nano /etc/apt/sources.list.d/tor.list
+```
+
+We're now going to configure `apt` to use the latest stable version of Tor from the Tor repository by adding the following lines to the `tor.list` file:
+
+```sh:Configure apt to Use Tor Repository
+deb     [signed-by=/usr/share/keyrings/tor-archive-keyring.gpg] https://deb.torproject.org/torproject.org <distribution> main
+deb-src [signed-by=/usr/share/keyrings/tor-archive-keyring.gpg] https://deb.torproject.org/torproject.org <distribution> main
+```
+
+Be sure to replace `<distribution>` with, e.g., the Debian codename which can be found by running the following command:
+
+```sh:Determine Codename
+lsb_release -c
+```
+
+The output should look similar to:
+
+```sh:Codename Output
+No LSB modules are available.
+Codename:	bookworm
+```
+
+Here we replaced `<distribution>` with the codename `bookworm`.
+
+<Callout client:load type="tip">
+  To check the structure of the Tor repository you can check out [deb.torproject.org](https://deb.torproject.org/) and navigate through the directories and files. If you're using the Tor Browser, then you can access `deb.torproject.org` using the following onion address [apow7mjfryruh65chtdydfmqfpj5btws7nbocgtaovhvezgccyjazpqd.onion](http://apow7mjfryruh65chtdydfmqfpj5btws7nbocgtaovhvezgccyjazpqd.onion/).
+</Callout>
+
+#### Import Tor Project Signing Key
+
+Before we can import the Tor Project signing key, we need to first temporarily enable the `root` user by running the following command:
+
+```sh:Temporarily Enable the root User
+sudo -i
+```
+
+If we don't temporarily enable the `root` user, then we'll get a `Permission denied` error when attempting to import the Tor project signing key.
+
+To import the signing key we can run the following command:
+
+```sh:Import Tor Project Signing Key
+sudo wget -qO- https://deb.torproject.org/torproject.org/A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89.asc | gpg --dearmor | tee /usr/share/keyrings/tor-archive-keyring.gpg >/dev/null
+```
+
+After importing the signing key, we can disable the `root` user again by logging out of the session by running the command:
+
+```sh:Exit Session
+exit
+```
+
+#### Update apt
+
+We're now going to fetch the information about the latest versions of the packages available for our system by running the following command:
+
+```sh:Update apt
+sudo apt update
+```
+
+#### Install Tor
+
+After running the above command, we're now able to install the latest stable version of Tor from the Tor repository along with the `deb.torproject.org-keyring` package which is used to keep the Tor Project signing key current by running the following command:
+
+```sh:Install tor and deb.torproject.org-keyring
+sudo apt install -y tor deb.torproject.org-keyring
+```
+
+### Check Tor Version
+
+After installing Tor, we can check the version by running the following command:
+
+```sh:Check Tor Version
+tor --version
+```
+
+The output should look similar to:
+
+```sh:Version Output
+Dec 04 19:10:07.628 [warn] Tor was compiled with zstd 1.5.2, but is running with zstd 1.5.4. For safety, we'll avoid using advanced zstd functionality.
+Tor version 0.4.7.13.
+Tor is running on Linux with Libevent 2.1.12-stable, OpenSSL 3.0.9, Zlib 1.2.13, Liblzma 5.4.1, Libzstd 1.5.4 and Glibc 2.36 as libc.
+Tor compiled with GCC version 12.2.0
+```
+
+If we take a look at the line starting with `Tor version`, then we see the Tor version is `0.4.7.13`.
+
+### Check Tor Status
+
+To check the `status` of Tor run the following command:
+
+```sh:Check Tor Status
+sudo systemctl status tor
+```
+
+The output should look similar to:
+
+```sh:Tor Status Output
+● tor.service - Anonymizing overlay network for TCP (multi-instance-master)
+     Loaded: loaded (/lib/systemd/system/tor.service; enabled; preset: enabled)
+     Active: active (exited) since Mon 2023-12-04 16:19:41 CST; 2h 52min ago
+    Process: 501 ExecStart=/bin/true (code=exited, status=0/SUCCESS)
+   Main PID: 501 (code=exited, status=0/SUCCESS)
+        CPU: 1ms
+```
+
+From the output of the command we’re able to determine the following about Tor:
+
+- If it's running
+
+- If it's set to automatically start on boot
+
+#### Check if Tor is Running
+
+If we look at the following line:
+
+```sh:Check if Tor is Running
+Active: active (exited)
+```
+
+Then we see that Tor is currently running since the status shows `active (exited)`.
+
+If you see `inactive (dead)`, then Tor isn't running.
+
+#### Check if Tor is Enabled
+
+If we look at the following line:
+
+```sh:Check if Tor is Enabled
+Loaded: loaded (/lib/systemd/system/tor.service; enabled; preset: enabled)
+```
+
+Then we see that Tor is set to automatically start on boot since the service is `enabled`.
+
+If you see `disabled`, then Tor isn't set to automatically start on boot.
+
+### Enable Tor
+
+If Tor isn't enabled to automatically start on boot, then run the following command:
+
+```sh:Enable Tor
+sudo systemctl enable tor
+```
+
+### Disable Tor
+
+If you want to disable Tor from automatically starting on boot, then run the following command:
+
+```sh:Disable Tor
+sudo systemctl disable tor
+```
+
+### Start Tor
+
+If Tor isn’t running, then run the following command to start the service:
+
+```sh:Start Tor
+sudo systemctl start tor
+```
+
+### Stop Tor
+
+If you want to stop Tor, then run the following command:
+
+```sh:Stop Tor
+sudo systemctl stop tor
+```
+
+### Reload Tor
+
+We can also load configuration updates without performing a complete reboot of Tor by running the following command:
+
+```sh:Reload Tor
+sudo systemctl reload tor
+```
+
+### Restart Tor
+
+If you want to restart Tor which completely stops then starts the service, then you can run the following command:
+
+```sh:Restart Tor
+sudo systemctl restart tor
+```
+
+### Install apt-transport-tor
+
+After installing Tor and checking that it's enabled and running, we're now ready to install `apt-transport-tor` which allows us to use APT with the Tor network with HTTP or HTTPS connections.
+
+We're now going to fetch the information about the latest versions of the packages available for our system by running the following command:
+
+```sh:Update apt
+sudo apt update
+```
+
+After running the above command, we're now able to install `apt-transport-tor` by running the following command:
+
+```sh:Install apt-transport-tor
+sudo apt install -y apt-transport-tor
+```
+
+<Callout client:load type="info">
+  Instead of using `apt-transport-tor` you can also force traffic over Tor by using transparent proxying using `iptables` or its successor `nftables` which are maintained by the [netfilter.org project](https://www.netfilter.org/). This method allows you to use onion addresses for APT repositories in the `sources.list` file as if they're standard HTTP addresses, and also has the added benefit of not relying on the installation of another package. Another method is to use an HTTP proxy, e.g., [Privoxy](https://www.privoxy.org/) and enable APT HTTP proxy support.
+</Callout>
+
+### Configure Tor
+
+Now that we have installed `apt-transport-tor`, we can now configure the `sources.list` file to use `tor+http` connections with or without **onion addresses** and/or `tor+https` connections.
+
+#### Onion Services
+
+Before configuring the `sources.list` file to use `tor+http` and `tor+https` connections, we're going to first briefly discuss what onion addresses and **onion services** are.
+
+Onion addresses consist of 56 letters and numbers followed by a `.onion` extension, e.g., [apow7mjfryruh65chtdydfmqfpj5btws7nbocgtaovhvezgccyjazpqd.onion](http://apow7mjfryruh65chtdydfmqfpj5btws7nbocgtaovhvezgccyjazpqd.onion/) which is the onion address for the [deb.torproject.org](https://deb.torproject.org/) website we previously mentioned. Onion addresses are used to identify onion services also known as **hidden services** which are services, e.g., websites that are only accessible using the Tor network.
+
+Onion services offer several advantages over ordinary services:
+
+- Onion services' location and IP address are hidden, making it difficult for adversaries to censor them or identify their operators.
+
+- All traffic between Tor users and onion services is end-to-end encrypted (E2EE), so you do not need to worry about connecting over HTTPS.
+
+- The address of an onion service is automatically generated, so the operators do not need to purchase a domain name.
+
+- Because of the cryptography involved, the `.onion` URL lets Tor ensure that it is connecting to the right location and that the connection is not being tampered with.
+
+All of these privacy and security benefits come at the cost of slower connection speeds though, so if speed is a major concern using `tor+https` connections, `tor+http` connections without onion addresses, or `https` connections are less private and secure alternatives.
+
+<Callout client:load type="info">
+  If you're interested in learning more about onion addresses and onion services, then check out the [Onion Services](https://tb-manual.torproject.org/onion-services/) resources provided by the Tor Community. If you're using the Tor Browser, then you can access the Onion Services resources using the following onion address [xmrhfasfg5suueegrnc4gsgyi2tyclcy5oz7f5drnrodmdtob6t2ioyd.onion](http://xmrhfasfg5suueegrnc4gsgyi2tyclcy5oz7f5drnrodmdtob6t2ioyd.onion/onion-services/).
+</Callout>
+
+#### tor+http
+
+To configure APT to use HTTP connections over the Tor network we can edit the `sources.list` file as follows:
+
+```sh:sources.list File Using HTTP Over Tor
+#deb cdrom:[Debian GNU/Linux 12.0.0 _Bookworm_ - Official amd64 NETINST with firmware 20230610-10:21]/ bookworm main non-free-firmware
+
+deb     tor+http://deb.debian.org/debian/ bookworm main non-free-firmware
+deb-src tor+http://deb.debian.org/debian/ bookworm main non-free-firmware
+
+deb     tor+http://security.debian.org/debian-security bookworm-security main non-free-firmware
+deb-src tor+http://security.debian.org/debian-security bookworm-security main non-free-firmware
+
+# bookworm-updates, to get updates before a point release is made;
+# see https://www.debian.org/doc/manuals/debian-reference/ch02.en.html#_updates_and_backports
+deb     tor+http://deb.debian.org/debian/ bookworm-updates main non-free-firmware
+deb-src tor+http://deb.debian.org/debian/ bookworm-updates main non-free-firmware
+
+# This system was installed using small removable media
+# (e.g. netinst, live or single CD). The matching "deb cdrom"
+# entries were disabled at the end of the installation process.
+# For information about how to configure apt package sources,
+# see the sources.list(5) manual.
+```
+
+Here we edited the `sources.list` file to use the HTTP connections over the Tor network to the `/debian/` archive repository provided by `deb.debian.org` and the HTTP connections to the `/debian-security` archive repository provided by `security.debian.org`:
+
+- `deb tor+http://deb.debian.org/debian/ bookworm main non-free-firmware`
+
+- `deb-src tor+http://deb.debian.org/debian/ bookworm main non-free-firmware`
+
+- `deb tor+http://security.debian.org/debian-security bookworm-security main non-free-firmware`
+
+- `deb-src tor+http://security.debian.org/debian-security bookworm-security main non-free-firmware`
+
+- `deb tor+http://deb.debian.org/debian/ bookworm-updates main non-free-firmware`
+
+- `deb-src tor+http://deb.debian.org/debian/ bookworm-updates main non-free-firmware`
+
+<Callout client:load type="warning">
+  When using HTTP with Tor when your request to download packages exits the Tor network the traffic will be unencrypted which means an adversary can view the content of the request to the server. The adversary doesn't know where the request orginated from though since the Tor network obfuscates that data, and only the exit node in Tor knows where the request is going to, i.e., the server being used to download the packages. This approach is only as secure as the Tor network itself, so if an adversary knows, e.g., the entry and exit node your device is using, then your network traffic can still be correlated.
+</Callout>
+
+##### Update apt
+
+We're now going to fetch the information about the latest versions of the packages available for our system using the HTTP over Tor connections we just configured by running the following command:
+
+```sh:Update apt
+sudo apt update
+```
+
+#### tor+http with Onion Addresses
+
+To configure APT to use HTTP connections over the Tor network using onion addresses which is the most private and secure method we can edit the `sources.list` file as follows:
+
+```sh:sources.list File Using HTTP Over Tor Using Onion Addresses
+#deb cdrom:[Debian GNU/Linux 12.0.0 _Bookworm_ - Official amd64 NETINST with firmware 20230610-10:21]/ bookworm main non-free-firmware
+
+deb     tor+http://2s4yqjx5ul6okpp3f2gaunr2syex5jgbfpfvhxxbbjwnrsvbk5v3qbid.onion/debian/ bookworm main non-free-firmware
+deb-src tor+http://2s4yqjx5ul6okpp3f2gaunr2syex5jgbfpfvhxxbbjwnrsvbk5v3qbid.onion/debian/ bookworm main non-free-firmware
+
+deb     tor+http://5ajw6aqf3ep7sijnscdzw77t7xq4xjpsy335yb2wiwgouo7yfxtjlmid.onion/debian-security bookworm-security main non-free-firmware
+deb-src tor+http://5ajw6aqf3ep7sijnscdzw77t7xq4xjpsy335yb2wiwgouo7yfxtjlmid.onion/debian-security bookworm-security main non-free-firmware
+
+# bookworm-updates, to get updates before a point release is made;
+# see https://www.debian.org/doc/manuals/debian-reference/ch02.en.html#_updates_and_backports
+deb     tor+http://2s4yqjx5ul6okpp3f2gaunr2syex5jgbfpfvhxxbbjwnrsvbk5v3qbid.onion/debian/ bookworm-updates main non-free-firmware
+deb-src tor+http://2s4yqjx5ul6okpp3f2gaunr2syex5jgbfpfvhxxbbjwnrsvbk5v3qbid.onion/debian/ bookworm-updates main non-free-firmware
+
+# This system was installed using small removable media
+# (e.g. netinst, live or single CD). The matching "deb cdrom"
+# entries were disabled at the end of the installation process.
+# For information about how to configure apt package sources,
+# see the sources.list(5) manual.
+```
+
+Here we edited the `sources.list` file to use the HTTP connections over the Tor network using onion addresses to the `/debian/` archive repository provided by `2s4yqjx5ul6okpp3f2gaunr2syex5jgbfpfvhxxbbjwnrsvbk5v3qbid.onion` which is the onion address for `deb.debian.org` and the HTTP connections over the Tor network using the onion addresses to the `/debian-security` archive repository provided by `5ajw6aqf3ep7sijnscdzw77t7xq4xjpsy335yb2wiwgouo7yfxtjlmid.onion` which is the onion address for `security.debian.org`:
+
+- `deb tor+http://2s4yqjx5ul6okpp3f2gaunr2syex5jgbfpfvhxxbbjwnrsvbk5v3qbid.onion/debian/ bookworm main non-free-firmware`
+
+- `deb-src tor+http://2s4yqjx5ul6okpp3f2gaunr2syex5jgbfpfvhxxbbjwnrsvbk5v3qbid.onion/debian/ bookworm main non-free-firmware`
+
+- `deb tor+http://5ajw6aqf3ep7sijnscdzw77t7xq4xjpsy335yb2wiwgouo7yfxtjlmid.onion/debian-security bookworm-security main non-free-firmware`
+
+- `deb-src tor+http://5ajw6aqf3ep7sijnscdzw77t7xq4xjpsy335yb2wiwgouo7yfxtjlmid.onion/debian-security bookworm-security main non-free-firmware`
+
+- `deb tor+http://2s4yqjx5ul6okpp3f2gaunr2syex5jgbfpfvhxxbbjwnrsvbk5v3qbid.onion/debian/ bookworm-updates main non-free-firmware`
+
+- `deb-src tor+http://2s4yqjx5ul6okpp3f2gaunr2syex5jgbfpfvhxxbbjwnrsvbk5v3qbid.onion/debian/ bookworm-updates main non-free-firmware`
+
+<Callout client:load type="tip">
+  The onion addresses were determined by checking [onion.deb.org](https://onion.debian.org/) which is a list of onion services run by the Debian project. If you're using the Tor Browser, then you can access `onion.debian.org` using the following onion address [jvgypgbnfyvfopg5msp6nwr2sl2fd6xmnguq35n7rfkw3yungjn2i4yd.onion](http://jvgypgbnfyvfopg5msp6nwr2sl2fd6xmnguq35n7rfkw3yungjn2i4yd.onion/). Most of the services are served from several backends using [Onionbalance](https://gitlab.torproject.org/tpo/onion-services/onionbalance). Here's the onion address for Onionbalance [eweiibe6tdjsdprb4px6rqrzzcsi22m4koia44kc5pcjr7nec2rlxyad.onion](http://eweiibe6tdjsdprb4px6rqrzzcsi22m4koia44kc5pcjr7nec2rlxyad.onion/tpo/onion-services/onionbalance).
+</Callout>
+
+<Callout client:load type="tip">
+  The Tor Project also maintains [onion.torproject.org](https://onion.torproject.org/) which is a list of onions services run by them. If you're using the Tor Browser, then you can access `onion.torproject.org` using the following onion address [apow7mjfryruh65chtdydfmqfpj5btws7nbocgtaovhvezgccyjazpqd.onion](http://apow7mjfryruh65chtdydfmqfpj5btws7nbocgtaovhvezgccyjazpqd.onion/). Most of the services are served from several backends using Onionbalance like the onion services run by the Debian project.
+</Callout>
+
+<Callout client:load type="warning">
+  Some potential concerns with using onion addresses is there tends to be fewer Debian mirrors that support them reducing mirror redundancy, they're slower, and the Tor network tends to have more frequent connectivity issues in general. Therefore, it's possbile to use `tor+https` connections if onion addresses aren't reliable enough as well as `tor+http` connections without onion addresses and `https` connections if the Tor network as a whole isn't reliable enough.
+</Callout>
+
+##### Update apt
+
+We're now going to fetch the information about the latest versions of the packages available for our system using the onion addresses we just configured by running the following command:
+
+```sh:Update apt
+sudo apt update
+```
+
+#### tor+https
+
+To configure APT to use HTTPS connections over the Tor network we can edit the `sources.list` file as follows:
+
+```sh:sources.list File Using HTTPS Over Tor
+#deb cdrom:[Debian GNU/Linux 12.0.0 _Bookworm_ - Official amd64 NETINST with firmware 20230610-10:21]/ bookworm main non-free-firmware
+
+deb     tor+https://deb.debian.org/debian/ bookworm main non-free-firmware
+deb-src tor+https://deb.debian.org/debian/ bookworm main non-free-firmware
+
+deb     tor+https://security.debian.org/debian-security bookworm-security main non-free-firmware
+deb-src tor+https://security.debian.org/debian-security bookworm-security main non-free-firmware
+
+# bookworm-updates, to get updates before a point release is made;
+# see https://www.debian.org/doc/manuals/debian-reference/ch02.en.html#_updates_and_backports
+deb     tor+https://deb.debian.org/debian/ bookworm-updates main non-free-firmware
+deb-src tor+https://deb.debian.org/debian/ bookworm-updates main non-free-firmware
+
+# This system was installed using small removable media
+# (e.g. netinst, live or single CD). The matching "deb cdrom"
+# entries were disabled at the end of the installation process.
+# For information about how to configure apt package sources,
+# see the sources.list(5) manual.
+```
+
+Here we edited the `sources.list` file to use the HTTPS connections over the Tor network to the `/debian/` archive repository provided by `deb.debian.org` and the HTTPS connections to the `/debian-security` archive repository provided by `security.debian.org`:
+
+- `deb tor+https://deb.debian.org/debian/ bookworm main non-free-firmware`
+
+- `deb-src tor+https://deb.debian.org/debian/ bookworm main non-free-firmware`
+
+- `deb tor+https://security.debian.org/debian-security bookworm-security main non-free-firmware`
+
+- `deb-src tor+https://security.debian.org/debian-security bookworm-security main non-free-firmware`
+
+- `deb tor+https://deb.debian.org/debian/ bookworm-updates main non-free-firmware`
+
+- `deb-src tor+https://deb.debian.org/debian/ bookworm-updates main non-free-firmware`
+
+<Callout client:load type="warning">
+  When using HTTPS with Tor when your request to download packages exits the Tor network the traffic will be encrypted which means an adversary cannot view the content of the request to the server. The adversary doesn't know where the request orginated from though since the Tor network obfuscates that data, and only the exit node in Tor knows where the request is going to, i.e., the server being used to download the packages. This approach is only as secure as the Tor network itself, so if an adversary knows, e.g., the entry and exit node your device is using, then your network traffic can still be correlated. This is why using onion addresses are preferred since it becomes much more difficult to correlate any network traffic.
+</Callout>
+
+##### Update apt
+
+We're now going to fetch the information about the latest versions of the packages available for our system using the HTTPS over Tor connections we just configured by running the following command:
+
+```sh:Update apt
+sudo apt update
+```
+
+### Use apt Tor Repository Over Tor
+
+When we installed Tor by configuring `apt` to use the latest stable version of Tor instead of using the prebuilt Debian package from the OS repository we used HTTPS connections in the `tor.list` file which we created in the `/etc/apt/sources.list.d` directory.
+
+Now that we have installed `apt-transport-tor` we can also configure the Tor repository to use `tor+https` or `tor+http` with onion addresses.
+
+To open the `tor.list` file we can run the following command:
+
+```sh:Open tor.list File
+sudo nano /etc/apt/sources.list.d/tor.list
+```
+
+#### tor+https
+
+To configure APT to use HTTPS connections over the Tor network for the Tor repository we can edit the `tor.list` file as follows:
+
+```sh:tor.list File Using HTTPS Over Tor
+deb     [signed-by=/usr/share/keyrings/tor-archive-keyring.gpg] tor+https://deb.torproject.org/torproject.org <distribution> main
+deb-src [signed-by=/usr/share/keyrings/tor-archive-keyring.gpg] tor+https://deb.torproject.org/torproject.org <distribution> main
+```
+
+Here we edited the `tor.list` file to use the HTTPS connections over the Tor network to the `/torproject.org` archive repository provided by `deb.torproject.org`.
+
+Be sure to replace `<distribution>` with, e.g., the Debian codename.
+
+##### Update apt
+
+We're now going to fetch the information about the latest versions of the packages available for our system using the HTTPS over Tor connections we just configured by running the following command:
+
+```sh:Update apt
+sudo apt update
+```
+
+#### tor+http with Onion Addresses
+
+To configure APT to use HTTP connections over the Tor network using onion addresses which is the most private and secure method we can edit the `tor.list` file as follows:
+
+```sh:tor.list File Using HTTP Over Tor Using Onion Addresses
+deb     [signed-by=/usr/share/keyrings/tor-archive-keyring.gpg] tor+http://apow7mjfryruh65chtdydfmqfpj5btws7nbocgtaovhvezgccyjazpqd.onion/torproject.org <distribution> main
+deb-src [signed-by=/usr/share/keyrings/tor-archive-keyring.gpg] tor+http://apow7mjfryruh65chtdydfmqfpj5btws7nbocgtaovhvezgccyjazpqd.onion/torproject.org <distribution> main
+```
+
+Here we edited the `tor.list` file to use the HTTP connections over the Tor network using onion addresses to the `/torproject.org` archive repository provided by `apow7mjfryruh65chtdydfmqfpj5btws7nbocgtaovhvezgccyjazpqd.onion` which is the onion address for `deb.torproject.org`:
+
+Be sure to replace `<distribution>` with, e.g., the Debian codename.
+
+##### Update apt
+
+We're now going to fetch the information about the latest versions of the packages available for our system using the onion addresses we just configured by running the following command:
+
+```sh:Update apt
+sudo apt update
+```
+
