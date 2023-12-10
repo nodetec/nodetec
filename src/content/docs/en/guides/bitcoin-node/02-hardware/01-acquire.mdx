@@ -1,0 +1,280 @@
+---
+label: Acquire
+slug: en/guides/bitcoin-node/hardware/acquire
+order: 10
+---
+
+import Callout from "@components/mdx/Callout.tsx";
+
+# Acquire
+
+Before discussing the hardware requirements needed to run the node, we're going to first discuss how to acquire the hardware using more private and secure means. Depending on your **threat model** you may have to incorporate all or some of the techniques discussed here. By threat model we mean the data you're attempting to keep private and secure and the adversary or adversaries you're attempting to keep the data from.
+
+It's worth mentioning even if you're not concerned about leaking **Personally Identifiable Information (PII)** and other metadata to certain adversaries today, it doesn't mean you won't be in the future. Therefore, it's recommended to incorporate as many of these techniques as possible when acquiring the hardware you'll be using for your node.
+
+<Callout client:load type="warning">
+  The techniques discussed here aren't an exhaustive list and cannot guarantee perfect privacy and security. Depending on your threat model you may have to incorporate even more advanced techniques.
+</Callout>
+
+## In Person vs Online
+
+When acquiring the hardware you have the option of purchasing it online and in person. Depending on where you live and the hardware you're attempting to acquire you may be able to purchase all of it in person, all of it online, or a combination of both.
+
+It's also worth mentioning if you're buying the parts and assembling the node yourself, then an adversary doesn't know what you're planning to do with the parts, e.g., you could be assembling a computer for a completely different use case. However, if you're buying a prebuilt node from a company, then that company will have any PII you shared with them as well as other metadata which they may or may not share with other third parties, e.g., companies, governments, etc. It's also possible that the company's website is hacked or they unintentionally leak the PII and the metadata themselves.
+
+Therefore, when purchasing the hardware it's recommended to not use or create any accounts either in person or online and to provide no PII or as little PII as possible and to mitigate the leaking of as much metadata as possible. It's also recommended to buy the hardware piecemeal, i.e., to spread out the purchases across different stores over time. Even if an adversary assumes you're acquiring the hardware to assemble a node, there's no way for them to know for sure if you purchase the hardware piecemeal.
+
+### In Person
+
+Purchasing the hardware in person is actually the preferred way to acquire the hardware assuming you're taking the following steps to mitigate the possibility of tying the purchase to yourself.
+
+#### Payment Methods
+
+One of the easiest ways to tie the purchase of the hardware to you is through the payment method you use. Therefore, it's recommended to use cash to purchase the hardware, a prepaid card bought and activated privately, e.g., with cash, a gift card bought and activated privately, e.g., with cash, or if possible Bitcoin using privacy best practices.
+
+When acquiring the cash to use for the payment if you're withdrawing it from a bank, ATM, or any other service that can be easily used to identify you, then it's recommended to withdraw more cash than you need for the purchase and to spend it at different stores before using the change to buy the hardware. Using the change from these purchases can help to prevent any potential serial number tracking that can more easily be applied to the cash you withdraw directly from a bank, ATM, or some other service using **Anti-Money Laundering (AML)** programs like **Know Your Customer (KYC)**.
+
+<Callout client:load type="warning">
+  If you're using a prepaid card or gift card to purchase the hardware, then make sure none of them were activated using any PII or metadata that can easily be tied back to you.
+</Callout>
+
+#### Video and Audio Surveillance
+
+When purchasing the hardware from a store there will almost certainly be some form of video and audio surveillance.
+
+In general a company won't keep video and audio surveillance for longer than a few months since it costs them money to store the data. With that being said there's no way to know for certain how long the company keeps the data and if that data is being shared with other third parties, e.g., companies, governments, etc.
+
+Therefore, if revealing any personally identifiable characteristics about yourself, e.g., your face, fingerprints, etc. are a concern you can, e.g., wear clothing like a hat, sunglasses, a mask, gloves, etc. to obfuscate these characteristics. Ideally, the clothing you choose to wear should also be serving a function which will draw less attention to you, e.g., if it's cold outside wearing a hood, hat, gloves, etc. is acceptable or you could wear motorcycle gear since people will assume you have a motorcycle. It's also worth mentioning the use of disposable clothing, i.e., clothing you use for making a purchase and then never wear again. There's also the possibility of having someone else make the purchase for you, but now another person is being involved which may or may not create more privacy and security concerns.
+
+With all of this being said, remember you're just buying one part or a few parts of commonly used hardware to build the node from. Therefore, all of these steps may not be required for you especially if they cause you to draw unecessary attention to yourself at the store.
+
+#### Tracking Devices
+
+If you're like the majority of people today, you're most likely carrying around numerous electronic devices, e.g., a smartphone, a smartwatch, etc. on your person which can be used to track your location and movement with or without your consent.
+
+These devices are generally black boxes running proprietary hardware, firmware, and software which means there's no way to verify whether or not they're tracking your movements, recording video, recording audio, etc. without your consent. Therefore, if you still want to keep these devices for other use cases it's recommended to leave them behind when making the purchases since they can be used to track and identify you.
+
+#### Transportation
+
+If you're using a modern car to get to a store to purchase the hardware, then it most likely has some tracking technology built into it. Just like the tracking devices discussed above, the devices used in cars are also generally black boxes running proprietary hardware, firmware, and software which again means there's no way to verify whether or not they're tracking your movements, recording video, recording audio, etc. without your consent.
+
+To get around transportation tracking you can use an older car which still requires a license plate to identify you, use some form of public transportation which doesn't require PII to use and allows you to pay in cash, ride a bike, walk, etc.
+
+Even though a modern car can track your movements to the store, there's no way for them to easily know what was purchased at the store. Therefore, these transportation concerns and recommendations may not be relevant to you, but it's still worth mentioning the current privacy issues associated with modern transportation.
+
+#### Aging Hardware
+
+You can purchase the hardware piecemeal by spreading out the purchases across time to prevent an adversary from being able to easily associate all of the hardware purchases with one another.
+
+After purchasing the hardware, you can also **age** the hardware, i.e., wait a few months before using it for the first time. This may result in the hardware being used to have no video or audio evidence of the purchase available for someone to use to track the purchase back to you.
+
+#### Using Multiple Stores
+
+You can also purchase the hardware piecemeal by spreading out the purchases across different stores to prevent an adversary from being able to easily associate all of your purchases together.
+
+It's also worth mentioning the possibility of purchasing the hardware from locations that aren't close to or associated in some way with where you'll be running the node from.
+
+### Online
+
+If you prefer to purchase the hardware online or don't have the ability to purchase the hardware privately in person, then here are some steps you can take to mitigate the possibility of tying online purchases to yourself.
+
+#### Accounts
+
+As previously mentioned it's recommended to not use or create any accounts when purchasing the hardware online. Most companies don't require the creation of an account, but they still require you to provide potential PII when ordering. The company may also collect metadata about your device. Therefore, it's recommended to provide no PII or as little PII as possible and to mitigate the leaking of as much metadata as possible.
+
+#### Payment Methods
+
+Once again one of the easiest ways to tie the purchase of the hardware to you is through the payment method you use. When purchasing items online most companies won't accept cash or money orders, so it's recommended to use a prepaid card bought and activated privately, e.g., with cash, a gift card bought and activated privately, e.g., with cash, or if possible Bitcoin using privacy best practices.
+
+In general the only fields that get sent when making a purchase online with a prepaid card are the card number, the expiration date, the Card Verification Value (CVV), the provided billing address street digits, billing address zip code, and the purchase amount. Only numbers are sent not any alphabetical data, e.g., the cardholder name, billing address street name, etc. Even though this data isn't sent to verify the purchase, it will still be stored by the company, any third parties they use with their site, etc. Plus there's no way to know if this data won't be sent in the future. Therefore, it's recommended to provide information that can protect your identity by masking this information properly which we'll discuss in more detail below.
+
+<Callout client:load type="tip">
+  Prepaid cards and gift cards can have a relatively small spending limit on them before KYC is required to activate them, so it's possible to run into a situation where you don't have enough funds to pay for the whole purchase online. To resolve this issue one option is to buy a prepaid card and a gift card and use both during the checkout process. If the company doesn't offer physical gift cards you can purchase with cash at a reasonable location, then it's also possible to buy another prepaid card which can be used to buy a gift card for the company online. You'll then be able to use the prepaid card and the gift card you bought online during the checkout process.
+</Callout>
+
+<Callout client:load type="warning">
+  Once again if you're using a prepaid card or gift card to purchase the hardware, then make sure none of them were activated using any PII or metadata that can easily be tied back to you.
+</Callout>
+
+<Callout client:load type="warning">
+  It's also possible to use virtual cards using a service like [Privacy](https://privacy.com/), but the software is proprietary and you're required to provide full KYC information including a picture of yourself holding a form of identification. Services like this are able to prevent a store, any third parties they may share your information with, and hackers from knowing your actual card number, but your purchases can still be easily tracked by the service, the KYC payment method you tied to the account, the government, etc.
+</Callout>
+
+#### Mask IP Address
+
+When purchasing the hardware online you should mask your IP address when visiting the website or any websites related to the product you're purchasing.
+
+##### VPN
+
+It's possible to mask your IP address by using, e.g., a trusted **Virtual Private Network (VPN)** that meets the following criteria:
+
+- Claims to not log user activity
+
+- Doesn't require the collection or store any PII on sign-up
+
+- Allows private payment methods, e.g., cash, prepaid cards, gift cards, Bitcoin using privacy best practices, etc.
+
+- The servers and clients are **Free and Open Source Software (FOSS)**
+
+- Uses servers that are self-hosted and operated by themselves
+
+- Conducts independent security audits
+
+- Doesn't rely on fake reviews or an affiliate program to market the service
+
+- Focused on educating users about what a VPN can realistically achieve by educating users and publishing privacy guides
+
+- Operated by privacy advocates that, e.g., give back to organizations focused on advancing privacy awareness, technologies, laws, etc.
+
+- Provides transparent information about the company
+
+Here are some recommended VPNs:
+
+- [IVPN](https://www.ivpn.net/)
+
+- [Mullvad](https://mullvad.net/)
+
+<Callout client:load type="tip">
+  If you're using the Tor Browser, then you can access Mullvad's website using the following onion address [o54hon2e2vj6c7m3aqqu6uyece65by3vgoxxhlqlsvkmacw6a7m7kiad.onion](o54hon2e2vj6c7m3aqqu6uyece65by3vgoxxhlqlsvkmacw6a7m7kiad.onion/).
+</Callout>
+
+<Callout client:load type="warning">
+  Using a VPN is part of an overall strategy to protect your privacy, and is only useful if you trust the VPN service more then your Internet Service Provider (ISP). VPNs are unable to provide users anonymity.
+</Callout>
+
+<Callout client:load type="tip">
+  When signing up for a VPN that doesn't require the collection or store any PII on sign-up, you'll be provided with an account ID that you need to sign into the service. The account ID should be properly secured, e.g., using a FOSS password mananger like [KeePass](https://keepass.info/) or [Bitwarden](https://bitwarden.com/) or by writing it down in a notebook. If someone has access to the account ID they may be able to tie the network traffic more easily to you. Ideally, you also shouldn't use the account ID on a device that is easily tied to your identity. When generating the account ID and paying for the service you can also use Tor to mask your IP address from the site which is discussed in more detail below.
+</Callout>
+
+##### Tor
+
+You also have the option of using [Tor](https://www.torproject.org/) to mask your IP address and if the site offers the ability to use an **onion address** you should use it.
+
+<Callout client:load type="tip">
+  Here's the onion address for the Tor Project website [2gzyxa5ihm7nsggfxnu52rck2vv4rvmdlkiu3zzui5du4xyclen53wid.onion](http://2gzyxa5ihm7nsggfxnu52rck2vv4rvmdlkiu3zzui5du4xyclen53wid.onion/).
+</Callout>
+
+<Callout client:load type="tip">
+  It's also possible to use a VPN with Tor, but isn't recommended unless you're an advanced user who knows how to configure both in a way that doesn't compromise your privacy. If you're interested in learning more about this method check out [TorPlusVPN](https://gitlab.torproject.org/legacy/trac/-/wikis/doc/TorPlusVPN). Here's the onion address for the TorPlusVPN post [eweiibe6tdjsdprb4px6rqrzzcsi22m4koia44kc5pcjr7nec2rlxyad.onion](http://eweiibe6tdjsdprb4px6rqrzzcsi22m4koia44kc5pcjr7nec2rlxyad.onion/legacy/trac/-/wikis/doc/TorPlusVPN).
+</Callout>
+
+#### Pseudonym
+
+If a company requires you to provide a first and last name you can use a pseudonym, i.e., an alias to protect your identity from being leaked online.
+
+A company will usually require a name if you create an account which again isn't recommended, for a billing address, and for a shipping address. When paying on a site with a prepaid card or a gift card there may still be required first name and last name fields which need to be filled out before the purchase goes through. Since there isn't a first and last name associated with the prepaid card or gift card, you can, e.g., use a pseudonym, type "Valued Cardholder", type "Gift Card", or some other text into the fields where a name would normally go.
+
+#### Email Address
+
+Most companies will also require the use of an email address when making a purchase. To protect your data online you shouldn't use an email address that is currently associated with your identity or has ever been assoicated with your identity in the past.
+
+Providing an email address is usually required to provide shipping updates and any other updates related to your purchase.
+
+Ideally, you would be self-hosting and operating your own private and secure email server, but for most people they're not able to or willing to do this. Instead you have the option of using an email provider which handles the hosting and operation of the email servers and provides email clients for users to use on their devices.
+
+An email provider should meet the following criteria:
+
+- Claims to not log user activity
+
+- Doesn't require the collection or store any PII on sign-up
+
+- Allows private payment methods, e.g., cash, prepaid cards, gift cards, Bitcoin using privacy best practices, etc.
+
+- The server and clients are FOSS
+
+- Uses servers that are self-hosted and operated by themselves
+
+- Provides **end-to-end encryption (E2EE)** enabled by default when available, i.e., if the email provider is interacting with a different email provider they cannot guarantee the other email provider isn't accessing the email data
+
+- Provides **zero-access encryption**, i.e., when receiving unencrypted email from email providers that don't support E2EE the email is encrypted immediately and can only be decrypted by the account owner
+
+- Provides subject line and other email header data encryption for at least stored emails and are ideally E2EE
+
+- Provides ephemeral messaging, i.e., messages that can be set to automatically be deleted after a specified amount of time
+
+- Conducts independent security audits
+
+- Doesn't rely on fake reviews to market the service
+
+- Focused on educating users about email privacy and security limitations and what can realistically be achieved by educating users and publishing privacy guides
+
+- Operated by privacy advocates that, e.g., give back to organizations focused on advancing privacy awareness, technologies, laws, etc.
+
+- Provides transparent information about the company
+
+Here are some recommended email providers:
+
+- [ProtonMail](https://proton.me/mail)
+
+- [Tuta](https://tuta.com/)
+
+<Callout client:load type="tip">
+  If you're using the Tor Browser, then you can access ProtonMail's website using the following onion address [protonmailrmez3lotccipshtkleegetolb73fuirgj7r4o4vfu7ozyd.onion](https://protonmailrmez3lotccipshtkleegetolb73fuirgj7r4o4vfu7ozyd.onion/).
+</Callout>
+
+<Callout client:load type="warning">
+  When using an email provider you're trusting that they're not logging your IP address, received emails that are initially unencrypted, unencrypted email headers, other metadata, etc.
+</Callout>
+
+<Callout client:load type="tip">
+  It's recommended to interact with the email service using Tor ideally through an onion address and at the very least to use a trusted VPN service. Ideally, a new email address is used for each order and when the order is complete the account should be deleted. The creation and deletion of the accounts can also be spread out over time to avoid any timing analysis techniques. If you don't won't to have to create a new email address for each store, then you also have the option of using an email aliasing solution, e.g., [SimpleLogin](https://simplelogin.io/) which masks your actual email address from the recipient. If you decide to use an email aliasing solution, then you're trusting the email data with another entity which can be a privacy and security concern. SimpleLogin is also built into ProtonMail, but it's a paid feature.
+</Callout>
+
+<Callout client:load type="tip">
+  When creating an email account be sure to properly secure the account by using a secure password. You can use a FOSS password mananger like [KeePass](https://keepass.info/) or [Bitwarden](https://bitwarden.com/) to generate and store your passwords.
+</Callout>
+
+#### Phone Number
+
+Most companies may also require the use of a phone number when making a purchase. Before providing a phone number, you should first try making the payment without one. If a phone number is required, then to protect your data online you shouldn't use a phone number currently associated with your identity or one that has ever been associated with your identity in the past.
+
+Instead of providing a phone number that is easily linked to you, you can provide a random phone number not associated with you at all, e.g., `(000) 000-0000`. If the website checks for the validity of the number, then you can provide a valid area code followed by random numbers, e.g., `(351) 867-5309`. The company will almost always use just the email address you provided them to provide you with updates or to contact you if there's an issue with the order.
+
+#### Addresses
+
+When ordering online you'll have to provide a shipping address, and you may also need to provide a billing address depending on your payment method.
+
+One option is to set up a PO box at a location near you using as little PII as possible. This method will mask your home address from the company, any third parties they may share your information with, and hackers, but an advesary like the government can still easily associate the order with you.
+
+If you want to use a location that isn't as easily tied to your identity, then you can use the address of a home near you, an abandoned home, a home under construction, a hotel, an office, a community workspace, etc.
+
+<Callout client:load type="warning">
+  When using an address you don't have control over, there's always the risk of the package being picked up by another person, e.g., a property owner, a worker, etc. Therefore, if you use an address you don't have control over, then be sure to arrive shortly after the package is delivered. There will also most likely be some form of video and audio surveillance at these locations.
+</Callout>
+
+<Callout client:load type="warning">
+  The transportation to the location is also potentially trackable, so be sure to use an older car which still requires a license plate to identify you, use some form of public transportation which doesn’t require PII to use and allows you to pay in cash, ride a bike, walk, etc. Also, make sure to not bring any tracking devices with you, e.g., a smartphone, a smartwatch, etc.
+</Callout>
+
+#### Video and Audio Surveillance
+
+It's worth mentioning even when shopping online you may still be surrounded by video and audio surveillance even in the privacy of your own home.
+
+These devices inlcude any computer cameras and mircrophones as well as the numerous **Internet of Things (IoT)** and smart devices you may have in your home, e.g., smartphones, smartwatches, smart TVs, smart thermostats, smart light bulbs, etc. The IoT and smart devices are generally black boxes running proprietary hardware, firmware, and software which means there's no way to verify whether or not they're tracking your movements, location, recording video, recording audio, etc. without your consent. These devices can also leak and share network information which gives adversaries an easy way to access the rest of your network.
+
+Therefore, it's recommended to avoid using IoT devices and most of the smart devices altogether if you can. If you're currently unable to rid your home of these devices, then it's possible to move to a location in your home where these devices aren't able to physically track you and to harden your network.
+
+Hardening your network is an involved topic, but to mitigate the possibility of IoT or smart devices from compromising the security of the device you're using to purchase the hardware with you can, e.g.,  if your router supports it, set up a **Virtual Local Area Network (VLAN)**. VLANs are virtual segmented networks, and putting devices on separate VLANs makes the devices think and act as if they're in completely separate networks. This means if one device is compromised on a particular VLAN, then the devices on the other VLAN should be safe.
+
+You can also set up **Guest WiFi** networks if your router supports them which are different wireless networks that you can use to allow guest users to connect to. Each guest network can use a different password, so you can compartmentalize the WiFi passwords used by different devices. Guest WiFi networks also give you the ability to restrict the network resources the guests have access to.
+
+It's also possible to place the purchases on someone else's WiFi network making sure you're using a trusted VPN service or Tor. This approach should be used with caution though since there will most likely be numerous video and audio surveillance devices around you. Also, the WiFi network you're connecting to may not be secure and may be logging data about the devices that are connected to it.
+
+#### Location
+
+If you have a private and secure location that offers a private and secure network that you can connect to that ideally isn't associated with you in some way, then you can make the online purchases using that location and network as opposed to using your home network. Ideally, the transportation to the location isn't easily trackable, e.g., you can use an older car which still requires a license plate to identify you, use some form of public transportation which doesn’t require PII to use and allows you to pay in cash, ride a bike, walk, etc. Also, make sure to not bring any tracking devices with you, e.g., a smartphone, a smartwatch, etc.
+
+#### Aging Hardware
+
+As previously mentioned for in person purchases, if you're purchasing the hardware piecemeal, then you can spread out the purchases across time to prevent an adversary from being able to easily associate all of the hardware purchases with one another.
+
+After purchasing the hardware, you once again have the option of aging the hardware, i.e., waiting for a certain amount of time before using it for the first time. This may result in certain data about the purchase being removed from company databases without having to make a request yourself. However, in most cases companies are required to retain order information for potentially many years. In which case you can still request to have some of the data deleted by them now and to request the rest of the data to be deleted when they're no longer required to retain it.
+
+<Callout client:load type="warning">
+  If you request the deletion of the order data, then make sure you're taking all of the privacy and security precautions outlined here, i.e., mask your IP address, don't provide any PII, pay attention to possible video and audio surveillance, etc.
+</Callout>
+
+#### Using Multiple Stores
+
+Again you can purchase the hardware piecemeal, which allows you to spread out the purchases across different stores to prevent an adversary from being able to easily associate all of your purchases together. Even if an adversary assumes you're acquiring the hardware to assemble a node, there's no way for them to know for sure if you purchase the hardware piecemeal.
+
