@@ -8,29 +8,957 @@ import Callout from "@components/mdx/Callout.tsx";
 
 # Devices
 
-You can run a node on various devices including a desktop, laptop, single-board computer (SBC), or a mini PC as long as the device meets the low-end recommendations.
+You can run a node on various devices including a **single-board computer (SBC)**, a **mini PC**, a **laptop**, or a **desktop** as long as the device meets the previously mentioned low-end recommendations.
 
-You can also run a node on devices that you use for other things, but ideally it's being run on a dedicated device which improves the security and reliability of the node.
+You can also run a node on devices that you use for other things, but ideally it's being run on a dedicated device which improves the privacy, security, and reliability of the node.
 
 If you plan to follow along with this guide, then you need to make sure whatever hardware you use supports [Debian](https://www.debian.org/).
+
+<Callout client:load type="tip">
+  If you’re using the Tor Browser, then you can access Debian’s website using the following onion address [5ekxbftvqg26oir5wle3p27ax3wksbxcecnm6oemju7bjra2pn26s3qd.onion](http://5ekxbftvqg26oir5wle3p27ax3wksbxcecnm6oemju7bjra2pn26s3qd.onion/).
+</Callout>
 
 <Callout client:load type="tip">
   This guide will also work with a virtual machine (VM) running Debian. This set up can be useful if your hardware doesn't support Debian directly, or if you want to test things out before setting up the node on bare metal.
 </Callout>
 
-## Device Recommendations
+## Free and Open Source Hardware
 
-Here are some recommendations for desktops, laptops, SBCs, and mini PCs made by companies that attempt to use free and open source hardware (FOSH) and free and open source software (FOSS) when possible.
+Even if a device is running a **free and open source (FOSS)** **Operating System (OS)**, it doesn't mean the hardware or the firmware used by each component that makes up the device is free and open source.
+
+**Free and open source hardware (FOSH)** also known as **free-design hardware** is a set of design principles and practices where all of the data about the hardware is made publicly available, and the users of the hardware are free to use the design of the hardware, i.e., fabricate their own hardware from the design, copy the design, study the design, modify the design by making any changes, and redistribute the design with or without changes.
+
+The data that needs to be publicly available and that needs to meet the criteria discussed above includes the following:
+
+- Schematics
+
+- Blueprints
+
+- Design files
+
+- Mechanical drawings
+
+- Computer Aided Design (CAD) drawings and files
+
+- Printed Circuit Board (PCB) layouts
+
+- Integrated Circuit (IC) layouts
+
+- Bill of Materials (BOMs)
+
+- Manufacturing documents
+
+- Hardware Description Language (HDL) source code
+
+- Other source code used by the hardware to function, e.g., firmware
+
+- Reference manuals
+
+- etc.
+
+<Callout client:load type="warning">
+  FOSH is still a relatively new development, so it's not currently feasible to obtain a device that doesn't rely on some form of proprietary hardware and proprietary firmware, e.g., most keyboards, cameras, disk drives, universial serial buses (USBs), etc. As FOSH develops and becomes more feasible to obtain the recommended companies and devices provided here will be updated accordingly.
+</Callout>
+
+<Callout client:load type="info">
+  If you're interested in learning more about FOSH, then check out [Free Hardware and Free Hardware Designs](https://www.gnu.org/philosophy/free-hardware-designs.en.html), [Open Source Hardware Association (OSHWA)](https://www.oshwa.org/), [What is open hardware?](https://opensource.com/resources/what-open-hardware), [Open-source hardware](https://en.wikipedia.org/wiki/Open-source_hardware), , and [Open source hardware](https://opensource.fandom.com/wiki/Open_source_hardware).
+</Callout>
+
+## Company Criteria
+
+When looking for a company to purchase the hardware from to assemble the node the following criteria should be taken into consideration:
+
+- **Free and Open Source Hardware (FOSH) and Free Open Source Software (FOSS)**: This refers to a company's commitment to producing FOSH and FOSS whenever possible and their attempts to be as transparent as possible about the operation, designing, manufacturing, distribution, etc. processes associated with their company.
+
+- **Jurisdiction**: Here we're referring to the location(s) a company uses. These locations include where a company's operation, designing, manufacturing, order processing, distribution, etc. take place. Different locations fall under different jurisdictions which means a company may have to comply with an entity, e.g., a government or risk the possibility of being fined, sued, violently attacked, etc. Ideally, there would be numerous companies producing FOSH and FOSS spread out across the world to prevent central points of failure. It's worth noting the jurisdictions these companies fall under in case you're in a certain jurisdiction they're unable to service or if you have any concerns about the jurisdictions they're associated with.
+
+- **Distribution**: This refers to the ability of a company to ship their products to you in a private, timely, and cost effective manner. Most companies should be able to globally ship their products, but there is no guarantee this will be the case in the future. Therefore, having multiple companies to choose from is ideal. It's also worth mentioning the ability of purchasing the hardware in person using a private payment method, e.g., cash to avoid the leaking of **Personally Identifiable Information (PII)** online.
+
+- **Support**: This refers to the lifespan of the products, i.e., the amount of time the products will be produced and sold for and the ability to provide any necessary software updates. Along with the lifespan of the products, this also refers to the ability of a company and/or the community around a company to help educate users, troubleshoot issues, etc.
+
+- **Products**: This refers to the selection of hardware produced by a company. A wider selection provides the end user with the ability to acquire a device that fits or at least more closely fits their specific needs.
+
+- **Supply**: This refers to the ability of a company to meet consumer demand. Ideally, a company is able to produce enough hardware to service each customer in a timely manner, but this isn't always the case especially with smaller companies focused on producing FOSH and FOSS.
+
+- **Operating Systems (OS's)**: This refers to the OS's supported by the hardware a company produces. Ideally, the hardware would be able to support multiple FOSS OS's, e.g., multiple Linux distributions, multiple Berkeley Software Distribution (BSD) OS's, etc.
+
+- **Price**: This refers to how expensive a company's products are, shipping costs, etc.
+
+Based on the criteria above, the ideal scenario is to have multiple companies producing a wide variety of hardware to meet the particular needs of various end users. This is why multiple companies and devices are recommended here, and these recommendations should be updated to add more devices produced by the same or new companies and to remove any current devices as needed.
+
+## Company Recommendations
+
+Here are some recommendations in alphabetical order of companies that produce desktops, laptops, SBCs, and mini PCs that attempt to use FOSH and FOSS when possible:
+
+- [Banana Pi](https://www.banana-pi.org/)
+
+- [Libre Computer](https://libre.computer/)
 
 - [PINE64](https://www.pine64.org/)
 
 - [Purism](https://puri.sm/)
 
+- [Radxa](https://radxa.com/)
+
+- [SiFive](https://www.sifive.com/)
+
 - [System76](https://system76.com/)
 
 <Callout client:load type="warning">
-  While you can run your node on a [Raspberry Pi 4](https://www.raspberrypi.com/products/raspberry-pi-4-model-b/) the hardware and firmware is closed source and has potential security issues. If you're looking to run your node on an SBC, then it may be worth taking a look at using some alternatives like the [ROCKPro64](https://www.pine64.org/rockpro64/) or a [ROCK 4](https://wiki.radxa.com/Rock4) SBC.
+  While you can run your node on a device produced by [Raspberry Pi](https://www.raspberrypi.com/), e.g., a [Raspberry Pi 4](https://www.raspberrypi.com/products/raspberry-pi-4-model-b/) the hardware and firmware is closed source which presents privacy and security issues. If you're looking to run your node on an SBC, then it may be worth taking a look at using one of the alternatives discussed below.
 </Callout>
 
-If you have any recommendations for desktops, laptops, SBCs, mini PCs, and/or hardware parts that use FOSH and FOSS whenever possbile let us know through one of our community channels.
+<Callout client:load type="warning">
+  All of these devices haven't been tested, so they may or may not run smoothly with all of the software we'll be installing. With that being said if the devices meet at least the mid-range recommendations they should work fine. If they only meet the low-end recommendations, then it's more likely you'll run into issues running your node, and you'll have to upgrade some or all of the parts sooner rather than later.
+</Callout>
+
+<Callout client:load type="tip">
+  The current guide uses the [ROCKPro64](https://www.pine64.org/rockpro64/) produced by PINE64. If you want to follow along exactly, then you should use the ROCKPro64 SBC.
+</Callout>
+
+### Banana Pi
+
+Banana Pi is an open source hardware community that attempts to follow the current mainstream open source hardware culture and standards. The community is focused on open source, discussion, collaboration, and sharing.
+
+#### FOSH and FOSS
+
+The producers of the Banana Pi have open sourced development documents, schematics, design drawings, BOMs, software, etc. to allow developers from around the world to freely participate in Banana Pi development. The license agreements supported by Banana Pi include **GNU General Public License (GPL)**, **Creative Commons (CC)**, and other protocol specifications.
+
+Here's a link to their [GitHub](https://github.com/bpi-sinovoip) and to their [Wiki](https://wiki.banana-pi.org/Main_Page).
+
+#### Jurisdiction
+
+The Banana Pi open source hardware community is led by [Guangdong BiPai Technology Co., Ltd](https://wiki.banana-pi.org/About_BPI), and supported by [Hon Hai Technology Group (Foxconn)](https://www.foxconn.com/en-us/).
+
+The company has headquarters in Songshan Lake High-tech Industrial Park which is Dongguan, China and offices in Shekou, Nanshan District, Shenzhen, China.
+
+#### Distribution
+
+The company has global distributors as well as more local distributors. Here's a link to the supported [distributors](https://www.banana-pi.org/en/buy/).
+
+#### Support
+
+The Banana Pi open source hardware community provides the following support resources:
+
+- [Forum](https://forum.banana-pi.org/)
+
+- [Docs](https://docs.banana-pi.org/en/home)
+
+- [Wiki](https://wiki.banana-pi.org/Main_Page)
+
+- [GitHub](https://github.com/bpi-sinovoip)
+
+- [YouTube](https://www.youtube.com/@lionwangsinovoip)
+
+#### Products
+
+Here is a list of possible devices currently produced by Banana Pi that can be used to run a node.
+
+- Low-end Recommendations:
+  - [Banana Pi BPI-M4 Zero](https://www.banana-pi.org/en/banana-pi-sbcs/171.html
+)
+  - [Banana Pi BPI-M64](https://wiki.banana-pi.org/Banana_Pi_BPI-M64)
+  - [Banana Pi BPI-M2 Pro](https://wiki.banana-pi.org/Banana_Pi_BPI-M2_Pro)
+  - [Banana Pi BPI-M2 Ultra](https://wiki.banana-pi.org/Banana_Pi_BPI-M2U)
+  - [Banana Pi BPI-M3](https://wiki.banana-pi.org/Banana_Pi_BPI-M3)
+  - [Banana Pi BPI-M4](https://wiki.banana-pi.org/Banana_Pi_BPI-M4)
+  - [Banana Pi BPI-M4 Berry](https://wiki.banana-pi.org/Banana_Pi_BPI-M4_Berry)
+
+- Mid-range Recommendations:
+  - [Banana Pi BPI-M5](https://wiki.banana-pi.org/Banana_Pi_BPI-M5)
+  - [Banana Pi BPI-M6](https://wiki.banana-pi.org/Banana_Pi_BPI-M6)
+
+- High-end Recommendations:
+  - [Banana Pi BPI-M7](https://www.banana-pi.org/en/banana-pi-sbcs/169.html)
+
+##### Banana Pi BPI-M4 Zero
+
+The [Banana Pi BPI-M4 Zero](https://wiki.banana-pi.org/Banana_Pi_BPI-M4_Zero) meets the low-end recommendations needed to run a node.
+
+Hardware Specifications:
+
+- SoC: Allwinner H618
+  - CPU: Quad-core ARM Cortex-A53 up to 1.5GHz
+  - GPU: ARM Mali-G31
+  - Video Decoder: H.265 up to 4K@60fps or 6K@30fps, VP9 and H.264up to 4K@30fps, AVS2 up to 4K60fps, and MPEG-4, MPEG-2, MPEG-1, and VP8 by 1080p@60fps
+  - Video Encoder: H.264 up to 4K@25fps
+
+- RAM: 2GB LPDDR4
+
+- Storage:
+  - MicroSD card slot
+  - 8GB eMMC flash memory
+
+- Networking: WiFi 5 (802.11ac) and Bluetooth 4.2
+
+- USB: 2x USB 2.0 Type-C ports
+
+- Video Output: 1x Mini HDMI 2.0a port up to 4K@60fps
+
+- Audio Output: 1x Mini HDMI 2.0a port
+
+- Power: USB 2.0 Type-C port
+
+- Dimensions: 65mm x 30mm
+
+This SBC is a low-end recommendation because it meets the low-end requirement of 2GB of RAM.
+
+The SBC also only has two USB 2.0 Type-C ports, and one of them is used to power the board. This can pose a problem if you prefer or want the ability to be able to easily connect, e.g., a keyboard, a mouse, backup battery communication, external storage, etc. These USB ports also only support the USB 2.0 transfer speeds of 480Mb/s which means the download speed of the blockchain will take longer.
+
+There also isn't an Ethernet port on the board, so you'll be relying on a slower and less reliable WiFi connection instead of a faster and more reliable Ethernet connection. However, it's possible to connect, e.g., an Ethernet module to the SBC, but this requires a separate module and more set up.
+
+<Callout client:load type="tip">
+  This SBC has the same form factor and 40-pin connector as the [Raspberry Pi Zero W](https://www.raspberrypi.com/products/raspberry-pi-zero-w/), and it'll fit most Raspberry Pi Zero W cases and accessories.
+</Callout>
+
+##### Banana Pi BPI-M64
+
+The [Banana Pi BPI-M64](https://wiki.banana-pi.org/Banana_Pi_BPI-M64) meets the low-end recommendations needed to run a node.
+
+Hardware Specifications:
+
+- SoC: Allwinner A64
+  - CPU: Quad-core ARM Cortex-A53 up to 1.152GHz
+  - GPU: ARM Mali-400
+
+- RAM: 2GB LPDDR3
+
+- Storage:
+  - MicroSD card slot, supports up to 256GB
+  - 8GB eMMC flash memory, supports up to 64GB
+
+- Networking:
+  - 1x 1GbE RJ45 (8P8C) port
+  - WiFi 4 (802.11b/g/n) and Bluetooth 4.0
+
+- USB:
+  - 2x USB 2.0 Type-A ports
+  - 1x Micro USB port
+
+- Video Output:
+  - 1x HDMI 1.4 port
+  - 1x MIPI DSI port
+
+- Video Input: 1x CSI connector
+
+- Audio Output:
+  - 1x 3.5mm jack
+  - 1x HDMI 1.4 port
+
+- Audio Input: On board microphone
+
+- Power:
+  - DC barrel jack
+  - 1x Micro USB port
+
+- Dimensions: 92mm x 60mm
+
+This SBC is a low-end recommendation because it meets the low-end requirement of 2GB of RAM.
+
+The SBC has two USB 2.0 Type-A ports and one Micro USB port which can be used to connect, e.g., a keyboard, a mouse, backup battery communication, external storage, etc. The USB ports only support the USB 2.0 transfer speeds of 480Mb/s which means the download speed of the blockchain will take longer.
+
+There is one 1GbE port on the SBC, so you can use a faster and more reliable Ethernet connection as well. If you prefer, it's also possible to establish an internet connection using WiFi since the SBC has WiFi 4 (802.11b/g/n) support.
+
+##### Banana Pi BPI-M2 Pro
+
+The [Banana Pi BPI-M2 Pro](https://wiki.banana-pi.org/Banana_Pi_BPI-M2_Pro) meets the low-end recommendations needed to run a node.
+
+Hardware Specifications:
+
+- SoC: Amlogic S905X3
+  - CPU: Quad-core ARM Cortex‑A55 up to 1.9GHz
+  - GPU: ARM Mali-G31
+
+- RAM: 2GB LPDDR4
+
+- Storage:
+  - MicroSD card slot, supports up to 256GB
+  - 16GB eMMC flash memory, supports up to 64GB
+
+- Networking:
+  - 1x 1GbE RJ45 (8P8C) port
+  - WiFi 5 (802.11ac) and Bluetooth 4.2
+
+- USB:
+  - 2x USB 3.0 Type-A ports
+  - 1x Micro USB 2.0 port
+
+- Video Output:
+  - 1x HDMI 2.1 port up to 4K@60fps
+
+- Audio Output:
+  - 1x HDMI 2.1 port
+
+- Power:
+  - DC barrel jack
+
+- Dimensions: 65mm x 65mm
+
+This SBC is a low-end recommendation because it meets the low-end requirement of 2GB of RAM.
+
+The SBC has two USB 3.0 Type-A ports and one Micro USB 2.0 port which can be used to connect, e.g., a keyboard, a mouse, backup battery communication, external storage, etc. The USB 3.0 Type-A ports support transfer speeds up to 5Gb/s which means the download speed of the blockchain will be faster if used for external storage. The Micro USB 2.0 port supports a transfer speed of 480Mb/s.
+
+There is one 1GbE port on the SBC, so you can use a faster and more reliable Ethernet connection as well. If you prefer, it's also possible to establish an internet connection using WiFi since the SBC has WiFi 5 support.
+
+##### Banana Pi BPI-M2 Ultra
+
+The [Banana Pi BPI-M2 Ultra](https://wiki.banana-pi.org/Banana_Pi_BPI-M2U) meets the low-end recommendations needed to run a node.
+
+Hardware Specifications:
+
+- SoC: Allwinner R40/V40
+  - CPU: Quad-core ARM Cortex‑A7 up to 1.2GHz
+  - GPU: ARM Mali-400
+
+- RAM: 2GB DDR3
+
+- Storage:
+  - 1x SATA port
+  - MicroSD card slot, supports up to 256GB
+  - 8GB eMMC flash memory, supports up to 64GB
+
+- Networking:
+  - 1x 1GbE RJ45 (8P8C) port
+  - WiFi 4 (802.11b/g/n) and Bluetooth 4.0
+
+- USB:
+  - 2x USB 2.0 Type-A ports
+  - 1x Micro USB 2.0 port
+
+- Video Output:
+  - 1x HDMI 1.4 port
+  - 1x MIPI DSI port
+
+- Video Input: 1x CSI connector
+
+- Audio Output:
+  - 1x 3.5mm jack
+  - 1x HDMI 1.4 port
+
+- Audio Input: On board microphone
+
+- Power:
+  - DC barrel jack
+  - 1x Micro USB 2.0 port
+
+- Dimensions: 92mm x 60mm
+
+This SBC is a low-end recommendation because it meets the low-end requirement of 2GB of RAM.
+
+The SBC has two USB 2.0 Type-A ports and one Micro USB 2.0 port which can be used to connect, e.g., a keyboard, a mouse, backup battery communication, external storage, etc. The USB ports only support the USB 2.0 transfer speeds of 480Mb/s which means the download speed of the blockchain will take longer. However, the SBC also has a SATA port which can be used to connect an SSD to instead of using the USB 2.0 ports which will increase the download speed of the blockchain.
+
+There is one 1GbE port on the SBC, so you can use a faster and more reliable Ethernet connection as well. If you prefer, it's also possible to establish an internet connection using WiFi since the SBC has WiFi 4 support.
+
+##### Banana Pi BPI-M3
+
+The [Banana Pi BPI-M3](https://wiki.banana-pi.org/Banana_Pi_BPI-M3) meets the low-end recommendations needed to run a node.
+
+Hardware Specifications:
+
+- SoC: Allwinner A83T
+  - CPU: Octa-core ARM Cortex‑A7 up to 1.6GHz
+  - GPU: Power VR SGX544MP1
+
+- RAM: 2GB LPDDR3
+
+- Storage:
+  - 1x SATA 2.0 port
+  - MicroSD card slot, supports 8GB, 16GB, 32GB, and 64GB
+  - 8GB eMMC flash memory, supports up to 64GB
+
+- Networking:
+  - 1x 1GbE RJ45 (8P8C) port
+  - WiFi 4 (802.11b/g/n) and Bluetooth 4.0
+
+- USB:
+  - 2x USB 2.0 Type-A ports
+  - 1x Micro USB 2.0 port
+
+- Video Output:
+  - 1x HDMI 1.4 port
+  - 1x MIPI DSI port
+
+- Video Input: 1x MIPI CSI connector
+
+- Audio Output:
+  - 1x 3.5mm jack
+  - 1x HDMI 1.4 port
+
+- Audio Input: On board microphone
+
+- Power:
+  - DC barrel jack
+  - 1x Micro USB 2.0 port
+
+- Dimensions: 92mm x 60mm
+
+This SBC is a low-end recommendation because it meets the low-end requirement of 2GB of RAM.
+
+The SBC has two USB 2.0 Type-A ports and one Micro USB 2.0 port which can be used to connect, e.g., a keyboard, a mouse, backup battery communication, external storage, etc. The USB ports only support the USB 2.0 transfer speeds of 480Mb/s which means the download speed of the blockchain will take longer. However, the SBC also has a SATA 2.0 port which can be used to connect an SSD to instead of using the USB 2.0 ports which will increase the download speed of the blockchain.
+
+There is one 1GbE port on the SBC, so you can use a faster and more reliable Ethernet connection as well. If you prefer, it's also possible to establish an internet connection using WiFi since the SBC has WiFi 4 support.
+
+##### Banana Pi BPI-M4
+
+The [Banana Pi BPI-M4](https://wiki.banana-pi.org/Banana_Pi_BPI-M4) meets the low-end recommendations needed to run a node.
+
+Hardware Specifications:
+
+- SoC: Realtek RTD1395
+  - CPU: Quad-core ARM Cortex-A53 up to 1.4GHz
+  - GPU: ARM Mali-470
+
+- RAM: 2GB DDR4
+
+- Storage:
+  - MicroSD card slot, supports up to 256GB
+  - 8GB eMMC flash memory, supports up to 64GB
+
+- Networking:
+  - 1x 1GbE RJ45 (8P8C) port
+  - WiFi 5 (802.11ac) and Bluetooth 4.2
+  - Optional WiFi and Bluetooth support using M.2 Key E PCIe 2.0 x1 and USB 2.0 socket
+
+- USB:
+  - 4x USB 2.0 Type-A ports
+  - 1x USB 2.0 Type-C port
+
+- Video Output: 1x HDMI port
+
+- Audio Output:
+  - 1x 3.5mm jack
+  - 1x HDMI port
+
+- Power:
+  - USB 2.0 Type-C port
+  - PoE support with separate PoE HAT
+
+- Dimensions: 92mm x 60mm
+
+This SBC is a low-end recommendation because it meets the low-end requirement of 2GB of RAM.
+
+The SBC has four USB 2.0 Type-A ports which can be used to connect, e.g., a keyboard, a mouse, backup battery communication, external storage, etc. The USB ports only support the USB 2.0 transfer speeds of 480Mb/s which means the download speed of the blockchain will take longer.
+
+There is one 1GbE port on the SBC, so you can use a faster and more reliable Ethernet connection as well. If you prefer, it's also possible to establish an internet connection using WiFi since the SBC has WiFi 5 support.
+
+##### Banana Pi BPI-M4 Berry
+
+The [Banana Pi BPI-M4 Berry](https://wiki.banana-pi.org/Banana_Pi_BPI-M4_Berry) meets the low-end recommendations needed to run a node.
+
+Hardware Specifications:
+
+- SoC: Allwinner H618
+  - CPU: Quad-core ARM Cortex-A53 up to 1.5GHz
+  - GPU: ARM Mali-G31
+  - Video Decoder: H.265 up to 4K@60fps or 6K@30fps, VP9 and H.264up to 4K@30fps, AVS2 up to 4K60fps, and MPEG-4, MPEG-2, MPEG-1, and VP8 by 1080p@60fps
+  - Video Encoder: H.264 up to 4K@25fps
+
+- RAM: 2GB LPDDR4
+
+- Storage:
+  - MicroSD card slot
+  - 8GB eMMC flash memory
+
+- Networking:
+  - 1x 1GbE RJ45 (8P8C) port
+  - WiFi 5 (802.11ac) and Bluetooth 4.2
+
+- USB:
+  - 4x USB 2.0 Type-A ports
+  - 1x USB 2.0 Type-C port
+
+- Video Output: 1x HDMI 2.0a port up to 4K@60fps
+
+- Audio Output:
+  - 1x 3.5mm jack
+  - 1x HDMI 2.0a port
+
+- Power:
+  - USB 2.0 Type-C port
+  - PoE support with separate PoE HAT
+
+- Dimensions: 85mm x 56mm
+
+This SBC is a low-end recommendation because it meets the low-end requirement of 2GB of RAM.
+
+The SBC has four USB 2.0 Type-A ports which can be used to connect, e.g., a keyboard, a mouse, backup battery communication, external storage, etc. The USB ports only support the USB 2.0 transfer speeds of 480Mb/s which means the download speed of the blockchain will take longer.
+
+There is one 1GbE port on the SBC, so you can use a faster and more reliable Ethernet connection as well. If you prefer, it's also possible to establish an internet connection using WiFi since the SBC has WiFi 5 support.
+
+<Callout client:load type="tip">
+  This SBC has a similar form factor and the same 40-pin connector as the [Raspberry Pi 4 Model B](https://www.raspberrypi.com/products/raspberry-pi-4-model-b/).
+</Callout>
+
+##### Banana Pi BPI-M5
+
+The [Banana Pi BPI-M5](https://wiki.banana-pi.org/Banana_Pi_BPI-M5) meets the mid-range recommendations needed to run a node.
+
+Hardware Specifications:
+
+- SoC: Amlogic S905X3
+  - CPU: Quad-core ARM Cortex‑A55 up to 1.9GHz
+  - GPU: ARM Mali-G31
+
+- RAM: 4GB LPDDR4
+
+- Storage:
+  - MicroSD card slot, supports up to 256GB
+  - 16GB eMMC flash memory, supports up to 64GB
+
+- Networking:
+  - 1x 1GbE RJ45 (8P8C) port
+  - Optional WiFi support using USB dongle or using an expansion board
+
+- USB: 4x USB 3.0 Type-A ports
+
+- Video Output: 1x HDMI 2.1 port up to 4K@60fps
+
+- Audio Output:
+  - 1x 3.5mm jack
+  - 1x HDMI 2.1 port
+
+- Power: USB Type-C port
+
+- Dimensions: 85mm x 56mm
+
+This SBC is a mid-range recommendation because it meets the mid-range requirement of 4GB of RAM.
+
+The SBC has four USB 3.0 Type-A ports which can be used to connect, e.g., a keyboard, a mouse, backup battery communication, external storage, etc. The USB ports also support transfer speeds up to 5Gb/s which means the download speed of the blockchain will be faster.
+
+There is one 1GbE port on the SBC, so you can use a faster and more reliable Ethernet connection as well. If you prefer, it's also possible to establish an internet connection using WiFi by using a separate USB dongle or a separate expansion board.
+
+<Callout client:load type="tip">
+  This SBC has a similar form factor and the same 40-pin connector as the [Raspberry Pi 4 Model B](https://www.raspberrypi.com/products/raspberry-pi-4-model-b/).
+</Callout>
+
+##### Banana Pi BPI-M6
+
+The [Banana Pi BPI-M6](https://wiki.banana-pi.org/Banana_Pi_BPI-M6) meets the mid-range recommendations needed to run a node.
+
+Hardware Specifications:
+
+- SoC: Synaptics VideoSmart VS680
+  - CPU: Quad-core ARM Cortex‑A73 up to 2.1GHz and One ARM Cortex-M3
+  - GPU: IMG GE9920
+  - NPU: Up to 6.75 TOPS
+
+- RAM: 4GB LPDDR4
+
+- Storage:
+  - MicroSD card slot, supports up to 256GB
+  - 16GB eMMC flash memory, supports up to 64GB
+
+- Networking:
+  - 1x 1GbE RJ45 (8P8C) port
+  - Optional WiFi support using USB dongle
+  - Optional WiFi and Bluetooth support using M.2 Key E PCIe x1 socket
+
+- USB: 4x USB 3.0 Type-A ports
+
+- Video Output:
+  - 1x Micro HDMI 2.1 port up to 4K@60fps
+  - 1x MIPI DSI port
+
+- Video Input
+  - 1x Micro HDMI 2.1 port
+
+- Audio Output
+  - 1x Micro HDMI 2.1 port
+
+- Power: USB Type-C port
+
+- Dimensions: 92mm x 60mm
+
+This SBC is a mid-range recommendation because it meets the mid-range requirement of 4GB of RAM.
+
+The SBC has four USB 3.0 Type-A ports which can be used to connect, e.g., a keyboard, a mouse, backup battery communication, external storage, etc. The USB ports also support transfer speeds up to 5Gb/s which means the download speed of the blockchain will be faster.
+
+There is one 1GbE port on the SBC, so you can use a faster and more reliable Ethernet connection as well. If you prefer, it's also possible to establish an internet connection using WiFi by using a separate USB dongle or a separate M.2 Key E networking card.
+
+##### Banana Pi BPI-M7
+
+The [Banana Pi BPI-M7](https://wiki.banana-pi.org/Banana_Pi_BPI-M7) meets the high-end recommendations needed to run a node.
+
+Hardware Specifications:
+
+- SoC: Rockchip RK3588
+  - CPU: Quad-core ARM Cortex‑A76 up to 2.4GHz and Quad-core ARM Cortex‑A55 up to 1.8GHz
+  - GPU: ARM Mali-G610 MC4
+  - Video Decoder: H.265 HEVC/MVC, AVS2, and VP9 up to 8K@60fps, H.264 AVC/MVC up to 8K@30fps, AV1 up to 4K@60fps, and MPEG-2, MPEG-1, VC-1, and VP8 up to 1080p@60fps
+  - Video Encoder: H.264 and H.265 by 8K@30fps
+  - NPU: Up to 6 TOPS
+
+- RAM: 8GB, 16GB, or 32GB LPDDR4
+
+- Storage:
+  - 1x M.2 2280 Key M PCIe 3.0 x4 socket for M.2 2280 NVMe SSD
+  - MicroSD card slot
+  - 64GB eMMC flash memory, supports up to 128GB
+
+- Networking:
+  - 2x 2.5GbE RJ45 (8P8C) ports
+  - WiFi 6 (802.11ax) and Bluetooth 5.2
+
+- USB:
+  - 2x USB 3.0 Type-A ports
+  - 1x USB Type-C DP Alt Mode port
+
+- Video Output:
+  - 1x HDMI 2.1 port up to 8K@60fps
+  - 1x USB Type-C DP Alt Mode port up to 8K@30fps
+  - 1x MIPI DSI port up to 4K@60fps
+
+- Video Input: 2x MIPI CSI connectors
+
+- Power: USB Type-C PD port
+
+- Dimensions: 92mm x 62mm
+
+This SBC is a high-end recommendation because it meets the high-end requirement of 8GB of RAM.
+
+The SBC has two USB 3.0 Type-A ports and one USB Type-C DP Alt Mode port which can be used to connect, e.g., a keyboard, a mouse, backup battery communication, external storage, etc. The USB ports also support transfer speeds of at least 5Gb/s which means the download speed of the blockchain will be faster if these ports are used for external storage. The SBC also has an M.2 2280 Key M PCIe 3.0 x4 socket for an M.2 2280 NVMe SSD which is the recommended high-end drive type to use with the node since it will increase the download speed of the blockchain even more.
+
+There are two 2.5GbE ports on the SBC, so you can use a faster and more reliable Ethernet connection as well. If you prefer, it's also possible to establish an internet connection using WiFi since the SBC has WiFi 6 support.
+
+### PINE64
+
+PINE64 is an open source hardware and software community that attempts to follow the current mainstream open source hardware culture and standards. The community is focused on open source, discussion, collaboration, and sharing.
+
+The main goal of PINE64 is to deliver ARM and RISC-V devices that the community wants to use and develop for. While the PINE64 team can and does work on the software, their main focus is on the hardware while the community handles the majority of the software.
+
+#### FOSH and FOSS
+
+The producers of the PINE64 have open sourced development documents, schematics, design drawings, BOMs, software, etc. to allow developers from around the world to freely participate in PINE64 hardware and software development.
+
+Here's a link to their [Wiki](https://wiki.pine64.org/wiki/Main_Page).
+
+#### Jurisdiction
+
+PINE64 is the stylized trade name for the Hong Kong based organization Pine Store Limited. Since late 2020, the standard form contract of the PINE64 website binds all orders to the laws of Malaysia, while the products are shipped from warehouses in Shenzhen, China and Hong Kong.
+
+#### Distribution
+
+The company has global distributors as well as more local distributors. Here's a link to the supported [distributors](https://pine64.com/affiliates/).
+
+#### Support
+
+The PINE64 open source hardware community provides the following support resources:
+
+- [Blog](https://www.pine64.org/blog/)
+
+- [Forum](https://forum.pine64.org/)
+
+- [IRC Chat](https://www.pine64.org/web-irc/)
+
+- [Matrix General PINE64 Chat](https://matrix.to/#/#pine64:matrix.org)
+
+- [Telegram General PINE64 Chat](https://t.me/mtrx_pine64)
+
+- [Wiki](https://wiki.pine64.org/wiki/Main_Page)
+
+- [YouTube](https://www.youtube.com/channel/UCs6A_0Jm21SIvpdKyg9Gmxw)
+
+#### Products
+
+Here is a list of possible devices currently produced by PINE64 that can be used to run a node.
+
+- Low-end Recommendations:
+  - [PINE A64-LTS](https://wiki.pine64.org/wiki/PINE_A64-LTS)
+  - [PINE H64 Model B](https://wiki.pine64.org/wiki/PINE_H64)
+
+- Mid-range Recommendations:
+  - [ROCK64](https://wiki.pine64.org/wiki/ROCK64)
+  - [ROCKPro64](https://wiki.pine64.org/wiki/ROCKPro64)
+
+- High-end Recommendations:
+  - [Quartz64 Model A](https://wiki.pine64.org/wiki/Quartz64)
+  - [Quartz64 Model B](https://wiki.pine64.org/wiki/Quartz64)
+
+##### PINE A64-LTS
+
+The [PINE A64-LTS](https://wiki.pine64.org/wiki/PINE_A64-LTS) meets the low-end recommendations needed to run a node.
+
+Hardware Specifications:
+
+- SoC: Allwinner A64
+  - CPU: Quad-core ARM Cortex-A53 up to 1.152GHz
+  - GPU: ARM Mali-400
+
+- RAM: 2GB LPDDR3
+
+- Storage:
+  - MicroSD card slot, supports up to 256GB
+  - Optional eMMC flash memory, supports from 16GB up to 128GB
+
+- Networking:
+  - 1x 1GbE RJ45 (8P8C) port
+  - Optional WiFi 4 (802.11b/g/n) and Bluetooth 4.0 support using an expansion module
+
+- USB: 2x USB 2.0 Type-A ports
+
+- Video Output:
+  - 1x HDMI port
+  - 1x DSI
+
+- Video Input: 1x CSI connector
+
+- Audio Output:
+  - 1x 3.5mm jack
+  - 1x HDMI port
+
+- Audio Input: 1x 3.5mm microphone jack
+
+- Power: DC barrel jack
+
+- Dimensions: 133mm x 80mm x 19mm
+
+This SBC is a low-end recommendation because it meets the low-end requirement of 2GB of RAM.
+
+The SBC has two USB 2.0 Type-A ports which can be used to connect, e.g., a keyboard, a mouse, backup battery communication, external storage, etc. The USB ports only support the USB 2.0 transfer speeds of 480Mb/s which means the download speed of the blockchain will take longer.
+
+There is one 1GbE port on the SBC, so you can use a faster and more reliable Ethernet connection as well. If you prefer, it's also possible to establish an internet connection using WiFi using an optional WiFi 4 (802.11b/g/n) expansion module.
+
+##### PINE H64 Model B
+
+The [PINE H64 Model B](https://wiki.pine64.org/wiki/PINE_H64) meets the low-end recommendations needed to run a node.
+
+Hardware Specifications:
+
+- SoC: Allwinner H6
+  - CPU: Quad-core ARM Cortex-A53 up to 1.488GHz
+  - GPU: ARM Mali-T720
+
+- RAM: 1GB, 2GB, or 3GB LPDDR3
+
+- Storage:
+  - MicroSD card slot, supports up to 256GB
+  - Optional eMMC flash memory module, supports up to 128GB
+
+- Networking:
+  - 1x 1GbE RJ45 (8P8C) port
+  - WiFi 5 (802.11ac) and Bluetooth 4.1
+
+- USB:
+  - 2x USB 2.0 Type-A ports
+  - 1x USB 3.0 Type-A port
+
+- Video Output:
+  - 1x HDMI port up to 4K@60fps
+
+- Audio Output:
+  - 1x 3.5mm jack
+  - 1x HDMI port
+
+- Audio Input: 1x 3.5mm microphone jack
+
+- Power: DC barrel jack
+
+- Dimensions: 85mm x 56mm x 19mm
+
+This SBC is a low-end recommendation because it meets the low-end requirement of 2GB of RAM and can support up to 3GB of RAM.
+
+The SBC has two USB 2.0 Type-A ports and one USB 3.0 Type-A port which can be used to connect, e.g., a keyboard, a mouse, backup battery communication, external storage, etc. The USB 2.0 ports only support the USB 2.0 transfer speeds of 480Mb/s, and the USB 3.0 port supports transfer speeds of up to 5Gb/s which means the download speed of the blockchain will be faster if this port is used for external storage.
+
+There is one 1GbE port on the SBC, so you can use a faster and more reliable Ethernet connection as well. If you prefer, it's also possible to establish an internet connection using WiFi since the SBC has WiFi 5 support.
+
+##### ROCK64
+
+The [ROCK64](https://wiki.pine64.org/wiki/ROCK64) meets the mid-range recommendations needed to run a node.
+
+Hardware Specifications:
+
+- SoC: Rockchip RK3328
+  - CPU: Quad-core ARM Cortex-A53 up to 1.5GHz
+  - GPU: ARM Mali-450
+
+- RAM: 1GB, 2GB, or 4GB LPDDR3
+
+- Storage:
+  - MicroSD card slot, supports up to 256GB
+  - Optional eMMC flash memory module, supports up to 128GB
+
+- Networking:
+  - 1x 1GbE RJ45 (8P8C) port
+  - Optional WiFi 4 (802.11b/g/n) and Bluetooth 4.0 support using a USB dongle
+
+- USB:
+  - 2x USB 2.0 Type-A ports
+  - 1x USB 3.0 Type-A port
+
+- Video Output:
+  - 1x HDMI port up to 4K@60fps
+
+- Audio Output:
+  - 1x 3.5mm jack
+  - 1x HDMI port
+
+- Audio Input: 1x 3.5mm microphone jack
+
+- Power:
+  - DC barrel jack
+  - PoE support with separate PoE HAT
+
+- Dimensions: 85mm x 56mm x 19mm
+
+This SBC is a mid-range recommendation because it meets the mid-range requirement of 4GB of RAM.
+
+The SBC has two USB 2.0 Type-A ports and one USB 3.0 Type-A port which can be used to connect, e.g., a keyboard, a mouse, backup battery communication, external storage, etc. The USB 2.0 ports only support the USB 2.0 transfer speeds of 480Mb/s, and the USB 3.0 port supports transfer speeds of up to 5Gb/s which means the download speed of the blockchain will be faster if this port is used for external storage.
+
+There is one 1GbE port on the SBC, so you can use a faster and more reliable Ethernet connection as well. If you prefer, it's also possible to establish an internet connection using WiFi using an optional WiFi 4 (802.11b/g/n) USB dongle.
+
+##### ROCKPro64
+
+The [ROCKPro64](https://wiki.pine64.org/wiki/ROCKPro64) meets the mid-range recommendations needed to run a node.
+
+Hardware Specifications:
+
+- SoC: Rockchip RK3399
+  - CPU: Quad-core ARM Cortex-A53 up to 1.5GHz and Dual-core ARM Cortex-A72 up to 2.0GHz
+  - GPU: ARM Mali-T860
+
+- RAM: 2GB or 4GB LPDDR4
+
+- Storage:
+  - 1x PCIe 2.1 x4 socket can be used for M.2/NGFF 2230, 2240, 2260, or 2280 Key M NVMe SSD using an adapter
+  - MicroSD card slot, supports up to 256GB
+  - Optional eMMC flash memory module, supports up to 128GB
+
+- Networking:
+  - 1x 1GbE RJ45 (8P8C) port
+  - Optional WiFi 5 (802.11ac) and Bluetooth 5.0 support using an expansion module
+
+- USB:
+  - 2x USB 2.0 Type-A ports
+  - 1x USB 3.0 Type-A port
+  - 1x USB 3.0 Type-C DP Alt Mode port
+
+- Video Output:
+  - 1x HDMI port up to 4K@60fps
+  - 1x MIPI DSI port
+  - 1x USB 3.0 Type-C DP Alt Mode port up to 4K@60fps
+
+- Video Input: 1x MIPI CSI connector
+
+- Audio Output:
+  - 1x 3.5mm jack
+  - 1x HDMI port
+
+- Audio Input: 1x 3.5mm microphone jack
+
+- Power:
+  - DC barrel jack
+
+- Dimensions: 133mm x 80mm x 19mm
+
+This SBC is a mid-range recommendation because it meets the mid-range requirement of 4GB of RAM.
+
+The SBC has two USB 2.0 Type-A ports, one USB 3.0 Type-A port, and one USB 3.0 Type-C DP Alt Mode port which can be used to connect, e.g., a keyboard, a mouse, backup battery communication, external storage, etc. The USB 2.0 ports only support the USB 2.0 transfer speeds of 480Mb/s, and the USB 3.0 ports support transfer speeds of up to 5Gb/s which means the download speed of the blockchain will be faster if these port is used for external storage. The SBC also has a PCIe 2.1 x4 socket that can be used for an M.2/NGFF 2230, 2240, 2260, or 2280 Key M NVMe SSD using, e.g., the [ROCKPro64 PCI-E X4 To M.2/NGFF NVMe SSD Interface Card](https://pine64.com/product/rockpro64-pci-e-x4-to-m-2-ngff-nvme-ssd-interface-card/) which is the recommended high-end drive type to use with the node since it will increase the download speed of the blockchain even more.
+
+There is one 1GbE port on the SBC, so you can use a faster and more reliable Ethernet connection as well. If you prefer, it's also possible to establish an internet connection using WiFi using an optional WiFi 5 (802.11ac) expansion module.
+
+<Callout client:load type="tip">
+  The current guide uses this SBC. If you want to follow along exactly, then you should use this SBC.
+</Callout>
+
+##### Quartz64 Model A
+
+The [Quartz64 Model A](https://wiki.pine64.org/wiki/Quartz64) meets the high-end recommendations needed to run a node.
+
+Hardware Specifications:
+
+- SoC: Rockchip RK3566
+  - CPU: Quad-core ARM Cortex-A55 up to 1.8GHz
+  - GPU: ARM Mali-G52
+  - NPU: Up to 0.8 TOPS
+
+- RAM: 4GB or 8GB LPDDR4
+
+- Storage:
+  - 1x PCIe 2.0 x4 socket can be used for M.2/NGFF 2230, 2240, 2260, or 2280 Key M NVMe SSD using an adapter
+  - MicroSD card slot, supports up to 256GB
+  - Optional eMMC flash memory module, supports up to 128GB
+
+- Networking:
+  - 1x 1GbE RJ45 (8P8C) port
+  - Optional WiFi 5 (802.11ac) and Bluetooth 5.0 support using an expansion module
+
+- USB:
+  - 3x USB 2.0 Type-A ports
+  - 1x USB 3.0 Type-A port
+
+- Video Output:
+  - 1x HDMI port up to 4K@60fps
+  - 1x MIPI DSI port
+
+- Video Input: 1x MIPI CSI connector
+
+- Audio Output:
+  - 1x 3.5mm jack
+  - 1x HDMI port
+
+- Audio Input: 1x 3.5mm microphone jack
+
+- Power:
+  - DC barrel jack
+
+- Dimensions: 133mm x 80mm x 19mm
+
+This SBC is a high-end recommendation because it meets the high-end requirement of 8GB of RAM.
+
+The SBC has three USB 2.0 Type-A ports and one USB 3.0 Type-A port which can be used to connect, e.g., a keyboard, a mouse, backup battery communication, external storage, etc. The USB 2.0 ports only support the USB 2.0 transfer speeds of 480Mb/s, and the USB 3.0 ports support transfer speeds of up to 5Gb/s which means the download speed of the blockchain will be faster if these port is used for external storage. The SBC also has a PCIe 2.0 x4 socket that can be used for an M.2/NGFF 2230, 2240, 2260, or 2280 Key M NVMe SSD using, e.g., the [ROCKPro64 PCI-E X4 To M.2/NGFF NVMe SSD Interface Card](https://pine64.com/product/rockpro64-pci-e-x4-to-m-2-ngff-nvme-ssd-interface-card/) which is the recommended high-end drive type to use with the node since it will increase the download speed of the blockchain even more.
+
+There is one 1GbE port on the SBC, so you can use a faster and more reliable Ethernet connection as well. If you prefer, it's also possible to establish an internet connection using WiFi using an optional WiFi 5 (802.11ac) expansion module.
+
+##### Quartz64 Model B
+
+The [Quartz64 Model B](https://wiki.pine64.org/wiki/Quartz64) meets the high-end recommendations needed to run a node.
+
+Hardware Specifications:
+
+- SoC: Rockchip RK3566
+  - CPU: Quad-core ARM Cortex-A55 up to 1.8GHz
+  - GPU: ARM Mali-G52
+  - NPU: Up to 0.8 TOPS
+
+- RAM: 4GB or 8GB LPDDR4
+
+- Storage:
+  - 1x M.2 PCIe 2.0 x1 socket, can be used for an M.2 NVMe SSD
+  - MicroSD card slot, supports up to 256GB
+  - Optional eMMC flash memory module, supports up to 128GB
+
+- Networking:
+  - 1x 1GbE RJ45 (8P8C) port
+  - WiFi 5 (802.11ac) and Bluetooth 5.0
+
+- USB:
+  - 2x USB 2.0 Type-A ports
+  - 1x USB 3.0 Type-A port
+
+- Video Output:
+  - 1x HDMI port up to 4K@60fps
+  - 1x MIPI DSI port
+
+- Video Input: 1x MIPI CSI connector
+
+- Audio Output:
+  - 1x 3.5mm jack
+  - 1x HDMI port
+
+- Audio Input: 1x 3.5mm microphone jack
+
+- Power:
+  - DC barrel jack
+
+- Dimensions: 85mm x 56mm x 19mm
+
+This SBC is a high-end recommendation because it meets the high-end requirement of 8GB of RAM.
+
+The SBC has two USB 2.0 Type-A ports and one USB 3.0 Type-A port which can be used to connect, e.g., a keyboard, a mouse, backup battery communication, external storage, etc. The USB 2.0 ports only support the USB 2.0 transfer speeds of 480Mb/s, and the USB 3.0 ports support transfer speeds of up to 5Gb/s which means the download speed of the blockchain will be faster if these port is used for external storage. The SBC also has an M.2 PCIe 2.0 x1 socket that can be used for a additional external storage using an M.2 NVMe SSD which will most likely require a separate adapter.
+
+There is one 1GbE port on the SBC, so you can use a faster and more reliable Ethernet connection as well. If you prefer, it's also possible to establish an internet connection using WiFi since the SBC has WiFi 5 support.
+
+## Feedback
+
+If you have any recommendations for SBCs, mini PCs, laptops, and/or desktops as well as other hardware parts that use FOSH and FOSS whenever possbile let us know through one of our community channels.
 
