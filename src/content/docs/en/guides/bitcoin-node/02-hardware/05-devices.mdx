@@ -1,7 +1,7 @@
 ---
 label: Devices
 slug: en/guides/bitcoin-node/hardware/devices
-order: 30
+order: 50
 ---
 
 import Callout from "@components/mdx/Callout.tsx";
@@ -85,6 +85,72 @@ Nowadays, the definition of firmware has been expanded to include the process of
 When discussing free and open source firmware we can apply the criteria from FOSH or FOSS depending on how the firmware is installed and if and how the firmware is updated. E.g., some firmware is installed on a ROM chip and is never meant to be updated which may cause it to be more easily considered part of the hardware and fall under the FOSH criteria; whereas, other firmware can be updated by rewriting a hardware component's flash memory by the user of a device which means it can be more easily considered part of the software and fall under the FOSS criteria.
 
 Ideally, firmware that's intended to never be changed once the hardware component is released by the manufacturer, firmware that receives updates by rewriting the flash memory, and firmware that receives updates from a firmware image being loaded into a device's RAM by a device driver during device intialization should all be free and open source. Currently, this isn't the case for all firmware used in many common devices, but the recommended companies provided here attempt to use free and open source firmware when it's possible and feasible to do so.
+
+## SBCs
+
+When running a node you have the option of using an SBC. SBCs are commonly made for demonstration or development systems, for educational systems, or for use as an embedded computer controller, i.e., they handle computer processes within larger mechanical or electronic systems. Before discussing the benefits of using an SBC, we're going to first discuss what an SBC is.
+
+An SBC is a complete computer built on a single circuit board that can consist of the following parts:
+
+- Central Processing Unit (CPU)
+
+- Graphics Processing Unit (GPU)
+
+- Neural Processing Unit (NPU)
+
+- Random Access Memory (RAM)
+
+- micro Secure Digital (microSD) card slots
+
+- embedded MultiMediaCard (eMMC) flash memory
+
+- Peripheral Component Interconnect express (PCIe) sockets
+
+- Registered Jack 45 (RJ45) also known as 8 Positions 8 Contacts (8P8C) ports for Ethernet
+
+- WiFi and Bluetooth chips
+
+- Universial Serial Bus (USB) ports
+
+- High-Definition Multimedia Interface (HDMI) ports
+
+- Display Serial Interface (DSI) ports
+
+- Camera Serial Interface (CSI) ports
+
+- Audio Jacks typically 3.5mm
+
+- DC Barrel Jacks for power
+
+- General-Purpose Input/Output (GPIO) pins
+
+- etc.
+
+Not all of these parts need to be included in an SBC for it to be considered a fully functional computer, e.g., an SBC doesn't need to have a GPU, an NPU, a microSD card slot, eMMC, PCIe sockets, WiFi and Bluetooth chips, and all of the numerous ports, jacks, and GPIO pins mentioned above.
+
+While not all of these parts are essential for the SBC to be considered a fully functional computer, they're still significant and usually preferable since they bring more functionality to the SBC. E.g, having multiple types of ports allows the connection of numerous peripherals like keyboards, mice, backup battery communication, external storage, monitors, speakers, etc.
+
+Most of the recommended SBCs below will contain multiple ports which allows a simple way to connect numerous peripherals. However, if there isn't enough ports to connect all of the preferred peripherals, then it's also possible in some cases to connect, e.g., a separate USB hub to increase the number of available ports.
+
+Generally, the CPU, GPU, and NPU are commonly included in what's known as a **System on a Chip (SoC)** which is a type of IC design that combines many or all of the components of a computer or some other electronic system onto a single chip.
+
+<Callout client:load type="info">
+  If you're interested in learning more about the current state of FOSH and FOSS when it comes to SBCs, then it's worth checking out the [Single-board computers](https://www.fsf.org/resources/hw/single-board-computers) article from the Free Software Foundation (FSF) which organizes the SBCs based on the SoC family they belong to as opposed to comparing specific boards or companies and groups them based on their ability to use as much FOSH and FOSS as possible.
+</Callout>
+
+### Benefits
+
+Here are some benefits of using an SBC:
+
+- They're are cheaper than mini PCs, laptops, and desktops.
+
+- They have a Small Form Factor (SFF) which allows them to take up less space, consume less power, are lighter in weight allowing them to be easily moved, and are easily mountable allowing them to be easily stored.
+
+- They also tend to be used as devices for specific applications, e.g., as a dedicated node as opposed to being used for more general tasks like mini PCs, laptops, and desktops.
+
+<Callout client:load type="tip">
+  The rest of the guide will be based off of an SBC build. If you're able to acquire hardware for an SBC build or the hardware for the specific SBC build we'll be using, then you'll be able to more easily follow along with the guide. However, other builds are possible as long as they meet at least the low-end requirements needed to run a node.
+</Callout>
 
 ## Company Criteria
 
