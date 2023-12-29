@@ -64,6 +64,28 @@ The data that needs to be publicly available and that needs to meet the criteria
   If you're interested in learning more about FOSH, then check out [Free Hardware and Free Hardware Designs](https://www.gnu.org/philosophy/free-hardware-designs.en.html), [Open Source Hardware Association (OSHWA)](https://www.oshwa.org/), [What is open hardware?](https://opensource.com/resources/what-open-hardware), [Open-source hardware](https://en.wikipedia.org/wiki/Open-source_hardware), , and [Open source hardware](https://opensource.fandom.com/wiki/Open_source_hardware).
 </Callout>
 
+## Free and Open Source Firmware
+
+As previously mentioned, even if a device is running a FOSS OS, it doesn't mean the firmware used by each hardware component that makes up the device is free and open source. Before discussing free and open source firmware, let's first define what we mean when we say firmware.
+
+Firmware is a type of software that's embedded into a specific hardware component. It handles the interactions between the hardware component it's embedded on and other hardware components as well as other software being run on the device. Typically, firmware is programmed by the manufacturers of the hardware components, and it's designed to work with specific hardware components.
+
+The term comes from the idea of firm software which consists of software instructions located in non-volatile memory, i.e., memory that holds its content even when a device is powered off.
+
+Here are some of the main differences between firmware and software:
+
+- Unlike software, firmware is stored on **Read-Only Memory (ROM)** and **flash memory** chips.
+
+- Firmware is specific to a particular hardware component; whereas, software isn't restricted to a specific hardware component and can be run on numerous devices.
+
+- Firmware is typically created by the company that manufacturers the hardware component; whereas, software can be written and distributed by anyone.
+
+Nowadays, the definition of firmware has been expanded to include the process of a firmware image being loaded into a device's **Random Access Memory (RAM)** by a device driver during device intialization as opposed to including just software instructions located in non-volatile memory, e.g., ROM and flash memory.
+
+When discussing free and open source firmware we can apply the criteria from FOSH or FOSS depending on how the firmware is installed and if and how the firmware is updated. E.g., some firmware is installed on a ROM chip and is never meant to be updated which may cause it to be more easily considered part of the hardware and fall under the FOSH criteria; whereas, other firmware can be updated by rewriting a hardware component's flash memory by the user of a device which means it can be more easily considered part of the software and fall under the FOSS criteria.
+
+Ideally, firmware that's intended to never be changed once the hardware component is released by the manufacturer, firmware that receives updates by rewriting the flash memory, and firmware that receives updates from a firmware image being loaded into a device's RAM by a device driver during device intialization should all be free and open source. Currently, this isn't the case for all firmware used in many common devices, but the recommended companies provided here attempt to use free and open source firmware when it's possible and feasible to do so.
+
 ## Company Criteria
 
 When looking for a company to purchase the hardware from to assemble the node the following criteria should be taken into consideration:
